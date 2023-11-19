@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Head">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="shader">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="MAIN.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="WinView.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="MACRO.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadFile.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="BUFFER.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshLoader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="DescriptorManager.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="IComp.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelManager.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="WinView.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="MACRO.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="BUFFER.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadFile.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshLoader.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="PoolManager.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="DescriptorManager.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="IComp.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelManager.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="poorVS.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="PoorPS.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Lambert.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PoorHeader.hlsli">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="packages.config" />
+    <None Include="Functions.hlsli">
+      <Filter>shader</Filter>
+    </None>
+  </ItemGroup>
+</Project>
