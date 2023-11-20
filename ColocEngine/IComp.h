@@ -4,35 +4,53 @@
 #include <stack>
 
 using std::string;
-typedef size_t Entity;
+class IComp;
 
-class IComp_Data
+struct Entity
 {
-public:
-	IComp_Data(Entity e);
+	string tag;
+	size_t ID;
 
-	Entity entity;
-};
+	std::vector<IComp*> comps;
+	std::vector<IComp*> sub_comps;
 
-class IComp_System
-{
-public:
-	virtual void Run(Entity e) = 0;
+	void Update(uint32_t tick);
+	void SubUpdate(uint32_t tick);
+
+	size_t Release();
+
+	Entity();
+
 	bool Runnable;
-	
-	IComp_System();
+	bool Usable;
 };
 
-namespace GOBJS
+struct IComp
 {
-//-------------
-	const size_t Size = 100;//test
-//-------------
+	Entity* entity;
+	virtual void Run(uint32_t tick);
+	virtual void Release();
 
-	extern IComp_Data** data;
-	extern IComp_System** system;
+	bool Runnable;
+	bool Usable;
 
-	std::stack<size_t> Vacancy;
+	IComp();
+};
+//-----------------------------
 
+namespace DataManager
+{
+	constexpr uint32_t Size = 200;
 
+	Entity Entities[Size];
+
+	size_t CreateEntity(Entity* e , string tag);
+	void   DeleteEntity(size_t ID);
+	void   DeleteEntity(Entity* e);
+
+	bool IsAlive(size_t ID);
+	bool IsRunnable(size_t ID);
+
+	void Process();
+	void Sub_Process();
 }
