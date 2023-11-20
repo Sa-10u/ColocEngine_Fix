@@ -181,6 +181,7 @@
       <AdditionalLibraryDirectories>Library/assimp/build/lib/$(Configuration)</AdditionalLibraryDirectories>
       <DelayLoadDLLs>assimp-vc143-mtd.dll</DelayLoadDLLs>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalDependencies>assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$OutDir)%(Filename).cso</ObjectFileOutput>
@@ -210,7 +211,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>Library/assimp/build/lib/$(Configuration)</AdditionalLibraryDirectories>
       <DelayLoadDLLs>assimp-vc143-mt.dll</DelayLoadDLLs>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
     <FxCompile>
@@ -236,6 +237,7 @@
       <AdditionalLibraryDirectories>Library/assimp/build/lib/$(Configuration)</AdditionalLibraryDirectories>
       <DelayLoadDLLs>assimp-vc143-mtd.dll</DelayLoadDLLs>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalDependencies>assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(ProjectDir)\Resource\Shader\%(Filename).cso</ObjectFileOutput>
@@ -265,7 +267,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>Library/assimp/build/lib/$(Configuration)</AdditionalLibraryDirectories>
       <DelayLoadDLLs>assimp-vc143-mt.dll</DelayLoadDLLs>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
     <FxCompile>
