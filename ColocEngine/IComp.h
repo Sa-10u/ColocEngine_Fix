@@ -167,4 +167,16 @@ inline void DataManager::DeleteComponents(t type, std::vector<IComp*>* list)
 		if(typeid(*itr) == typeid(t))	itr->Release();
 	}
 }
+s
+template<class t>
+uint32_t DataManager::SearchComponents(t type, std::vector<IComp*>* list)
+{
+	return 0;
+}
+
+template<class t>
+uint32_t DataManager::SearchComponents(t type, std::vector<IComp*>* get, const std::vector<IComp*>* list)
+{
+	return 0;
+}
 
