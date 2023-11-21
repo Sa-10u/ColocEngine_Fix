@@ -7,7 +7,7 @@ class WorldWork
 public:
 	virtual void Run(float tick) =0;
 	virtual void Initialize() = 0;
-	virtual void Delete() = 0;
+	virtual void release() = 0;
 
 	void Update(float tick);
 	void Release();
@@ -26,9 +26,11 @@ enum class WLD_ID
 namespace WorldManager
 {
 	void ChangeWorld(WLD_ID next);
+	void Init();
+	void Release();
 
-	WLD_ID NowWorld = WLD_ID::BLACK_SCREEN;
+	extern WLD_ID NowWorld;
 
-	WorldWork* Scene;
+	extern WorldWork* Scene;
 };
 

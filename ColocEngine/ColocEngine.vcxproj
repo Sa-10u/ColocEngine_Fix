@@ -20,9 +20,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BUFFER.cpp" />
+    <ClCompile Include="C_SetColorBG.cpp" />
     <ClCompile Include="D3D.cpp" />
     <ClCompile Include="DescriptorManager.cpp" />
+    <ClCompile Include="GameMain.cpp" />
     <ClCompile Include="IComp.cpp" />
+    <ClCompile Include="Input.cpp" />
     <ClCompile Include="LoadFile.cpp" />
     <ClCompile Include="MACRO.cpp" />
     <ClCompile Include="MAIN.cpp" />
@@ -32,12 +35,16 @@
     <ClCompile Include="WinView.cpp" />
     <ClCompile Include="WorldManager.cpp" />
     <ClCompile Include="WorldWork.cpp" />
+    <ClCompile Include="WW_BlackScreen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BUFFER.h" />
+    <ClInclude Include="C_SetColorBG.h" />
     <ClInclude Include="D3D.h" />
     <ClInclude Include="DescriptorManager.h" />
+    <ClInclude Include="GameMain.h" />
     <ClInclude Include="IComp.h" />
+    <ClInclude Include="Input.h" />
     <ClInclude Include="LoadFile.h" />
     <ClInclude Include="MACRO.h" />
     <ClInclude Include="MeshLoader.h" />
@@ -46,6 +53,7 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="WinView.h" />
     <ClInclude Include="WorldManager.h" />
+    <ClInclude Include="WW_BlackScreen.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Lambert.hlsl">

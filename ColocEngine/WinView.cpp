@@ -6,7 +6,7 @@ using namespace std::chrono;
 #define _ALL NULL
 #define _THIS NULL
 
-WinView::WinView(uint32_t h, uint32_t w) :h_ins(nullptr), h_wnd(nullptr), h_(h), w_(w)
+WinView::WinView(uint32_t h, uint32_t w) :h_ins(nullptr), h_wnd(nullptr), h_(h), w_(w),D3D(nullptr)
 {
 }
 
@@ -24,6 +24,11 @@ void WinView::Run()
     termination();
 }
 
+HWND WinView::GetWindowHandle()
+{
+    return h_wnd;
+}
+
 //-------------------------------------------------------------------------------------
 
 bool WinView::setup()
@@ -34,6 +39,11 @@ bool WinView::setup()
     {
         if (D3D->Initialize(h_wnd,h_,w_))
         {
+            GameMain::Init();
+            DataManager::Init();
+            WorldManager::Init();
+            Input_KB::Init();
+
             return true;
         }
     }
@@ -119,6 +129,11 @@ void WinView::termination()
 
     h_ins = nullptr;
     h_wnd = nullptr;
+
+    GameMain::Release();
+    Input_KB::Release();
+    WorldManager::Release();
+    DataManager::Release();
 }
 
 void WinView::loop()
@@ -135,6 +150,7 @@ void WinView::loop()
 
         else
         {
+            GameMain::Update(1.0f);
             D3D->Run(1);
         }
     }

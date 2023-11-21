@@ -31,8 +31,8 @@ struct IComp
 	Entity* entity;
 	virtual void initialize()=0 ;
 	virtual void release() = 0;
-
 	virtual void Run(float tick);
+
 	void Release();
 	void Initialize();
 
@@ -47,9 +47,9 @@ namespace DataManager
 {
 	constexpr uint32_t Size = 200;
 
-	Entity Entities[Size];
+	extern Entity* Entities;
 
-	size_t CreateEntity(Entity* e , string tag);
+	size_t CreateEntity(Entity** e , string tag);
 	Entity* CreateEntity(size_t ID, string tag);
 
 	void DeleteEntity(size_t ID);
@@ -64,11 +64,13 @@ namespace DataManager
 	void sub_proc(float tick , size_t ID);
 	void EmptyProcess(float tick , size_t ID);
 
+	void Init();
+	void Release();
 	void Process(float tick);
 	void Sub_Process(float tick);
 
-	void (*Process_Jump[2])(float tick ,size_t ID) = {&EmptyProcess,&proc};			
-	void (*Sub_Process_Jump[2])(float tick,size_t ID) = {&EmptyProcess , &sub_proc};
+	extern void (*Process_Jump[2])(float tick, size_t ID);
+	extern void (*Sub_Process_Jump[2])(float tick, size_t ID);
 
 	bool HasEntity(string tag , Entity* ptr);
 	bool HasEntities(string tag, std::vector<Entity*> ptrs);
@@ -76,12 +78,12 @@ namespace DataManager
 	bool HasEntity(string tag);
 	uint32_t HasEntities(string tag);
 
-	void ALL_RELEASE();
+	void ALL_RESET();
 
 //----------------------------------------
 
 	template<class t>
-	t* AddComponet(t* cmp, std::vector<IComp*>* list , Entity* ent);
+	t* AddComponent(t* cmp, std::vector<IComp*>* list , Entity* ent);
 
 	template<class t>
 	t* AddComponent(std::vector<IComp*>* list, string tag , Entity* ent);
@@ -108,7 +110,7 @@ namespace DataManager
 //--------------------------
 
 template<class t>
-inline t* DataManager::AddComponet(t* cmp, std::vector<IComp*>* list ,Entity* ent)
+inline t* DataManager::AddComponent(t* cmp, std::vector<IComp*>* list ,Entity* ent)
 {
 	if (cmp == nullptr)	return nullptr;
 
@@ -167,16 +169,33 @@ inline void DataManager::DeleteComponents(t type, std::vector<IComp*>* list)
 		if(typeid(*itr) == typeid(t))	itr->Release();
 	}
 }
-s
+
 template<class t>
 uint32_t DataManager::SearchComponents(t type, std::vector<IComp*>* list)
 {
-	return 0;
+	uint32_t cnt = 0;
+	
+	for (auto itr : *list) {
+
+		if (typeid(itr) == typeid(type))	cnt++;
+	}
+
+	return cnt;
 }
 
 template<class t>
 uint32_t DataManager::SearchComponents(t type, std::vector<IComp*>* get, const std::vector<IComp*>* list)
 {
-	return 0;
-}
+	uint32_t cnt = 0;
 
+	for (auto itr : *list) {
+
+		if (typeid(itr) == typeid(type))
+		{
+			cnt++;
+			get->push_back(itr);
+		}
+	}
+
+	return cnt;
+}

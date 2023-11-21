@@ -1,34 +1,39 @@
 #include "WorldManager.h"
 #include "IComp.h"
 
+#include"WW_BlackScreen.h"
+
 void WorldManager::ChangeWorld(WLD_ID next)
 {
 	if (next == NowWorld)	return;
 
 	Scene->Release();
+	delete Scene;
 
 	switch (next)
 	{
-	case WLD_ID::PLAY			:	break;
+	case WLD_ID::PLAY			:	Scene = nullptr; break;
 
-	case WLD_ID::SCENE			:	break;
+	case WLD_ID::SCENE			:	Scene = nullptr; break;
 
-	case WLD_ID::BLACK_SCREEN	:	break;
+	case WLD_ID::BLACK_SCREEN	:	Scene = new WW_BlackScreen; break;
+
+	default:	exit(-1);
 	}
 }
 
-void WorldWork::Update(float tick)
+void WorldManager::Init()
 {
-	Run(tick);	
-//-------------
-	DataManager::Process(tick);
-	DataManager::Sub_Process(tick);
+	
 }
 
-void WorldWork::Release()
+void WorldManager::Release()
 {
-	Delete();
-//------------
-
-	DataManager::
 }
+
+namespace WorldManager
+{
+	WLD_ID NowWorld = WLD_ID::BLACK_SCREEN;
+	WorldWork* Scene = new WW_BlackScreen;
+}
+

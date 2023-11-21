@@ -40,6 +40,8 @@ public:
 	float GetHeight();
 	float GetWidth();
 
+	void SetColorBG(float R, float G, float B ,float A);
+
 private:
 
 	void write();
@@ -95,5 +97,16 @@ private:
 	vector<MESH> mesh_;
 	vector<MATERIAL> mtr_;
 
+	//-----
+	float backcolor_ [4];
 };
 
+namespace PTR_D3D
+{
+	extern D3d* ptr;
+}
+
+namespace PTR_WND
+{
+	extern HWND* ptr;
+}

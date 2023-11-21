@@ -54,6 +54,18 @@
     <ClCompile Include="WorldWork.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Input.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="GameMain.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="WW_BlackScreen.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="C_SetColorBG.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinView.h">
@@ -90,6 +102,18 @@
       <Filter>Head</Filter>
     </ClInclude>
     <ClInclude Include="WorldManager.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="Input.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="GameMain.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="WW_BlackScreen.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="C_SetColorBG.h">
       <Filter>Head</Filter>
     </ClInclude>
   </ItemGroup>

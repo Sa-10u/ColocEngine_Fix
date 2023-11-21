@@ -2,6 +2,10 @@
 #include <Windows.h>
 #include <cstdint>
 #include"D3D.h"
+#include"GameMain.h"
+#include"IComp.h"
+#include"WorldManager.h"
+#include"Input.h"
 
 #include<DirectXMath.h>
 #include<d3d12.h>
@@ -17,6 +21,7 @@ public:
 	WinView(uint32_t h, uint32_t w);
 	~WinView();
 	void Run();
+	HWND GetWindowHandle();
 	
 private:
 

@@ -39,6 +39,8 @@ size_t Entity::Release()
 Entity::Entity():Usable(true),Runnable(false),ID(NULL)
 {
 	Tag = {};
+	comps = {};
+	sub_comps = {};
 }
 
 //---------------------------------------------------------
@@ -76,8 +78,13 @@ IComp::IComp(string name):entity(nullptr),Runnable(false),Usable(true)
 }
 
 //-------------------------------
-
-size_t DataManager::CreateEntity(Entity* e , string tag)
+namespace DataManager
+{
+	Entity* Entities = new Entity[Size];
+	void (*Process_Jump[2])(float tick, size_t ID) = { &EmptyProcess,&proc };
+	void (*Sub_Process_Jump[2])(float tick, size_t ID) = { &EmptyProcess , &sub_proc };
+}
+size_t DataManager::CreateEntity(Entity** e , string tag)
 {
 	for (auto i = 0; i < Size; i++) {
 
@@ -88,6 +95,8 @@ size_t DataManager::CreateEntity(Entity* e , string tag)
 			Entities[i].Usable = false;
 
 			Entities[i].Tag = tag;
+
+			*e = &Entities[i];
 
 			return i;
 		}
@@ -162,6 +171,16 @@ void DataManager::EmptyProcess(float tick, size_t ID)
 	//--NULL WORK--
 }
 
+void DataManager::Init()
+{
+	
+}
+
+void DataManager::Release()
+{
+	delete[] Entities;
+}
+
 void DataManager::Process(float tick)
 {
 	for (auto itr = 0u; itr < Size; itr++) {
@@ -230,7 +249,7 @@ uint32_t DataManager::HasEntities(string tag)
 	return cnt;
 }
 
-void DataManager::ALL_RELEASE()
+void DataManager::ALL_RESET()
 {
 	for (auto i = 0; i < Size; i++) {
 
@@ -245,6 +264,7 @@ void DataManager::DeleteComponent(string tag, std::vector<IComp*>* list)
 		if (itr->Tag == tag)
 		{
 			itr->Release();
+
 			return;
 		}
 	}
@@ -321,3 +341,4 @@ uint32_t DataManager::SearchComponents(string tag, std::vector<IComp*> *get, con
 
 	return cnt;
 }
+

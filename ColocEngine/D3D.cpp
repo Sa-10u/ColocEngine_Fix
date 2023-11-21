@@ -7,6 +7,14 @@
 
 bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
 {
+    PTR_D3D::ptr = this;
+    PTR_WND::ptr = &hwnd;
+
+    backcolor_[0] = .0f;
+    backcolor_[1] = .0f;
+    backcolor_[2] = .5f;
+    backcolor_[3] = 1.0f;
+
     for (auto i = 0u; i < FrameAmmount;++i) {
 
         colbuf_[i] = nullptr;
@@ -836,6 +844,14 @@ float D3d::GetWidth()
     return Width;
 }
 
+void D3d::SetColorBG(float R, float G, float B , float A)
+{
+    backcolor_[0] = R;
+    backcolor_[1] = G;
+    backcolor_[2] = B;
+    backcolor_[3] = A;
+}
+
 D3d::~D3d()
 {
 }
@@ -870,8 +886,6 @@ void D3d::write()
         brr.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
     }
     cmdlist_->ResourceBarrier(1, &brr);
-
-    float backcolor_[] = { 0.0f,0.0f,0.5f,1.0f};
 
     cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], FALSE, &h_ZBV);
     cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
@@ -928,4 +942,14 @@ void D3d::present(uint32_t itv)
     }
 
     fencecnt_[IND_frame] = curval + 1;
+}
+
+namespace PTR_D3D
+{
+    D3d* ptr = nullptr;
+}
+
+namespace PTR_WND
+{
+    HWND* ptr = nullptr;
 }
