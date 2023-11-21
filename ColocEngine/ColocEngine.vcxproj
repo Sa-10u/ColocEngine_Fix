@@ -30,6 +30,8 @@
     <ClCompile Include="ModelManager.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="WinView.cpp" />
+    <ClCompile Include="WorldManager.cpp" />
+    <ClCompile Include="WorldWork.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BUFFER.h" />
@@ -43,6 +45,7 @@
     <ClInclude Include="PoolManager.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="WinView.h" />
+    <ClInclude Include="WorldManager.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Lambert.hlsl">

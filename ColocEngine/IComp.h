@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <stack>
 
 using std::string;
 class IComp;
@@ -23,13 +22,6 @@ struct Entity
 	size_t Release();
 
 	Entity();
-	//---
-	template<class t>
-	t AddComponet(t cmp, std::vector<IComp*> list);
-	
-	template<class t>
-	t AddComponent(t cmp, std::vector<IComp*> list, string tag);
-
 };
 
 struct IComp
@@ -37,9 +29,12 @@ struct IComp
 	string Tag;
 
 	Entity* entity;
-	virtual void Initialize() ;
+	virtual void initialize()=0 ;
+	virtual void release() = 0;
+
 	virtual void Run(float tick);
-	virtual void Release();
+	void Release();
+	void Initialize();
 
 	bool Runnable;
 	bool Usable;
@@ -57,8 +52,8 @@ namespace DataManager
 	size_t CreateEntity(Entity* e , string tag);
 	Entity* CreateEntity(size_t ID, string tag);
 
-	void   DeleteEntity(size_t ID);
-	void   DeleteEntity(Entity* e);
+	void DeleteEntity(size_t ID);
+	void DeleteEntity(Entity* e);
 
 	bool IsAlive(size_t ID);
 	bool IsAlive(Entity* e);
@@ -72,53 +67,104 @@ namespace DataManager
 	void Process(float tick);
 	void Sub_Process(float tick);
 
-	void (*Process_Jump[2])(float tick ,size_t ID) = {&EmptyProcess,&proc};			//	<- use this
-	void (*Sub_Process_Jump[2])(float tick,size_t ID) = {&EmptyProcess , &sub_proc};//	<- use this
+	void (*Process_Jump[2])(float tick ,size_t ID) = {&EmptyProcess,&proc};			
+	void (*Sub_Process_Jump[2])(float tick,size_t ID) = {&EmptyProcess , &sub_proc};
+
+	bool HasEntity(string tag , Entity* ptr);
+	bool HasEntities(string tag, std::vector<Entity*> ptrs);
+
+	bool HasEntity(string tag);
+	uint32_t HasEntities(string tag);
+
+	void ALL_RELEASE();
+
+//----------------------------------------
+
+	template<class t>
+	t* AddComponet(t* cmp, std::vector<IComp*>* list , Entity* ent);
+
+	template<class t>
+	t* AddComponent(std::vector<IComp*>* list, string tag , Entity* ent);
+
+	void DeleteComponent(string tag , std::vector<IComp*> *list);
+	void DeleteComponent(IComp* ptr , std::vector<IComp*> *list);
+
+	template<class t>
+	void DeleteComponents(t type , std::vector<IComp*> *list);
+	void DeleteComponents(string tag , std::vector<IComp*> *list);
+
+	bool SearchComponent(string tag , std::vector<IComp*> *list);
+	bool SearchComponent(string tag, IComp* cmp , std::vector<IComp*> *list);
+
+	uint32_t SearchComponents(string tag, std::vector<IComp*> *list);
+	uint32_t SearchComponents(string tag, std::vector<IComp*> *get ,const std::vector<IComp*> *list);
+
+	template<class t>
+	uint32_t SearchComponents(t type, std::vector<IComp*> *list);
+	template<class t>
+	uint32_t SearchComponents(t type, std::vector<IComp*>* get, const std::vector<IComp*>* list);
 }
 
 //--------------------------
 
 template<class t>
-inline t Entity::AddComponet(t cmp, std::vector<IComp*> list)
+inline t* DataManager::AddComponet(t* cmp, std::vector<IComp*>* list ,Entity* ent)
 {
 	if (cmp == nullptr)	return nullptr;
 
-	for (auto itr : list) {
+	for (auto itr : *list) {
 
 		if (itr->Usable)
 		{
+			delete itr;
+
 			itr = cmp;
+			cmp->Initialize();
+			cmp->entity = ent;
 
 			return cmp;
 		}
 	}
 
-	list.push_back(cmp);
+	list->push_back(cmp);
+	cmp->Initialize();
+	cmp->entity = ent;
 
 	return cmp;
 }
 template<class t>
-inline t Entity::AddComponent(t cmp, std::vector<IComp*> list, string tag)
+inline t* DataManager::AddComponent(std::vector<IComp*>* list, string tag , Entity* ent)
 {
-	if (cmp == nullptr)
-	{
-		cmp = new t(tag);
-		cmp->Initialize();
-	}
+	t* cmp = new t(tag);
 
-	for (auto itr : list) {
+	for (auto itr : *list) {
 
 		if (itr->Usable)
 		{
+			delete itr;
+
 			itr = cmp;
+			itr->Initialize();
+			cmp->entity = ent;
 
 			return cmp;
 		}
 	}
 
-	list.push_back(cmp);
+	list->push_back(cmp);
+	cmp->Initialize();
+	cmp->entity = ent;
 
 	return cmp;
 
 }
-;
+
+template<class t>
+inline void DataManager::DeleteComponents(t type, std::vector<IComp*>* list)
+{
+	for (auto itr : *list) {
+
+		if(typeid(*itr) == typeid(t))	itr->Release();
+	}
+}
+

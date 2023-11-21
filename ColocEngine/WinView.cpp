@@ -1,4 +1,7 @@
 #include "WinView.h"
+#include <chrono>
+
+using namespace std::chrono;
 
 #define _ALL NULL
 #define _THIS NULL

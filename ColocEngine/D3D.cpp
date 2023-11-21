@@ -795,10 +795,6 @@ void D3d::Run(int interval)
 
 	write();
 	//waitGPU();
-
-    angle_ += 0.01;
-    CBV[IND_frame].ptr->wld = XMMatrixRotationY(angle_);
-
     {
         brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
         brr.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;

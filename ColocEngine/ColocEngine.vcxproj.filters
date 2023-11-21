@@ -48,6 +48,12 @@
     <ClCompile Include="ModelManager.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="WorldManager.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="WorldWork.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinView.h">
@@ -81,6 +87,9 @@
       <Filter>Head</Filter>
     </ClInclude>
     <ClInclude Include="ModelManager.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="WorldManager.h">
       <Filter>Head</Filter>
     </ClInclude>
   </ItemGroup>
