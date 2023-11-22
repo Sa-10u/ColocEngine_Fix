@@ -26,7 +26,6 @@
     <ClCompile Include="GameMain.cpp" />
     <ClCompile Include="IComp.cpp" />
     <ClCompile Include="Input.cpp" />
-    <ClCompile Include="LoadFile.cpp" />
     <ClCompile Include="MACRO.cpp" />
     <ClCompile Include="MAIN.cpp" />
     <ClCompile Include="MeshLoader.cpp" />
@@ -45,7 +44,6 @@
     <ClInclude Include="GameMain.h" />
     <ClInclude Include="IComp.h" />
     <ClInclude Include="Input.h" />
-    <ClInclude Include="LoadFile.h" />
     <ClInclude Include="MACRO.h" />
     <ClInclude Include="MeshLoader.h" />
     <ClInclude Include="ModelManager.h" />

@@ -569,28 +569,12 @@ bool D3d::InitGBO()
     //-----------------------------------------------------------------------------------------*****
     {
         std::wstring tex_Path = {};
-        tex_Path = L"Resource/Texture/VAVA.dds";
-
-        ResourceUploadBatch bat(device_);
-        bat.Begin();
-
-        res = CreateDDSTextureFromFile
-        (
-            device_,
-            bat,
-            tex_Path.c_str(),
-            &(tex.rsc_ptr),
-            true
-        );
-        if (FAILED(res)) return 0;
-
-        auto fut = bat.End(cmdque_);
-        fut.wait();
+        tex_Path = L"Resource/Texture/default.dds";
  //-------------------------------------------------------
 
         TexMetadata data = {};
         ScratchImage image = {};
-        std::vector<D3D12_SUBRESOURCE_DATA> rsc = {};
+        const Image* rsc = nullptr;
 
         res = LoadFromWICFile
         (
@@ -600,18 +584,57 @@ bool D3d::InitGBO()
             image
         );
         if (FAILED(res)) return 0;
-        
-        res = PrepareUpload
+
+
+       
+        rsc = image.GetImage(0, 0, 0);
+
+
+        D3D12_RESOURCE_DESC rc_desc_tex = {};
+        {
+            rc_desc_tex.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+            rc_desc_tex.Format = rsc->format;
+            rc_desc_tex.MipLevels = 1;
+            rc_desc_tex.DepthOrArraySize = 1;
+            rc_desc_tex.Flags = D3D12_RESOURCE_FLAG_NONE;
+            rc_desc_tex.Height = rsc->height;
+            rc_desc_tex.Width = rsc->width;
+            rc_desc_tex.SampleDesc.Count = 1;
+            rc_desc_tex.SampleDesc.Quality = 1;
+            rc_desc_tex.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+        }
+
+        D3D12_HEAP_PROPERTIES hp_prop_tex = {};
+        {
+            hp_prop_tex.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
+            hp_prop_tex.CreationNodeMask = 0;
+            hp_prop_tex.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
+            hp_prop_tex.Type = D3D12_HEAP_TYPE_CUSTOM;
+            hp_prop_tex.VisibleNodeMask = 0;
+        }
+
+        res = device_->CreateCommittedResource
         (
-            device_,
-            image.GetImages(),
-            image.GetImageCount(),
-            data,
-            rsc
+            &hp_prop_tex,
+            D3D12_HEAP_FLAG_NONE,
+            &rc_desc_tex,
+            D3D12_RESOURCE_STATE_COPY_DEST,
+            nullptr,
+            IID_PPV_ARGS(&tex.rsc_ptr)
         );
         if (FAILED(res)) return 0;
 
-        //----
+        UINT i = static_cast<UINT>(rsc->rowPitch);
+
+        res = tex.rsc_ptr->WriteToSubresource
+        (
+            0,
+            nullptr,
+            rsc,
+            0,
+            rsc->slicePitch
+        );
+        if (FAILED(res)) return 0;
 
         auto incre = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
         auto HCPU_ = heapCBV_SRV_UAV_->GetCPUDescriptorHandleForHeapStart();
@@ -623,28 +646,23 @@ bool D3d::InitGBO()
         tex.HCPU = HCPU_;
         tex.HGPU = HGPU_;
 
-        auto tex_desc = tex.rsc_ptr->GetDesc();
-
-        D3D12_SHADER_RESOURCE_VIEW_DESC v_desc = {};
+        D3D12_SHADER_RESOURCE_VIEW_DESC rsc_v_desc = {};
         {
-            v_desc.Format = tex_desc.Format;
-            v_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-            v_desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-            v_desc.Texture2D.MipLevels = tex_desc.MipLevels;
-            v_desc.Texture2D.MostDetailedMip = 0;
-            v_desc.Texture2D.PlaneSlice = 0;
-            v_desc.Texture2D.ResourceMinLODClamp = 0.0f;
+            rsc_v_desc.Format = rc_desc_tex.Format;
+            rsc_v_desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+            rsc_v_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+            rsc_v_desc.Texture2D.MipLevels = rc_desc_tex.MipLevels;
+            rsc_v_desc.Texture2D.MostDetailedMip = 0;
+            rsc_v_desc.Texture2D.PlaneSlice = 0;
+            rsc_v_desc.Texture2D.ResourceMinLODClamp = 0.0f;
         }
-
+        
         device_->CreateShaderResourceView
         (
             tex.rsc_ptr,
-            &v_desc,
-            HCPU_
+            &rsc_v_desc,
+            tex.HCPU
         );
-
-    
-
     }
     //-----------------******
     view_.Height = Height;

@@ -6,9 +6,6 @@
 #include <assimp/postprocess.h>
 #include <assimp/cimport.h>
 
-//#pragma comment(lib,"assimp-vc143-mt.lib")
-
-
 class MeshLoader
 {
 public:

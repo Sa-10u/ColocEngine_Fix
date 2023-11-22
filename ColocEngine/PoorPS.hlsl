@@ -35,6 +35,8 @@ PSoutput main(VSoutput inp)
         
         res.color += float4(col, 1);
     }
-
+    
+    res.color = colmap.Sample(colsmp, inp.uv);
+    
     return res;
 }
