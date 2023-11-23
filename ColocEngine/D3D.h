@@ -96,7 +96,7 @@ private:
 	//-------
 	vector<MESH> mesh_;
 	vector<MATERIAL> mtr_;
-
+	UINT meshcnt_;
 	//-----
 	float backcolor_ [4];
 };

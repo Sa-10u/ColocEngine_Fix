@@ -261,7 +261,7 @@ bool D3d::InitGBO()
 {
     HRESULT res = FALSE;
 
-    std::wstring path = L"Resource/3dModel/teapot/teapot.obj";
+    std::wstring path = L"Resource/3dModel/Re_Meta Knigt.fbx";
     //path set 3Ddata name
 
     if (!LoadMesh(path.c_str(), mesh_, mtr_)) return 0;
@@ -569,7 +569,7 @@ bool D3d::InitGBO()
     //-----------------------------------------------------------------------------------------*****
     {
         std::wstring tex_Path = {};
-        tex_Path = L"Resource/Texture/default.dds";
+        tex_Path = L"Resource/Texture/MK_tex1.png";
  //-------------------------------------------------------
 
         TexMetadata data = {};
@@ -624,14 +624,12 @@ bool D3d::InitGBO()
         );
         if (FAILED(res)) return 0;
 
-        UINT i = static_cast<UINT>(rsc->rowPitch);
-
         res = tex.rsc_ptr->WriteToSubresource
         (
             0,
             nullptr,
-            rsc,
-            0,
+            rsc->pixels,
+            rsc->rowPitch,
             rsc->slicePitch
         );
         if (FAILED(res)) return 0;
