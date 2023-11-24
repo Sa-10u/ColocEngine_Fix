@@ -583,7 +583,17 @@ bool D3d::InitGBO()
             &data,
             image
         );
-        if (FAILED(res)) return 0;
+        if (FAILED(res))
+        {
+            res = LoadFromWICFile
+            (
+                L"Resource/Texture/default.dds",
+                WIC_FLAGS_NONE,
+                &data,
+                image
+            );
+            if (FAILED(res)) return 0;
+        }
 
 
        

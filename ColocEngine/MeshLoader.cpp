@@ -48,6 +48,7 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<MATERIAL>&
     }
 
     scene = nullptr;
+    imp.FreeScene();
 
     return true;
 }
@@ -74,7 +75,7 @@ bool MeshLoader::Load(const wchar_t* file, RModel* ptr)
     ptr->numMesh_ = scene->mNumMeshes;
     ptr->numMtr_ = scene->mNumMaterials;
     ptr->numHasTex_ = scene->mNumTextures;
-
+//--------------------------------------------
     ptr->Mesh_.clear();
     ptr->Mesh_.resize(ptr->numMesh_);
     for (size_t i = 0; i < ptr->Mesh_.size(); i++) {
@@ -82,7 +83,7 @@ bool MeshLoader::Load(const wchar_t* file, RModel* ptr)
         const auto pm = scene->mMeshes[i];
         ParseMesh(ptr->Mesh_[i], pm);
     }
-
+//--------------------------------------------
     ptr->Mtr_.clear();
     ptr->Mtr_.resize(ptr->numMtr_);
     for (size_t i = 0; i < ptr->Mtr_.size(); i++) {
@@ -90,6 +91,12 @@ bool MeshLoader::Load(const wchar_t* file, RModel* ptr)
         
         const auto pm = scene->mMaterials[i];
         ParseMaterial(ptr->Mtr_[i], pm);
+    }
+//--------------------------------------------
+    ptr->TexName_.clear();
+    ptr->TexName_.resize(ptr->numHasTex_);
+    for (auto i = 0u; i < ptr->numMtr_; i++) {
+
     }
 
     scene = nullptr;
@@ -111,7 +118,7 @@ void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src)
         auto norm = &(src->mNormals[i]);
         auto uv = (src->HasTextureCoords(0)) ? &(src->mTextureCoords[0][i]) : &vecdef;
         auto tan =(src->HasTangentsAndBitangents())? & (src->mTangents[i]) : &vecdef;
-
+       
         mesh.vtcs_[i] = VERTEX
         (
             XMFLOAT3(pos->x, pos->y, pos->z),
@@ -200,14 +207,14 @@ void MeshLoader::ParseMaterial(MATERIAL& mtl, const aiMaterial* src)
             }
             
         __CREATE("DIFFUSEMAP")  aiString path = {};
-            if (src->Get(AI_MATKEY_COLOR_DIFFUSE(0), path) == AI_SUCCESS)
-            {
-                mtl.map_ = string(path.C_Str());
-            }
-            else
-            {
-                mtl.map_.clear();
-            }
+        if (src->Get(AI_MATKEY_COLOR_DIFFUSE(0), path) == AI_SUCCESS)
+        {
+            mtl.map_ = string(path.C_Str());
+        }
+        else
+        {
+            mtl.map_.clear();
+        }
     }
 }
 //--------------------------------------------

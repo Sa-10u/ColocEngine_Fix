@@ -68,6 +68,8 @@ private:
 
 	D3D12_RESOURCE_BARRIER brr;
 
+
+	//-----------------
 	ID3D12DescriptorHeap* heapCBV_SRV_UAV_;
 	ID3D12RootSignature* rootsig_;
 	ID3D12PipelineState* PSO;
@@ -83,6 +85,7 @@ private:
 	D3D12_INDEX_BUFFER_VIEW IBV;
 	ID3D12DescriptorHeap* hp_ZBV;
 
+	//---------------
 	D3D12_VIEWPORT view_;
 	D3D12_RECT rect_;
 

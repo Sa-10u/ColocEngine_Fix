@@ -60,6 +60,12 @@
     <ClCompile Include="C_SetColorBG.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="ModelComp.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="C_Draw.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinView.h">
@@ -105,6 +111,12 @@
       <Filter>Head</Filter>
     </ClInclude>
     <ClInclude Include="C_SetColorBG.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelComp.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="C_Draw.h">
       <Filter>Head</Filter>
     </ClInclude>
   </ItemGroup>
