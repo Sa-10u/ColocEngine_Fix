@@ -1,5 +1,6 @@
 #include "MeshLoader.h"
 #include "MACRO.h"
+#include"Resource.h"
 
 static constexpr unsigned int TRIANGLE = 3;
 
@@ -44,6 +45,51 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<MATERIAL>&
 
         const auto pm = scene->mMaterials[i];
         ParseMaterial(mtr[i], pm);
+    }
+
+    scene = nullptr;
+
+    return true;
+}
+
+bool MeshLoader::Load(const wchar_t* file, RModel* ptr)
+{
+    if (file == nullptr) return false;
+    auto path = wtoc(file);
+
+    Assimp::Importer imp = {};
+    //---------
+    auto flag = 0;
+    flag |= aiProcess_Triangulate;
+    flag |= aiProcess_PreTransformVertices;
+    flag |= aiProcess_CalcTangentSpace;
+    flag |= aiProcess_GenSmoothNormals;
+    flag |= aiProcess_GenUVCoords;
+    flag |= aiProcess_RemoveRedundantMaterials;
+    flag |= aiProcess_OptimizeMeshes;
+    //----------------
+    auto scene = imp.ReadFile(path, flag);
+    if (scene == nullptr)    return false;
+
+    ptr->numMesh_ = scene->mNumMeshes;
+    ptr->numMtr_ = scene->mNumMaterials;
+    ptr->numHasTex_ = scene->mNumTextures;
+
+    ptr->Mesh_.clear();
+    ptr->Mesh_.resize(ptr->numMesh_);
+    for (size_t i = 0; i < ptr->Mesh_.size(); i++) {
+
+        const auto pm = scene->mMeshes[i];
+        ParseMesh(ptr->Mesh_[i], pm);
+    }
+
+    ptr->Mtr_.clear();
+    ptr->Mtr_.resize(ptr->numMtr_);
+    for (size_t i = 0; i < ptr->Mtr_.size(); i++) {
+
+        
+        const auto pm = scene->mMaterials[i];
+        ParseMaterial(ptr->Mtr_[i], pm);
     }
 
     scene = nullptr;
@@ -189,4 +235,11 @@ bool LoadMesh(const wchar_t* file, vector<MESH>& mesh, vector<MATERIAL>& materia
 
     //Flyweight
     return (ml.Load(file, mesh, material));
+}
+
+bool LoadMesh(const wchar_t* file, RModel* ptr)
+{
+    MeshLoader ml = {};
+
+    return (ml.Load(file, ptr));
 }

@@ -7,6 +7,10 @@ PSoutput main(VSoutput inp)
 {
     PSoutput res = (PSoutput)0;
     
-    res.color = colmap.Sample(colsmp, inp.uv);
+    float2 UV = float2(inp.uv.x, 1 - inp.uv.y);
+    res.color = colmap.Sample(colsmp, UV);
+
+
+
     return res;
 }

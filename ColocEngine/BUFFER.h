@@ -8,6 +8,8 @@ using std::string;
 using std::vector;
 using namespace DirectX;
 
+class RModel;
+
 struct SIMPLEVERTEX
 {
 	XMFLOAT3 pos  ;
@@ -75,6 +77,7 @@ struct MESH
 };
 
 bool LoadMesh(const wchar_t* file, vector<MESH>& mesh, vector<MATERIAL>& material);
+bool LoadMesh(const wchar_t* file, RModel* ptr);
 
 //-----------------------------
 

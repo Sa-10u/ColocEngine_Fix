@@ -751,7 +751,7 @@ bool D3d::InitPSO()
     if (FAILED(res))     return 0;
 
     ID3DBlob* PSblob = nullptr;
-    res = D3DReadFileToBlob(SHADER_FILENAME::PoorPS, &PSblob);
+    res = D3DReadFileToBlob(SHADER_FILENAME::LambertPS, &PSblob);
     if (FAILED(res))     return 0;
     //--------------------------
 

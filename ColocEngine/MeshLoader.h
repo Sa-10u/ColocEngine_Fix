@@ -14,6 +14,7 @@ public:
 	~MeshLoader();
 
 	bool Load(const wchar_t* file,vector<MESH>& mesh,vector<MATERIAL>& mtr);
+	bool Load(const wchar_t* file, RModel* ptr);
 
 private:
 

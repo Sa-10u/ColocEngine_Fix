@@ -30,7 +30,6 @@
     <ClCompile Include="MAIN.cpp" />
     <ClCompile Include="MeshLoader.cpp" />
     <ClCompile Include="ModelManager.cpp" />
-    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="WinView.cpp" />
     <ClCompile Include="WorldManager.cpp" />
     <ClCompile Include="WorldWork.cpp" />
