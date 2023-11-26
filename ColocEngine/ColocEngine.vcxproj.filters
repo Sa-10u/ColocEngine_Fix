@@ -39,9 +39,6 @@
     <ClCompile Include="IComp.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="ModelManager.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="WorldManager.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -64,6 +61,12 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="C_Draw.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="FileLoader.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -95,7 +98,7 @@
     <ClInclude Include="IComp.h">
       <Filter>Head</Filter>
     </ClInclude>
-    <ClInclude Include="ModelManager.h">
+    <ClInclude Include="ResourceManager.h">
       <Filter>Head</Filter>
     </ClInclude>
     <ClInclude Include="WorldManager.h">
@@ -117,6 +120,9 @@
       <Filter>Head</Filter>
     </ClInclude>
     <ClInclude Include="C_Draw.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="FileLoader.h">
       <Filter>Head</Filter>
     </ClInclude>
   </ItemGroup>

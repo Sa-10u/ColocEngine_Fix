@@ -24,6 +24,7 @@
     <ClCompile Include="C_SetColorBG.cpp" />
     <ClCompile Include="D3D.cpp" />
     <ClCompile Include="DescriptorManager.cpp" />
+    <ClCompile Include="FileLoader.cpp" />
     <ClCompile Include="GameMain.cpp" />
     <ClCompile Include="IComp.cpp" />
     <ClCompile Include="Input.cpp" />
@@ -31,7 +32,7 @@
     <ClCompile Include="MAIN.cpp" />
     <ClCompile Include="MeshLoader.cpp" />
     <ClCompile Include="ModelComp.cpp" />
-    <ClCompile Include="ModelManager.cpp" />
+    <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="WinView.cpp" />
     <ClCompile Include="WorldManager.cpp" />
     <ClCompile Include="WorldWork.cpp" />
@@ -43,13 +44,14 @@
     <ClInclude Include="C_SetColorBG.h" />
     <ClInclude Include="D3D.h" />
     <ClInclude Include="DescriptorManager.h" />
+    <ClInclude Include="FileLoader.h" />
     <ClInclude Include="GameMain.h" />
     <ClInclude Include="IComp.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="MACRO.h" />
     <ClInclude Include="MeshLoader.h" />
     <ClInclude Include="ModelComp.h" />
-    <ClInclude Include="ModelManager.h" />
+    <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="PoolManager.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="WinView.h" />

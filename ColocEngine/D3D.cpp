@@ -4,6 +4,8 @@
 #include "DDSTextureLoader.h"
 #include "VertexTypes.h"
 #include <string>
+#include"ResourceManager.h"
+#include"FileLoader.h"
 
 bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
 {
@@ -261,7 +263,10 @@ bool D3d::InitGBO()
 {
     HRESULT res = FALSE;
 
-    std::wstring path = L"Resource/3dModel/Re_Meta Knigt.fbx";
+    std::wstring path ;
+    FileLoad(L"Re_Meta Knigt.fbx", &path);
+    
+
     //path set 3Ddata name
 
     if (!LoadMesh(path.c_str(), mesh_, mtr_)) return 0;
@@ -568,8 +573,8 @@ bool D3d::InitGBO()
     }
     //-----------------------------------------------------------------------------------------*****
     {
-        std::wstring tex_Path = {};
-        tex_Path = L"Resource/Texture/MK_tex1.png";
+        std::wstring tex_Path ;
+        FileLoad(L"MK_tex1.png", &tex_Path);
  //-------------------------------------------------------
 
         TexMetadata data = {};

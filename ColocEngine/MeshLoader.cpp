@@ -46,7 +46,6 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<MATERIAL>&
         const auto pm = scene->mMaterials[i];
         ParseMaterial(mtr[i], pm);
     }
-
     scene = nullptr;
     imp.FreeScene();
 

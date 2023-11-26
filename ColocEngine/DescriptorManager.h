@@ -26,7 +26,7 @@ public:
 	DescriptorHandle* AllocHandle();
 	void FreeHandle(DescriptorHandle** handle);
 	ID3D12DescriptorHeap* GetHeap();
-
+	
 private:
 	std::atomic<uint32_t> count_;
 	PoolManager<DescriptorHandle>  pool_;
