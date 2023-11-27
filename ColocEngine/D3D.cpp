@@ -430,7 +430,7 @@ bool D3d::InitGBO()
             rc_desc_c.MipLevels = 1;
             rc_desc_c.Alignment = 0;
             rc_desc_c.Height = 1;
-            rc_desc_c.Width = sizeof(WVPT);
+            rc_desc_c.Width = sizeof(Util);
             rc_desc_c.DepthOrArraySize = 1;
             rc_desc_c.Flags = D3D12_RESOURCE_FLAG_NONE;
             rc_desc_c.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
@@ -450,7 +450,7 @@ bool D3d::InitGBO()
                 &rc_desc_c,
                 D3D12_RESOURCE_STATE_GENERIC_READ,
                 NULL,
-                IID_PPV_ARGS(&CB[i])
+                IID_PPV_ARGS(&Cmn_CB[i])
             );
             if (FAILED(res))     return false;
             //----------------------------------
@@ -929,7 +929,8 @@ void D3d::write()
     cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
     cmdlist_->ClearDepthStencilView(h_ZBV, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-   /* {
+   
+    {
         cmdlist_->SetGraphicsRootSignature(rootsig_);
         cmdlist_->SetDescriptorHeaps(1, &heapCBV_SRV_UAV_);
         cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
@@ -946,7 +947,7 @@ void D3d::write()
 
         auto cnt = static_cast<uint32_t>(mesh_[0].indexes_.size());
         cmdlist_->DrawIndexedInstanced(cnt, 1, 0, 0,0);
-    }*/
+    }
 
     for (auto itr : ResourceManager::models_) {
         for (auto cnt : itr.Mesh_) {
@@ -958,7 +959,7 @@ void D3d::write()
             cmdlist_->SetPipelineState(PSO);
             
             cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-            cmdlist_->IASetVertexBuffers(0, 1, &VBV);
+            cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV);
             cmdlist_->IASetIndexBuffer(&IBV);
             cmdlist_->RSSetViewports(1, &view_);
             cmdlist_->RSSetScissorRects(1, &rect_);

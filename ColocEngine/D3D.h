@@ -78,13 +78,15 @@ private:
 	ID3D12PipelineState* PSO;
 
 	ID3D12Resource* VB;
-	ID3D12Resource* CB[FrameAmmount];
+	ID3D12Resource* Ins_CB[FrameAmmount];
+	ID3D12Resource* Cmn_CB[FrameAmmount];
 	ID3D12Resource* IB;
 	ID3D12Resource* ZB;
 	Texture			tex;
 
 	D3D12_VERTEX_BUFFER_VIEW VBV;
-	CBUFFERVIEW<WVPT> CBV[FrameAmmount];
+	CBUFFERVIEW<MeshMAT> Ins_CBV[FrameAmmount];
+	CBUFFERVIEW<Util>	 Cmn_CBV;
 	D3D12_INDEX_BUFFER_VIEW IBV;
 	ID3D12DescriptorHeap* hp_ZBV;
 

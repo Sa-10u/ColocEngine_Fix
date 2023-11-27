@@ -171,7 +171,7 @@ RTexture* ResourceManager::TexLoad(std::wstring str)
     std::wstring path;
     FileLoad(str.c_str(), &path);
 
-    HRESULT res = E_FAIL;
+    res = E_FAIL;
     //-------
     TexMetadata data = {};
     ScratchImage scr = {};

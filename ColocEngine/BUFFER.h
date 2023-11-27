@@ -81,9 +81,13 @@ bool LoadMesh(const wchar_t* file, RModel* ptr);
 
 //-----------------------------
 
-struct alignas(256) WVPT
+struct alignas(256) MeshMAT
 {
 	XMMATRIX wld;
+};
+
+struct alignas(256) Util
+{
 	XMMATRIX view;
 	XMMATRIX proj;
 	float time;
