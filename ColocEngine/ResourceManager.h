@@ -9,7 +9,7 @@ namespace ResourceManager
 	extern std::vector<RModel> models_;
 	extern std::vector<RTexture> textures_;
 	
-	void ModelLoad(string str);
-	void TexLoad(string str);
+	RModel* ModelLoad(std::wstring str);
+	RTexture* TexLoad(std::wstring str);
 };
 

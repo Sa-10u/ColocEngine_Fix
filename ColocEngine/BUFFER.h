@@ -67,6 +67,7 @@ struct MATERIAL
 
 struct MESH
 {
+public:
 	vector<VERTEX> vtcs_;
 	vector<uint32_t> indexes_;
 

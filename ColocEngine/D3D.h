@@ -42,6 +42,9 @@ public:
 
 	void SetColorBG(float R, float G, float B ,float A);
 
+	ID3D12Device* GetDevice();
+	ID3D12GraphicsCommandList* GetCMDList();
+
 private:
 
 	void write();

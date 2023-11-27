@@ -252,9 +252,12 @@ bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
         }
     }
 
-    cmdlist_->Close();
+    cmdlist_->Close(); InitGBO();
 
-    if (!InitGBO()) return false;
+ __CREATE("Pipeline State Object : PSO")
+    {
+        if (!InitPSO())      return 0;
+    }
 
     return true;
 }
@@ -278,7 +281,6 @@ bool D3d::InitGBO()
     //    {XMFLOAT3(1.0f,-1.0f,0.0f),XMFLOAT2(1.0f,1.0f)},
     //    {XMFLOAT3(-1.0f,-1.0f,0.0f),XMFLOAT2(0.0f,1.0f)},
     //};
-    int i = mesh_.size();
 
     auto size = sizeof(VERTEX) * mesh_[0].vtcs_.size();//for 
     auto vtcs = mesh_[0].vtcs_.data();
@@ -566,11 +568,7 @@ bool D3d::InitGBO()
         if (FAILED(res))     return 0;
     }
     //---------------------------------**********
-    __CREATE("Pipeline State Object : PSO")
-    {
-        if (!InitPSO())      return 0;
-
-    }
+   
     //-----------------------------------------------------------------------------------------*****
     {
         std::wstring tex_Path ;
@@ -881,6 +879,16 @@ void D3d::SetColorBG(float R, float G, float B , float A)
     backcolor_[3] = A;
 }
 
+ID3D12Device* D3d::GetDevice()
+{
+    return device_;
+}
+
+ID3D12GraphicsCommandList* D3d::GetCMDList()
+{
+    return cmdlist_;
+}
+
 D3d::~D3d()
 {
 }
@@ -921,7 +929,7 @@ void D3d::write()
     cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
     cmdlist_->ClearDepthStencilView(h_ZBV, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-    {
+   /* {
         cmdlist_->SetGraphicsRootSignature(rootsig_);
         cmdlist_->SetDescriptorHeaps(1, &heapCBV_SRV_UAV_);
         cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
@@ -938,6 +946,27 @@ void D3d::write()
 
         auto cnt = static_cast<uint32_t>(mesh_[0].indexes_.size());
         cmdlist_->DrawIndexedInstanced(cnt, 1, 0, 0,0);
+    }*/
+
+    for (auto itr : ResourceManager::models_) {
+        for (auto cnt : itr.Mesh_) {
+
+            cmdlist_->SetGraphicsRootSignature(rootsig_);
+            cmdlist_->SetDescriptorHeaps(1, &heapCBV_SRV_UAV_);
+            cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
+            cmdlist_->SetGraphicsRootDescriptorTable(1, tex.HGPU);
+            cmdlist_->SetPipelineState(PSO);
+            
+            cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            cmdlist_->IASetVertexBuffers(0, 1, &VBV);
+            cmdlist_->IASetIndexBuffer(&IBV);
+            cmdlist_->RSSetViewports(1, &view_);
+            cmdlist_->RSSetScissorRects(1, &rect_);
+
+            cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
+
+            cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_,0, 0, 0);
+        }
     }
 }
 
