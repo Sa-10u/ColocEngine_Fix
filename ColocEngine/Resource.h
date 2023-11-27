@@ -5,8 +5,8 @@ class RTexture
 {
 public:
 	Texture tex_;
-
 	std::wstring Name_;
+	ID3D12DescriptorHeap* DHeap;
 };
 
 //------------------------------------------------

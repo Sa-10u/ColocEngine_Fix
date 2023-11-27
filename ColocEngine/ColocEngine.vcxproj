@@ -22,6 +22,7 @@
     <ClCompile Include="BUFFER.cpp" />
     <ClCompile Include="C_Draw.cpp" />
     <ClCompile Include="C_SetColorBG.cpp" />
+    <ClCompile Include="C_Trans.cpp" />
     <ClCompile Include="D3D.cpp" />
     <ClCompile Include="DescriptorManager.cpp" />
     <ClCompile Include="FileLoader.cpp" />
@@ -31,7 +32,6 @@
     <ClCompile Include="MACRO.cpp" />
     <ClCompile Include="MAIN.cpp" />
     <ClCompile Include="MeshLoader.cpp" />
-    <ClCompile Include="ModelComp.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="WinView.cpp" />
     <ClCompile Include="WorldManager.cpp" />
@@ -42,6 +42,7 @@
     <ClInclude Include="BUFFER.h" />
     <ClInclude Include="C_Draw.h" />
     <ClInclude Include="C_SetColorBG.h" />
+    <ClInclude Include="C_Trans.h" />
     <ClInclude Include="D3D.h" />
     <ClInclude Include="DescriptorManager.h" />
     <ClInclude Include="FileLoader.h" />
@@ -50,7 +51,6 @@
     <ClInclude Include="Input.h" />
     <ClInclude Include="MACRO.h" />
     <ClInclude Include="MeshLoader.h" />
-    <ClInclude Include="ModelComp.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="PoolManager.h" />
     <ClInclude Include="Resource.h" />

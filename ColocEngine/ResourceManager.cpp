@@ -84,7 +84,7 @@ RModel* ResourceManager::ModelLoad(std::wstring str)
 //----------------------------------------------------
             void* ptr = nullptr;
             res = temp.VB[i]->Map(NULL, 0, &ptr);
-            if (FAILED(res)) return false;
+            if (FAILED(res)) return &models_[0];
 
             memcpy(ptr, vtcs, *size);
 
@@ -152,13 +152,76 @@ RModel* ResourceManager::ModelLoad(std::wstring str)
             temp.IBV.SizeInBytes = *size;
         }
 
-        delete[] size;  delete indcs;
+        delete[] size;  delete[] indcs;
     }
-
 
 }
 
 RTexture* ResourceManager::TexLoad(std::wstring str)
 {
-	return nullptr;
+    ID3D12Device* device_ = PTR_D3D::ptr->GetDevice();
+
+    for (auto list : textures_) {
+        if (list.Name_ == str)	return &list;
+    }
+
+    RTexture temp = {};
+    HRESULT res = E_FAIL;
+
+    std::wstring path;
+    FileLoad(str.c_str(), &path);
+
+    HRESULT res = E_FAIL;
+    //-------
+    TexMetadata data = {};
+    ScratchImage scr = {};
+    const Image* image = {}
+    ;
+    res = LoadFromWICFile
+    (
+        path.c_str(),
+        WIC_FLAGS_NONE,
+        &data,
+        scr
+    );
+    if (FAILED(res)) return &textures_[0];
+
+    image = scr.GetImage(0, 0, 0);
+
+    D3D12_RESOURCE_DESC rc_desc_tex = {};
+    {
+        rc_desc_tex.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+        rc_desc_tex.Format = image->format;
+        rc_desc_tex.MipLevels = 1;
+        rc_desc_tex.DepthOrArraySize = 1;
+        rc_desc_tex.Flags = D3D12_RESOURCE_FLAG_NONE;
+        rc_desc_tex.Height = image->height;
+        rc_desc_tex.Width = image->width;
+        rc_desc_tex.SampleDesc.Count = 1;
+        rc_desc_tex.SampleDesc.Quality = 1;
+        rc_desc_tex.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+    }
+
+    D3D12_HEAP_PROPERTIES hp_prop_tex = {};
+    {
+        hp_prop_tex.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
+        hp_prop_tex.CreationNodeMask = 0;
+        hp_prop_tex.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
+        hp_prop_tex.Type = D3D12_HEAP_TYPE_CUSTOM;
+        hp_prop_tex.VisibleNodeMask = 0;
+    }
+
+    res = device_->CreateCommittedResource
+    (
+        &hp_prop_tex,
+        D3D12_HEAP_FLAG_NONE,
+        &rc_desc_tex,
+        D3D12_RESOURCE_STATE_COPY_DEST,
+        nullptr,
+        IID_PPV_ARGS(&temp.tex_.rsc_ptr)
+    );
+    if (FAILED(res)) return 0;
+
+    
+    
 }

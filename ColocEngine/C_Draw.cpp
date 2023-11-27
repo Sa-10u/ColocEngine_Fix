@@ -1,10 +1,4 @@
 #include "C_Draw.h"
-#include"ModelComp.h"
-
-void C_Draw::Draw(ModelComp* model)
-{
-
-}
 
 C_Draw::C_Draw(string tag):IComp(tag)
 {

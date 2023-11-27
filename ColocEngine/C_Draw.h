@@ -1,17 +1,20 @@
 #pragma once
 #include "IComp.h"
 #include "MACRO.h"
-#include"ModelComp.h"
+#include"ResourceManager.h"
 
 class C_Draw : public IComp
 {
-	void Draw(ModelComp* model);
-
+public:
 	C_Draw(string tag);
 
 	//---
 	void initialize() override;
 	void release() override;
 	void Run(float tick) override;
+
+private:
+	RModel* mc;
+	
 };
 

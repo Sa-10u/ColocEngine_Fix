@@ -51,7 +51,6 @@ struct Texture
 	ID3D12Resource* rsc_ptr = nullptr;
 	D3D12_GPU_DESCRIPTOR_HANDLE HGPU;
 	D3D12_CPU_DESCRIPTOR_HANDLE HCPU;
-	ID3D12DescriptorHeap* DHeap;
 };
 
 struct MATERIAL

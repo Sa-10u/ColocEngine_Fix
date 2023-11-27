@@ -57,16 +57,16 @@
     <ClCompile Include="C_SetColorBG.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="ModelComp.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="C_Draw.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="ResourceManager.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="FileLoader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="C_Trans.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="C_Draw.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -116,13 +116,13 @@
     <ClInclude Include="C_SetColorBG.h">
       <Filter>Head</Filter>
     </ClInclude>
-    <ClInclude Include="ModelComp.h">
-      <Filter>Head</Filter>
-    </ClInclude>
     <ClInclude Include="C_Draw.h">
       <Filter>Head</Filter>
     </ClInclude>
     <ClInclude Include="FileLoader.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="C_Trans.h">
       <Filter>Head</Filter>
     </ClInclude>
   </ItemGroup>
