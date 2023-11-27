@@ -34,6 +34,9 @@ public:
 	std::vector<ID3D12Resource*> VB;
 	std::vector<ID3D12Resource*> IB;
 
+	D3D12_VERTEX_BUFFER_VIEW VBV;
+	D3D12_INDEX_BUFFER_VIEW  IBV;
+
 	std::wstring Name_;
 
 	
