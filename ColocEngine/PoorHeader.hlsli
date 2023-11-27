@@ -10,6 +10,7 @@ struct VSoutput
 {
 	float4 pos	: SV_POSITION;
 	float2 uv	: TEXCOORD;
+	float4 eye	: POSITION;
 };
 
 struct PSoutput

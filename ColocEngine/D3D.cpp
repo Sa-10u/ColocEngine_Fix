@@ -264,7 +264,7 @@ bool D3d::InitGBO()
     HRESULT res = FALSE;
 
     std::wstring path ;
-    FileLoad(L"Re_Meta Knigt.fbx", &path);
+    FileLoad(L"Sphere.fbx", &path);
     
 
     //path set 3Ddata name
@@ -574,7 +574,7 @@ bool D3d::InitGBO()
     //-----------------------------------------------------------------------------------------*****
     {
         std::wstring tex_Path ;
-        FileLoad(L"MK_tex1.png", &tex_Path);
+        FileLoad(L"Tex.png", &tex_Path);
  //-------------------------------------------------------
 
         TexMetadata data = {};
@@ -851,8 +851,6 @@ void D3d::Run(int interval)
     cmdque_->ExecuteCommandLists(1, commands);
 	present(interval);
 
-    constexpr float incre = 1 / 60;
-
 }
 
 void D3d::SetHeight(float h)
@@ -901,6 +899,7 @@ void D3d::write()
 
         time_ += incre;
         CBV[IND_frame].ptr->time = time_;
+        CBV[IND_frame].ptr->wld = XMMatrixRotationY(time_);
     }
     cmdalloc_[IND_frame]->Reset();
     cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
