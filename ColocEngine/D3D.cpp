@@ -6,6 +6,9 @@
 #include <string>
 #include"ResourceManager.h"
 #include"FileLoader.h"
+#include"CAM.h"
+
+constexpr UINT CBCOUNT = 256;
 
 bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
 {
@@ -252,7 +255,8 @@ bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
         }
     }
 
-    cmdlist_->Close(); InitGBO();
+    cmdlist_->Close();
+    InitGBO();
 
  __CREATE("Pipeline State Object : PSO")
     {
@@ -472,18 +476,6 @@ bool D3d::InitGBO()
 
             res = Cmn_CB[i]->Map(0, NULL, reinterpret_cast<void**>(&Cmn_CBV[i].ptr));
             if (FAILED(res)) return 0;
-
-            auto C_pos = XMVectorSet(0.0f, 0.0f, 5.0f, 0.0f);
-            auto C_tgt = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-            auto C_head = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-
-            auto C_fovY = 37.5 * (_PI / 180);
-
-            auto C_aspect = Width / Height;
- 
-            Cmn_CBV[i].ptr->view = XMMatrixLookAtRH(C_pos, C_tgt, C_head);
-            Cmn_CBV[i].ptr->proj = XMMatrixPerspectiveFovRH(C_fovY, C_aspect, 1.0f ,1000.0f);
-            Cmn_CBV[i].ptr->time = 0.0f;
         }
     }
     //-----------------------------------------------------------
@@ -675,69 +667,9 @@ bool D3d::InitGBO()
         );
     }
     //-----------------******
-
-    {
-        D3D12_HEAP_PROPERTIES hp_prop ={};
-        {
-            hp_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-            hp_prop.CreationNodeMask = 1;
-            hp_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-            hp_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
-            hp_prop.VisibleNodeMask = 1;
-        }
-
-        D3D12_RESOURCE_DESC rc_desc = {};
-        {
-            rc_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-            rc_desc.Format = DXGI_FORMAT_UNKNOWN;
-            rc_desc.MipLevels = 1;
-            rc_desc.Height = 1;
-            rc_desc.DepthOrArraySize = 1;
-            rc_desc.SampleDesc.Count = 1;
-            rc_desc.SampleDesc.Quality = 0;
-            rc_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
-            rc_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-
-            rc_desc.Width = sizeof(ObjInfo) * 10;
-        }
-
-        auto incre = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-        for (auto i = 0u; i < FrameAmmount; i++) {
-            res = device_->CreateCommittedResource
-            (
-                &hp_prop,
-                D3D12_HEAP_FLAG_NONE,
-                &rc_desc,
-                D3D12_RESOURCE_STATE_COPY_DEST,
-                nullptr,
-                IID_PPV_ARGS(&Ins_CB[i])
-            );
-            if (FAILED(res)) return 0;
-        }
+    
 
 
-        D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc_ccb = {};
-        {
-            srv_desc_ccb.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-            srv_desc_ccb.Format = DXGI_FORMAT_UNKNOWN;
-            srv_desc_ccb.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-
-            srv_desc_ccb.Buffer.StructureByteStride = sizeof(ObjInfo);
-            srv_desc_ccb.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-            srv_desc_ccb.Buffer.FirstElement = 0;
-            srv_desc_ccb.Buffer.NumElements = 1;
-        }
-
-        for (auto i = 0u; i < FrameAmmount; i++) {
-            device_->CreateShaderResourceView
-            (
-                Ins_CB[i],
-                &srv_desc_ccb,
-                Ins_CBV[i].HCPU
-            );
-        }
-    }
     //----------------------*****
     view_.Height = Height;
     view_.Width = Width;
@@ -782,7 +714,7 @@ bool D3d::InitPSO()
     D3D12_RASTERIZER_DESC rs_desc = {};
     {
         rs_desc.FillMode = D3D12_FILL_MODE_SOLID;
-        rs_desc.CullMode = D3D12_CULL_MODE_NONE;
+        rs_desc.CullMode = D3D12_CULL_MODE_BACK;
         rs_desc.FrontCounterClockwise = false;
         rs_desc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
         rs_desc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
@@ -827,7 +759,7 @@ bool D3d::InitPSO()
     if (FAILED(res))     return 0;
 
     ID3DBlob* PSblob = nullptr;
-    res = D3DReadFileToBlob(SHADER_FILENAME::LambertPS, &PSblob);
+    res = D3DReadFileToBlob(SHADER_FILENAME::PoorPS, &PSblob);
     if (FAILED(res))     return 0;
     //--------------------------
 
@@ -892,7 +824,7 @@ void D3d::TermGBO()
 
 void D3d::Run(int interval)
 {
-
+    Update();
 	write();
 	//waitGPU();
     {
@@ -912,6 +844,19 @@ void D3d::Run(int interval)
     cmdque_->ExecuteCommandLists(1, commands);
 	present(interval);
 
+}
+
+void D3d::Update()
+{
+    {
+        static float time_ = 0.0f;
+        constexpr float incre = 1.0f / 60.0f;
+
+        time_ += incre;
+        Cmn_CBV[IND_frame].ptr->time = time_;
+    }
+
+    CAM::Run();
 }
 
 void D3d::SetHeight(float h)
@@ -964,13 +909,6 @@ D3d::D3d()
 
 void D3d::write()
 {
-    {
-        static float time_ = 0.0f;
-        constexpr float incre = 1.0f/60.0f;
-
-        time_ += incre;
-        Cmn_CBV[IND_frame].ptr->time = time_;
-    }
     cmdalloc_[IND_frame]->Reset();
     cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
 

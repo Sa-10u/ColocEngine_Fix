@@ -3,7 +3,6 @@
 #include <Windows.h>
 
 #include<DirectXMath.h>
-#include<d3d12.h>
 #include<dxgi1_4.h>
 #include"MACRO.h"
 #include"BUFFER.h"
@@ -34,6 +33,7 @@ public:
 	void Termination();
 	void TermGBO();		//Graphic Buffer Object
 	void Run(int interval);
+	void Update();
 
 	void SetHeight(float h);
 	void SetWidth(float w);
@@ -80,6 +80,7 @@ private:
 	ID3D12Resource* VB;
 	ID3D12Resource* Ins_CB[FrameAmmount];
 	ID3D12Resource* Cmn_CB[FrameAmmount];
+	ID3D12Resource* GPUBuffer[FrameAmmount];
 	ID3D12Resource* IB;
 	ID3D12Resource* ZB;
 	Texture			tex;

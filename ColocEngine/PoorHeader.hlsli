@@ -30,6 +30,9 @@ struct PerInstance
 {
 	float4x4 World;
 	float tick;
+	float4x4 View;
+	float4x4 Projection ;
+	float Time;
 };
 
 StructuredBuffer<PerInstance> Data : register(t1);

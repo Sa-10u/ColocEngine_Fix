@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BUFFER.cpp" />
+    <ClCompile Include="CAM.cpp" />
     <ClCompile Include="C_Draw.cpp" />
     <ClCompile Include="C_SetColorBG.cpp" />
     <ClCompile Include="C_Trans.cpp" />
@@ -40,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BUFFER.h" />
+    <ClInclude Include="CAM.h" />
     <ClInclude Include="C_Draw.h" />
     <ClInclude Include="C_SetColorBG.h" />
     <ClInclude Include="C_Trans.h" />

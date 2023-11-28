@@ -1,5 +1,6 @@
 #include "WinView.h"
 #include <chrono>
+#include"CAM.h"
 
 using namespace std::chrono;
 
@@ -39,6 +40,7 @@ bool WinView::setup()
     {
         if (D3D->Initialize(h_wnd,h_,w_))
         {
+            CAM::Init();
             GameMain::Init();
             DataManager::Init();
             WorldManager::Init();

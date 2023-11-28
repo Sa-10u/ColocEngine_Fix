@@ -69,6 +69,9 @@
     <ClCompile Include="C_Draw.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="CAM.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinView.h">
@@ -123,6 +126,9 @@
       <Filter>Head</Filter>
     </ClInclude>
     <ClInclude Include="C_Trans.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="CAM.h">
       <Filter>Head</Filter>
     </ClInclude>
   </ItemGroup>
