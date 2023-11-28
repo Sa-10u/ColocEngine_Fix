@@ -85,8 +85,8 @@ private:
 	Texture			tex;
 
 	D3D12_VERTEX_BUFFER_VIEW VBV;
-	CBUFFERVIEW<MeshMAT> Ins_CBV[FrameAmmount];
-	CBUFFERVIEW<Util>	 Cmn_CBV;
+	CBUFFERVIEW<ObjInfo> Ins_CBV[FrameAmmount];
+	CBUFFERVIEW<Util>	 Cmn_CBV[FrameAmmount];
 	D3D12_INDEX_BUFFER_VIEW IBV;
 	ID3D12DescriptorHeap* hp_ZBV;
 

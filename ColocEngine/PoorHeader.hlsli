@@ -26,11 +26,12 @@ cbuffer Util : register(b0)
     float Time			: packoffset(c8);
 };
 
-struct Transform
+struct PerInstance
 {
 	float4x4 World;
+	float tick;
 };
 
-StructuredBuffer<Transform> Data : register(t1);
+StructuredBuffer<PerInstance> Data : register(t1);
 
 

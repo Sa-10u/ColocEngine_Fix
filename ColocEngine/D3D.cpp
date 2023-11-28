@@ -455,22 +455,22 @@ bool D3d::InitGBO()
             if (FAILED(res))     return false;
             //----------------------------------
 
-            auto address = CB[i]->GetGPUVirtualAddress();
+            auto address = Cmn_CB[i]->GetGPUVirtualAddress();
             auto _HCPU = heapCBV_SRV_UAV_->GetCPUDescriptorHandleForHeapStart();
             auto _HGPU = heapCBV_SRV_UAV_->GetGPUDescriptorHandleForHeapStart();
 
             _HCPU.ptr += incre * i;
             _HGPU.ptr += incre * i;
 
-            CBV[i].HCPU = _HCPU;
-            CBV[i].HGPU = _HGPU;
-            CBV[i].desc.BufferLocation = address;
-            CBV[i].desc.SizeInBytes = sizeof(WVPT);
+            Cmn_CBV[i].HCPU = _HCPU;
+            Cmn_CBV[i].HGPU = _HGPU;
+            Cmn_CBV[i].desc.BufferLocation = address;
+            Cmn_CBV[i].desc.SizeInBytes = sizeof(Util);
 
-            device_->CreateConstantBufferView(&CBV[i].desc, _HCPU);
+            device_->CreateConstantBufferView(&Cmn_CBV[i].desc, _HCPU);
 
 
-            res = CB[i]->Map(0, NULL, reinterpret_cast<void**>(&CBV[i].ptr));
+            res = Cmn_CB[i]->Map(0, NULL, reinterpret_cast<void**>(&Cmn_CBV[i].ptr));
             if (FAILED(res)) return 0;
 
             auto C_pos = XMVectorSet(0.0f, 0.0f, 5.0f, 0.0f);
@@ -480,11 +480,10 @@ bool D3d::InitGBO()
             auto C_fovY = 37.5 * (_PI / 180);
 
             auto C_aspect = Width / Height;
-
-            CBV[i].ptr->wld = XMMatrixIdentity();
-            CBV[i].ptr->view = XMMatrixLookAtRH(C_pos, C_tgt, C_head);
-            CBV[i].ptr->proj = XMMatrixPerspectiveFovRH(C_fovY, C_aspect, 1.0f ,1000.0f);
-            CBV[i].ptr->time = 0.0f;
+ 
+            Cmn_CBV[i].ptr->view = XMMatrixLookAtRH(C_pos, C_tgt, C_head);
+            Cmn_CBV[i].ptr->proj = XMMatrixPerspectiveFovRH(C_fovY, C_aspect, 1.0f ,1000.0f);
+            Cmn_CBV[i].ptr->time = 0.0f;
         }
     }
     //-----------------------------------------------------------
@@ -599,7 +598,7 @@ bool D3d::InitGBO()
         }
 
 
-       
+
         rsc = image.GetImage(0, 0, 0);
 
 
@@ -667,7 +666,7 @@ bool D3d::InitGBO()
             rsc_v_desc.Texture2D.PlaneSlice = 0;
             rsc_v_desc.Texture2D.ResourceMinLODClamp = 0.0f;
         }
-        
+
         device_->CreateShaderResourceView
         (
             tex.rsc_ptr,
@@ -676,6 +675,70 @@ bool D3d::InitGBO()
         );
     }
     //-----------------******
+
+    {
+        D3D12_HEAP_PROPERTIES hp_prop ={};
+        {
+            hp_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+            hp_prop.CreationNodeMask = 1;
+            hp_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+            hp_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
+            hp_prop.VisibleNodeMask = 1;
+        }
+
+        D3D12_RESOURCE_DESC rc_desc = {};
+        {
+            rc_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+            rc_desc.Format = DXGI_FORMAT_UNKNOWN;
+            rc_desc.MipLevels = 1;
+            rc_desc.Height = 1;
+            rc_desc.DepthOrArraySize = 1;
+            rc_desc.SampleDesc.Count = 1;
+            rc_desc.SampleDesc.Quality = 0;
+            rc_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+            rc_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+            rc_desc.Width = sizeof(ObjInfo) * 10;
+        }
+
+        auto incre = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+        for (auto i = 0u; i < FrameAmmount; i++) {
+            res = device_->CreateCommittedResource
+            (
+                &hp_prop,
+                D3D12_HEAP_FLAG_NONE,
+                &rc_desc,
+                D3D12_RESOURCE_STATE_COPY_DEST,
+                nullptr,
+                IID_PPV_ARGS(&Ins_CB[i])
+            );
+            if (FAILED(res)) return 0;
+        }
+
+
+        D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc_ccb = {};
+        {
+            srv_desc_ccb.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+            srv_desc_ccb.Format = DXGI_FORMAT_UNKNOWN;
+            srv_desc_ccb.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+
+            srv_desc_ccb.Buffer.StructureByteStride = sizeof(ObjInfo);
+            srv_desc_ccb.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+            srv_desc_ccb.Buffer.FirstElement = 0;
+            srv_desc_ccb.Buffer.NumElements = 1;
+        }
+
+        for (auto i = 0u; i < FrameAmmount; i++) {
+            device_->CreateShaderResourceView
+            (
+                Ins_CB[i],
+                &srv_desc_ccb,
+                Ins_CBV[i].HCPU
+            );
+        }
+    }
+    //----------------------*****
     view_.Height = Height;
     view_.Width = Width;
     view_.MaxDepth = 1.0f;
@@ -906,8 +969,7 @@ void D3d::write()
         constexpr float incre = 1.0f/60.0f;
 
         time_ += incre;
-        CBV[IND_frame].ptr->time = time_;
-        CBV[IND_frame].ptr->wld = XMMatrixRotationY(time_);
+        Cmn_CBV[IND_frame].ptr->time = time_;
     }
     cmdalloc_[IND_frame]->Reset();
     cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
@@ -933,7 +995,7 @@ void D3d::write()
     {
         cmdlist_->SetGraphicsRootSignature(rootsig_);
         cmdlist_->SetDescriptorHeaps(1, &heapCBV_SRV_UAV_);
-        cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
+        cmdlist_->SetGraphicsRootConstantBufferView(0, Cmn_CBV[IND_frame].desc.BufferLocation);
         cmdlist_->SetGraphicsRootDescriptorTable(1, tex.HGPU);
         cmdlist_->SetPipelineState(PSO);
 
@@ -943,7 +1005,7 @@ void D3d::write()
         cmdlist_->RSSetViewports(1, &view_);
         cmdlist_->RSSetScissorRects(1, &rect_);
 
-        cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame ].desc.BufferLocation);
+        cmdlist_->SetGraphicsRootConstantBufferView(0, Cmn_CBV[IND_frame ].desc.BufferLocation);
 
         auto cnt = static_cast<uint32_t>(mesh_[0].indexes_.size());
         cmdlist_->DrawIndexedInstanced(cnt, 1, 0, 0,0);
@@ -954,7 +1016,7 @@ void D3d::write()
 
             cmdlist_->SetGraphicsRootSignature(rootsig_);
             cmdlist_->SetDescriptorHeaps(1, &heapCBV_SRV_UAV_);
-            cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
+            cmdlist_->SetGraphicsRootConstantBufferView(0, Cmn_CBV[IND_frame].desc.BufferLocation);
             cmdlist_->SetGraphicsRootDescriptorTable(1, tex.HGPU);
             cmdlist_->SetPipelineState(PSO);
             
@@ -964,7 +1026,7 @@ void D3d::write()
             cmdlist_->RSSetViewports(1, &view_);
             cmdlist_->RSSetScissorRects(1, &rect_);
 
-            cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
+            cmdlist_->SetGraphicsRootConstantBufferView(0, Cmn_CBV[IND_frame].desc.BufferLocation);
 
             cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_,0, 0, 0);
         }
