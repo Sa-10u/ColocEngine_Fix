@@ -668,7 +668,68 @@ bool D3d::InitGBO()
     }
     //-----------------******
     
+     //StructuredBuffer
+    D3D12_HEAP_PROPERTIES hp_prop = {};
+    {
+        hp_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+        hp_prop.CreationNodeMask = 1;
+        hp_prop.VisibleNodeMask = 1;
+        hp_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+        hp_prop.Type = D3D12_HEAP_TYPE_DEFAULT;
+    }
 
+    D3D12_RESOURCE_DESC rc_desc = {};
+    {
+        rc_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        rc_desc.Format = DXGI_FORMAT_UNKNOWN;
+        rc_desc.MipLevels = 1;
+        rc_desc.DepthOrArraySize = 1;
+        rc_desc.Height = 1;
+        rc_desc.Width = sizeof(ObjInfo) * CBCOUNT;
+        rc_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+        rc_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+        rc_desc.SampleDesc.Count = 1;
+    }
+
+    auto incre = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+    for (auto i = 0u; i < FrameAmmount; i++) {
+        res = device_->CreateCommittedResource
+        (
+            &hp_prop,
+            D3D12_HEAP_FLAG_NONE,
+            &rc_desc,
+            D3D12_RESOURCE_STATE_GENERIC_READ,
+            nullptr,
+            IID_PPV_ARGS(&Ins_CB[i])
+        );
+        if (FAILED(res)) return 0;
+
+        D3D12_SHADER_RESOURCE_VIEW_DESC srv = {};
+        {
+            srv.
+        }
+
+
+        auto addr = Ins_CB[i]->GetGPUVirtualAddress();
+        auto HCPU_ = heapCBV_SRV_UAV_->GetCPUDescriptorHandleForHeapStart();
+        auto HGPU_ = heapCBV_SRV_UAV_->GetGPUDescriptorHandleForHeapStart();
+
+        HCPU_.ptr += incre * i;
+        HGPU_.ptr += incre * i;
+
+        Ins_CBV[i].HCPU = HCPU_;
+        Ins_CBV[i].HGPU = HGPU_;
+        Ins_CBV[i].desc.BufferLocation = addr;
+
+        res = Ins_CB[i]->Map(0, NULL, reinterpret_cast<void**>(&Ins_CBV[i].ptr));
+        if (FAILED(res)) return 0;
+
+        device_->CreateShaderResourceView
+        (
+            Ins_CB[i],
+
+            );
 
     //----------------------*****
     view_.Height = Height;
