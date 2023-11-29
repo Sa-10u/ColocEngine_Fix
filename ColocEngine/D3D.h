@@ -74,6 +74,8 @@ private:
 
 	//-----------------
 	ID3D12DescriptorHeap* heapCBV_SRV_UAV_;
+	ID3D12DescriptorHeap* heapTex_;
+	ID3D12DescriptorHeap* heapStructureBuffer_;
 	ID3D12RootSignature* rootsig_;
 	ID3D12PipelineState* PSO;
 
