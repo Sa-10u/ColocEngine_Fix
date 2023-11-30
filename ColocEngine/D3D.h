@@ -91,6 +91,7 @@ private:
 	CBUFFERVIEW<Util>	 CBV[FrameAmmount];
 	D3D12_INDEX_BUFFER_VIEW IBV;
 	ID3D12DescriptorHeap* hp_ZBV;
+	ID3D12Resource* SBV[FrameAmmount];
 
 	//---------------
 	D3D12_VIEWPORT view_;
