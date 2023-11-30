@@ -413,7 +413,7 @@ bool D3d::InitGBO()
 
             if (FAILED(res)) return false;
         }
-        {
+        /* {
             D3D12_DESCRIPTOR_HEAP_DESC hp_desc = {};
             {
                 hp_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -442,7 +442,7 @@ bool D3d::InitGBO()
                 IID_PPV_ARGS(&heapTex_)
             );
             if (FAILED(res)) return false;
-        }
+        }*/
     }
 
     //------------------------
@@ -483,33 +483,33 @@ bool D3d::InitGBO()
                 &rc_desc_c,
                 D3D12_RESOURCE_STATE_GENERIC_READ,
                 NULL,
-                IID_PPV_ARGS(&Cmn_CB[i])
+                IID_PPV_ARGS(&CB[i])
             );
             if (FAILED(res))     return false;
             //----------------------------------
 
-            auto address = Cmn_CB[i]->GetGPUVirtualAddress();
+            auto address = CB[i]->GetGPUVirtualAddress();
             auto _HCPU = heapCBV_SRV_UAV_->GetCPUDescriptorHandleForHeapStart();
             auto _HGPU = heapCBV_SRV_UAV_->GetGPUDescriptorHandleForHeapStart();
 
             _HCPU.ptr += incre * i;
             _HGPU.ptr += incre * i;
 
-            Cmn_CBV[i].HCPU = _HCPU;
-            Cmn_CBV[i].HGPU = _HGPU;
-            Cmn_CBV[i].desc.BufferLocation = address;
-            Cmn_CBV[i].desc.SizeInBytes = sizeof(Util);
+            CBV[i].HCPU = _HCPU;
+            CBV[i].HGPU = _HGPU;
+            CBV[i].desc.BufferLocation = address;
+            CBV[i].desc.SizeInBytes = sizeof(Util);
 
-            device_->CreateConstantBufferView(&Cmn_CBV[i].desc, _HCPU);
+            device_->CreateConstantBufferView(&CBV[i].desc, _HCPU);
 
-            res = Cmn_CB[i]->Map(0, NULL, reinterpret_cast<void**>(&Cmn_CBV[i].ptr));
+            res = CB[i]->Map(0, NULL, reinterpret_cast<void**>(&CBV[i].ptr));
             if (FAILED(res)) return 0;
         }
     }
     //-----------------------------------------------------------------------------------------*****
     {
         std::wstring tex_Path;
-        FileLoad(L"Tex.png", &tex_Path);
+        FileLoad(L"default.DDS", &tex_Path);
 
         TexMetadata data = {};
         ScratchImage image = {};
@@ -583,9 +583,10 @@ bool D3d::InitGBO()
         );
         if (FAILED(res)) return 0;
 
-        auto incre = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-        auto HCPU_ = heapTex_->GetCPUDescriptorHandleForHeapStart();
-        auto HGPU_ = heapTex_->GetGPUDescriptorHandleForHeapStart();
+        //auto HCPU_ = heapTex_->GetCPUDescriptorHandleForHeapStart();
+       // auto HGPU_ = heapTex_->GetGPUDescriptorHandleForHeapStart();
+        auto HCPU_ = heapCBV_SRV_UAV_->GetCPUDescriptorHandleForHeapStart();
+        auto HGPU_ = heapCBV_SRV_UAV_->GetGPUDescriptorHandleForHeapStart();
 
         tex.HCPU = HCPU_;
         tex.HGPU = HGPU_;
@@ -619,7 +620,7 @@ bool D3d::InitGBO()
             hp_prop.CreationNodeMask = 1;
             hp_prop.VisibleNodeMask = 1;
             hp_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-            hp_prop.Type = D3D12_HEAP_TYPE_DEFAULT;
+            hp_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
         }
 
         D3D12_RESOURCE_DESC rc_desc = {};
@@ -645,7 +646,7 @@ bool D3d::InitGBO()
                 &rc_desc,
                 D3D12_RESOURCE_STATE_GENERIC_READ,
                 nullptr,
-                IID_PPV_ARGS(&Ins_CB[i])
+                IID_PPV_ARGS(&SB[i].rsc_ptr)
             );
             if (FAILED(res)) return 0;
 
@@ -660,52 +661,78 @@ bool D3d::InitGBO()
                 srv.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
             }
 
-
-            auto addr = Ins_CB[i]->GetGPUVirtualAddress();
-            auto HCPU_ = heapStructureBuffer_->GetCPUDescriptorHandleForHeapStart();
-            auto HGPU_ = heapStructureBuffer_->GetGPUDescriptorHandleForHeapStart();
+            auto HCPU_ = heapCBV_SRV_UAV_->GetCPUDescriptorHandleForHeapStart();//<---t1 register ‚É‚µ‚½‚¢
+            auto HGPU_ = heapCBV_SRV_UAV_->GetGPUDescriptorHandleForHeapStart();//
 
             HCPU_.ptr += incre * i;
             HGPU_.ptr += incre * i;
 
-            Ins_CBV[i].HCPU = HCPU_;
-            Ins_CBV[i].HGPU = HGPU_;
-            Ins_CBV[i].desc.BufferLocation = addr;
+            SB[i].HCPU = HCPU_;
+            SB[i].HGPU = HGPU_;
 
+            void* ptr = nullptr;
+            auto res = SB[i].rsc_ptr->Map(0, nullptr,reinterpret_cast<void**>(&SB[i].view));
+            if (FAILED(res)) return false;
 
             device_->CreateShaderResourceView
             (
-                Ins_CB[i],
+                SB[i].rsc_ptr,
                 &srv,
-                Ins_CBV[i].HCPU
+                SB[i].HCPU
             );
         }
     }
     //--------------*****
     {
-        D3D12_ROOT_PARAMETER r_param[2] = {};
+
+        enum
         {
-            r_param[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-            r_param[0].Descriptor.RegisterSpace = 0;
-            r_param[0].Descriptor.ShaderRegister = 0;
-            r_param[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+            CB =0,
+            TEX,
+            SB,
+            AMMOUNT
+        };
+
+        D3D12_ROOT_PARAMETER r_param[AMMOUNT] = {};
+        {
+            r_param[CB].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+            r_param[CB].Descriptor.RegisterSpace = 0;
+            r_param[CB].Descriptor.ShaderRegister = 0;
+            r_param[CB].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
         }
 
-        D3D12_DESCRIPTOR_RANGE range = {};
+        D3D12_DESCRIPTOR_RANGE range_Tex = {};
         {
-            range.BaseShaderRegister = 0;
-            range.NumDescriptors = 1;
-            range.OffsetInDescriptorsFromTableStart = 0;
-            range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-            range.RegisterSpace = 0;
+            range_Tex.BaseShaderRegister = 0;
+            range_Tex.NumDescriptors = 1;
+            range_Tex.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+            range_Tex.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            range_Tex.RegisterSpace = 0;
         }
 
-        r_param[1];
+        r_param[TEX];
         {
-            r_param[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-            r_param[1].DescriptorTable.NumDescriptorRanges = 1;
-            r_param[1].DescriptorTable.pDescriptorRanges = &range;
-            r_param[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+            r_param[TEX].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+            r_param[TEX].DescriptorTable.NumDescriptorRanges = 1;
+            r_param[TEX].DescriptorTable.pDescriptorRanges = &range_Tex;
+            r_param[TEX].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+        }
+
+        D3D12_DESCRIPTOR_RANGE range_SB = {};
+        {
+            range_SB.BaseShaderRegister = 1;
+            range_SB.NumDescriptors = CBCOUNT;
+            range_SB.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+            range_SB.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            range_SB.RegisterSpace = 0;
+        }
+
+        r_param[SB];
+        {
+            r_param[SB].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+            r_param[SB].DescriptorTable.NumDescriptorRanges = 1;
+            r_param[SB].DescriptorTable.pDescriptorRanges = &range_SB;
+            r_param[SB].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
         }
 
         D3D12_STATIC_SAMPLER_DESC sampler = {};
@@ -736,7 +763,7 @@ bool D3d::InitGBO()
             r_s_desc.pParameters = r_param;
             r_s_desc.pStaticSamplers = &sampler;
             r_s_desc.Flags = flag;
-            r_s_desc.NumParameters = 2;
+            r_s_desc.NumParameters = AMMOUNT;
             r_s_desc.NumStaticSamplers = 1;
         }
 
@@ -945,7 +972,15 @@ void D3d::Update()
         constexpr float incre = 1.0f / 60.0f;
 
         time_ += incre;
-        Cmn_CBV[IND_frame].ptr->time = time_;
+        CBV[IND_frame].ptr->time = time_;
+
+        CBV[IND_frame].ptr->view = XMMatrixLookAtRH(CAM::Pos, CAM::Tgt, CAM::Head);
+        CBV[IND_frame].ptr->proj = XMMatrixPerspectiveFovRH(CAM::Fov, CAM::Aspect, 1.0f, 1000.0f);
+
+        ObjInfo info[CBCOUNT] = {};
+        info[0].wld = XMMatrixIdentity();
+
+        memcpy(SB[IND_frame].view, info, sizeof(info));
     }
 
     CAM::Run();
@@ -1021,11 +1056,9 @@ void D3d::write()
     cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
     cmdlist_->ClearDepthStencilView(h_ZBV, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-
     {
         cmdlist_->SetGraphicsRootSignature(rootsig_);
-        cmdlist_->SetDescriptorHeaps(1, &heapCBV_SRV_UAV_);
-        cmdlist_->SetGraphicsRootConstantBufferView(0, Cmn_CBV[IND_frame].desc.BufferLocation);
+        cmdlist_->SetDescriptorHeaps(1,&heapCBV_SRV_UAV_);
         cmdlist_->SetGraphicsRootDescriptorTable(1, tex.HGPU);
         cmdlist_->SetPipelineState(PSO);
 
@@ -1035,19 +1068,18 @@ void D3d::write()
         cmdlist_->RSSetViewports(1, &view_);
         cmdlist_->RSSetScissorRects(1, &rect_);
 
-        cmdlist_->SetGraphicsRootConstantBufferView(0, Cmn_CBV[IND_frame].desc.BufferLocation);
+        cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
 
         auto cnt = static_cast<uint32_t>(mesh_[0].indexes_.size());
-        cmdlist_->DrawIndexedInstanced(cnt, 1, 0, 0, 0);
+        cmdlist_->DrawIndexedInstanced(cnt, 3, 0, 0, 0);
     }
 
-    for (auto itr : ResourceManager::models_) {
+   /* for (auto itr : ResourceManager::models_) {
         for (auto cnt : itr.Mesh_) {
 
             cmdlist_->SetGraphicsRootSignature(rootsig_);
             cmdlist_->SetDescriptorHeaps(1, &heapCBV_SRV_UAV_);
-            cmdlist_->SetGraphicsRootConstantBufferView(0, Cmn_CBV[IND_frame].desc.BufferLocation);
-            cmdlist_->SetGraphicsRootDescriptorTable(1, tex.HGPU);
+            cmdlist_->SetGraphicsRootDescriptorTable(0, tex.HGPU);
             cmdlist_->SetPipelineState(PSO);
 
             cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -1056,11 +1088,11 @@ void D3d::write()
             cmdlist_->RSSetViewports(1, &view_);
             cmdlist_->RSSetScissorRects(1, &rect_);
 
-            cmdlist_->SetGraphicsRootConstantBufferView(0, Cmn_CBV[IND_frame].desc.BufferLocation);
+            cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
 
             cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_, 0, 0, 0);
         }
-    }
+    }*/
 }
 
 void D3d::waitGPU()
