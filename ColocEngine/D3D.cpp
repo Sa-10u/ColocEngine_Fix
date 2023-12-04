@@ -1030,7 +1030,7 @@ void D3d::write()
         cmdlist_->SetDescriptorHeaps(1,&heapCBV_SRV_UAV_);
         cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
         cmdlist_->SetGraphicsRootDescriptorTable(1, tex.HGPU);
-        cmdlist_->SetGraphicsRootDescriptorTable(2, tex.HGPU);
+        cmdlist_->SetGraphicsRootDescriptorTable(2, SB[IND_frame].HGPU);
         cmdlist_->SetPipelineState(PSO);
 
         cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
