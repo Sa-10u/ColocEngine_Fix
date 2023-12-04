@@ -591,7 +591,7 @@ bool D3d::InitGBO()
             hp_prop.CreationNodeMask = 1;
             hp_prop.VisibleNodeMask = 1;
             hp_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-            hp_prop.Type = D3D12_HEAP_TYPE_DEFAULT;
+            hp_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
         }
 
         D3D12_RESOURCE_DESC rc_desc = {};
@@ -615,11 +615,14 @@ bool D3d::InitGBO()
                 &hp_prop,
                 D3D12_HEAP_FLAG_NONE,
                 &rc_desc,
-                D3D12_RESOURCE_STATE_COPY_DEST,
+                D3D12_RESOURCE_STATE_GENERIC_READ,
                 nullptr,
                 IID_PPV_ARGS(&SB[i].rsc_ptr)
             );
             if (FAILED(res)) return 0;
+
+            res = SB[i].rsc_ptr->Map(0, nullptr, reinterpret_cast<void**>(&SB[i].view));
+            memset(SB[i].view, 0, CBCOUNT * sizeof(ObjInfo));
 
             D3D12_SHADER_RESOURCE_VIEW_DESC srv = {};
             {
@@ -701,6 +704,7 @@ bool D3d::InitGBO()
             r_param[SB].DescriptorTable.pDescriptorRanges = &range_SB;
             r_param[SB].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
         }
+        
 
         D3D12_STATIC_SAMPLER_DESC sampler = {};
         {
@@ -1025,8 +1029,8 @@ void D3d::write()
         cmdlist_->SetGraphicsRootSignature(rootsig_);
         cmdlist_->SetDescriptorHeaps(1,&heapCBV_SRV_UAV_);
         cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
-        cmdlist_->SetGraphicsRootDescriptorTable(0, tex.HGPU);
-        cmdlist_->SetGraphicsRootDescriptorTable(1, SB[IND_frame].HGPU);
+        cmdlist_->SetGraphicsRootDescriptorTable(1, tex.HGPU);
+        cmdlist_->SetGraphicsRootDescriptorTable(2, tex.HGPU);
         cmdlist_->SetPipelineState(PSO);
 
         cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
