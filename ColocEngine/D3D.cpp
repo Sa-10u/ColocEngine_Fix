@@ -1024,6 +1024,9 @@ void D3d::write()
     {
         cmdlist_->SetGraphicsRootSignature(rootsig_);
         cmdlist_->SetDescriptorHeaps(1,&heapCBV_SRV_UAV_);
+        cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
+        cmdlist_->SetGraphicsRootDescriptorTable(0, tex.HGPU);
+        cmdlist_->SetGraphicsRootDescriptorTable(1, SB[IND_frame].HGPU);
         cmdlist_->SetPipelineState(PSO);
 
         cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -1032,9 +1035,6 @@ void D3d::write()
         cmdlist_->RSSetViewports(1, &view_);
         cmdlist_->RSSetScissorRects(1, &rect_);
 
-        cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
-        cmdlist_->SetGraphicsRootDescriptorTable(0, tex.HGPU);
-        cmdlist_->SetGraphicsRootDescriptorTable(1, SB[IND_frame].HGPU);
 
         auto cnt = static_cast<uint32_t>(mesh_[0].indexes_.size());
         cmdlist_->DrawIndexedInstanced(cnt, 3, 0, 0, 0);
