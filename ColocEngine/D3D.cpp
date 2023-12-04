@@ -401,7 +401,7 @@ bool D3d::InitGBO()
             {
                 hp_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
                 hp_desc.NodeMask = 0;
-                hp_desc.NumDescriptors = 2 * FrameAmmount;
+                hp_desc.NumDescriptors = 3 * FrameAmmount;
                 hp_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
             }
 
@@ -413,36 +413,6 @@ bool D3d::InitGBO()
 
             if (FAILED(res)) return false;
         }
-        /* {
-            D3D12_DESCRIPTOR_HEAP_DESC hp_desc = {};
-            {
-                hp_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-                hp_desc.NodeMask = 0;
-                hp_desc.NumDescriptors = CBCOUNT * 2;
-                hp_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-            }
-            res = device_->CreateDescriptorHeap
-            (
-                &hp_desc,
-                IID_PPV_ARGS(&heapStructureBuffer_)
-            );
-            if (FAILED(res)) return false;
-        }
-        {
-            D3D12_DESCRIPTOR_HEAP_DESC hp_desc = {};
-            {
-                hp_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-                hp_desc.NodeMask = 0;
-                hp_desc.NumDescriptors = 512;
-                hp_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-            }
-            res = device_->CreateDescriptorHeap
-            (
-                &hp_desc,
-                IID_PPV_ARGS(&heapTex_)
-            );
-            if (FAILED(res)) return false;
-        }*/
     }
 
     //------------------------
@@ -587,9 +557,10 @@ bool D3d::InitGBO()
        // auto HGPU_ = heapTex_->GetGPUDescriptorHandleForHeapStart();
         auto HCPU_ = heapCBV_SRV_UAV_->GetCPUDescriptorHandleForHeapStart();
         auto HGPU_ = heapCBV_SRV_UAV_->GetGPUDescriptorHandleForHeapStart();
+        auto incre = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-        tex.HCPU = HCPU_;
-        tex.HGPU = HGPU_;
+        tex.HCPU.ptr = HCPU_.ptr + incre * 2;
+        tex.HGPU.ptr = HGPU_.ptr + incre * 2;
 
 
         D3D12_SHADER_RESOURCE_VIEW_DESC rsc_v_desc = {};
@@ -656,7 +627,7 @@ bool D3d::InitGBO()
                 srv.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
                 srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
                 srv.Buffer.FirstElement = 0;
-                srv.Buffer.NumElements = CBCOUNT *2 ;
+                srv.Buffer.NumElements = CBCOUNT  ;
                 srv.Buffer.StructureByteStride = sizeof(ObjInfo);
                 srv.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
             }
@@ -664,15 +635,11 @@ bool D3d::InitGBO()
             auto HCPU_ = heapCBV_SRV_UAV_->GetCPUDescriptorHandleForHeapStart();//<---t1 register ‚É‚µ‚½‚¢
             auto HGPU_ = heapCBV_SRV_UAV_->GetGPUDescriptorHandleForHeapStart();//
 
-            HCPU_.ptr += incre * (i);
-            HGPU_.ptr += incre * (i);
+            HCPU_.ptr = (incre * (i + 3)) + heapCBV_SRV_UAV_->GetCPUDescriptorHandleForHeapStart().ptr;
+            HGPU_.ptr = (incre * (i + 3)) + heapCBV_SRV_UAV_->GetGPUDescriptorHandleForHeapStart().ptr;
 
             SB[i].HCPU = HCPU_;
             SB[i].HGPU = HGPU_;
-
-           // void* ptr = nullptr;
-           // auto res = SB[i].rsc_ptr->Map(0, nullptr,reinterpret_cast<void**>(&SB[i].view));
-           // if (FAILED(res)) return false;
 
             device_->CreateShaderResourceView
             (
@@ -979,8 +946,6 @@ void D3d::Update()
 
         ObjInfo info[CBCOUNT] = {};
         info[0].wld = XMMatrixIdentity();
-
-        //memcpy(SB[IND_frame].view, info, sizeof(info));
     }
 
     CAM::Run();
@@ -1059,8 +1024,6 @@ void D3d::write()
     {
         cmdlist_->SetGraphicsRootSignature(rootsig_);
         cmdlist_->SetDescriptorHeaps(1,&heapCBV_SRV_UAV_);
-        cmdlist_->SetGraphicsRootDescriptorTable(0, tex.HGPU);
-        cmdlist_->SetGraphicsRootDescriptorTable(1, SB[IND_frame].HGPU);
         cmdlist_->SetPipelineState(PSO);
 
         cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -1070,6 +1033,8 @@ void D3d::write()
         cmdlist_->RSSetScissorRects(1, &rect_);
 
         cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
+        cmdlist_->SetGraphicsRootDescriptorTable(0, tex.HGPU);
+        cmdlist_->SetGraphicsRootShaderResourceView(1, SB[IND_frame].HGPU);
 
         auto cnt = static_cast<uint32_t>(mesh_[0].indexes_.size());
         cmdlist_->DrawIndexedInstanced(cnt, 3, 0, 0, 0);

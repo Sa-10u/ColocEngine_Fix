@@ -81,7 +81,7 @@ private:
 
 	ID3D12Resource* VB;
 	ID3D12Resource* CB[FrameAmmount];
-	ID3D12Resource* GPUBuffer[FrameAmmount];
+	//ID3D12Resource* GPUBuffer[FrameAmmount];
 	ID3D12Resource* IB;
 	ID3D12Resource* ZB;
 	Texture			tex;
@@ -91,7 +91,6 @@ private:
 	CBUFFERVIEW<Util>	 CBV[FrameAmmount];
 	D3D12_INDEX_BUFFER_VIEW IBV;
 	ID3D12DescriptorHeap* hp_ZBV;
-	ID3D12Resource* SBV[FrameAmmount];
 
 	//---------------
 	D3D12_VIEWPORT view_;
