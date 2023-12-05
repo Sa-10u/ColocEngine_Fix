@@ -90,7 +90,7 @@ bool LoadMesh(const wchar_t* file, RModel* ptr);
 
 //-----------------------------
 
-struct alignas(256) ObjInfo
+struct ObjInfo
 {
 	XMMATRIX wld;
 	float tick;

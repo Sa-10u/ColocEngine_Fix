@@ -268,7 +268,7 @@ bool D3d::InitGBO()
     HRESULT res = FALSE;
 
     std::wstring path;
-    FileLoad(L"Sphere.fbx", &path);
+    FileLoad(L"teapot.obj", &path);
 
 
     //path set 3Ddata name
@@ -492,20 +492,7 @@ bool D3d::InitGBO()
             &data,
             image
         );
-        if (FAILED(res))
-        {
-            res = LoadFromWICFile
-            (
-                L"Resource/Texture/default.dds",
-                WIC_FLAGS_NONE,
-                &data,
-                image
-            );
-            if (FAILED(res)) return 0;
-        }
-
-
-
+      
         rsc = image.GetImage(0, 0, 0);
 
 
@@ -635,8 +622,8 @@ bool D3d::InitGBO()
                 srv.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
             }
 
-            auto HCPU_ = heapCBV_SRV_UAV_->GetCPUDescriptorHandleForHeapStart();//<---t1 register ‚É‚µ‚½‚¢
-            auto HGPU_ = heapCBV_SRV_UAV_->GetGPUDescriptorHandleForHeapStart();//
+            auto HCPU_ = heapCBV_SRV_UAV_->GetCPUDescriptorHandleForHeapStart();
+            auto HGPU_ = heapCBV_SRV_UAV_->GetGPUDescriptorHandleForHeapStart();
 
             HCPU_.ptr = (incre * (i + 3)) + heapCBV_SRV_UAV_->GetCPUDescriptorHandleForHeapStart().ptr;
             HGPU_.ptr = (incre * (i + 3)) + heapCBV_SRV_UAV_->GetGPUDescriptorHandleForHeapStart().ptr;
@@ -948,8 +935,14 @@ void D3d::Update()
         CBV[IND_frame].ptr->view = XMMatrixLookAtRH(CAM::Pos, CAM::Tgt, CAM::Head);
         CBV[IND_frame].ptr->proj = XMMatrixPerspectiveFovRH(CAM::Fov, CAM::Aspect, 1.0f, 1000.0f);
 
-        ObjInfo info[CBCOUNT] = {};
-        info[0].wld = XMMatrixIdentity();
+        for (auto i = 0u; i < CBCOUNT; i++) {
+
+            float v = i ;
+
+            XMMATRIX mat = XMMatrixRotationY(v);
+
+            SB[IND_frame].view[i].wld = mat;
+        }
     }
 
     CAM::Run();
@@ -1029,8 +1022,10 @@ void D3d::write()
         cmdlist_->SetGraphicsRootSignature(rootsig_);
         cmdlist_->SetDescriptorHeaps(1,&heapCBV_SRV_UAV_);
         cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
+
         cmdlist_->SetGraphicsRootDescriptorTable(1, tex.HGPU);
         cmdlist_->SetGraphicsRootDescriptorTable(2, SB[IND_frame].HGPU);
+
         cmdlist_->SetPipelineState(PSO);
 
         cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -1041,7 +1036,7 @@ void D3d::write()
 
 
         auto cnt = static_cast<uint32_t>(mesh_[0].indexes_.size());
-        cmdlist_->DrawIndexedInstanced(cnt, 3, 0, 0, 0);
+        cmdlist_->DrawIndexedInstanced(cnt, CBCOUNT, 0, 0, 0);
     }
 
    /* for (auto itr : ResourceManager::models_) {

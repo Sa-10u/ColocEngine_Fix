@@ -20,7 +20,7 @@ void CAM::Init()
 	Tgt = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 	Head = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
-	Fov = 37.5 * (_PI * 180);
+	Fov = 37.5 * (_PI / 180);
 	
 	Aspect = PTR_D3D::ptr->GetWidth()/PTR_D3D::ptr->GetHeight();
 }
