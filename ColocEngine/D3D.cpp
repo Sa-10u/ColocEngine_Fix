@@ -1064,7 +1064,7 @@ void D3d::write()
 
             cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV);
-            cmdlist_->IASetIndexBuffer(&IBV);
+            cmdlist_->IASetIndexBuffer(&itr.IBV);
             cmdlist_->RSSetViewports(1, &view_);
             cmdlist_->RSSetScissorRects(1, &rect_);
 

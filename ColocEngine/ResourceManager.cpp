@@ -160,8 +160,12 @@ RModel* ResourceManager::ModelLoad(std::wstring str)
         }
 
         delete[] size;  delete[] indcs;
+
+        temp.Name_ = path.c_str();
     }
 
+    ResourceManager::models_.push_back(temp);
+    return &ResourceManager::models_.back();
 }
 
 RTexture* ResourceManager::TexLoad(std::wstring str)
