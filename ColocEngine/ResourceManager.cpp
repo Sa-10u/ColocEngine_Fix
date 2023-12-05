@@ -15,13 +15,19 @@ void ResourceManager::Init()
 	
 }
 
+void ResourceManager::Term()
+{
+    ModelFlush();
+    TexFlush();
+}
+
 RModel* ResourceManager::ModelLoad(std::wstring str)
 {
-    ID3D12Device* device_ = PTR_D3D::ptr->GetDevice();
-
 	for (auto list : models_) {
 		if (list.Name_ == str)	return &list;
 	}
+
+    ID3D12Device* device_ = PTR_D3D::ptr->GetDevice();
 
 	HRESULT res = E_FAIL;
 
@@ -86,22 +92,23 @@ RModel* ResourceManager::ModelLoad(std::wstring str)
             res = temp.VB[i]->Map(NULL, 0, &ptr);
             if (FAILED(res)) return &models_[0];
 
-            memcpy(ptr, vtcs, *size);
+            memcpy(ptr, vtcs[i], size[i]);
 
             temp.VB[i]->Unmap(0, 0);
             temp.VBV.StrideInBytes = static_cast <UINT>(sizeof(VERTEX));
 
-            delete[] size;    delete[] vtcs;
+            
         }
     }
+    delete[] size;    delete[] vtcs;
 
     {
         auto size = new size_t[temp.numMesh_];
         auto indcs = new uint32_t * [temp.numMesh_];
         for (auto i = 0u; i < temp.numMesh_; i++) {
 
-            *size = sizeof(uint32_t) * temp.Mesh_[i].indexes_.size();
-            *indcs = temp.Mesh_[i].indexes_.data();
+            size[i] = sizeof(uint32_t) * temp.Mesh_[i].indexes_.size();
+            indcs[i] = temp.Mesh_[i].indexes_.data();
         }
         for (auto i = 0u; i < temp.numMesh_; i++) {
 
@@ -225,4 +232,26 @@ RTexture* ResourceManager::TexLoad(std::wstring str)
     
     
     
+}
+
+void ResourceManager::ModelFlush()
+{
+    for (auto md : models_) {
+
+        md.Name_.clear();
+        md.VB.clear();
+        md.IB.clear();
+        md.TexName_.clear();
+        md.Mtr_.clear();
+        md.Mesh_.clear();
+    }
+}
+
+void ResourceManager::TexFlush()
+{
+    for (auto pic : textures_) {
+
+        pic.Name_.clear();
+        pic.DHeap->Release();
+    }
 }

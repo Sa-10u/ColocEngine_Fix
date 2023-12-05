@@ -26,7 +26,9 @@ public:
 	UINT numMtr_;
 	UINT numMesh_;
 	UINT numHasTex_;
+
 	UINT DrawCount_;
+	vector<XMMATRIX> mat;
 
 	std::vector<MESH> Mesh_;
 	std::vector<MATERIAL> Mtr_;
@@ -39,5 +41,4 @@ public:
 
 	std::wstring Name_;
 
-	
 };

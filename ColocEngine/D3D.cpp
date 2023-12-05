@@ -7,6 +7,7 @@
 #include"ResourceManager.h"
 #include"FileLoader.h"
 #include"CAM.h"
+#include"S_Draw.h"
 
 constexpr UINT CBCOUNT = 256;
 
@@ -268,7 +269,7 @@ bool D3d::InitGBO()
     HRESULT res = FALSE;
 
     std::wstring path;
-    FileLoad(L"teapot.obj", &path);
+    FileLoad(L"Re_Meta Knigt.fbx", &path);
 
 
     //path set 3Ddata name
@@ -479,7 +480,7 @@ bool D3d::InitGBO()
     //-----------------------------------------------------------------------------------------*****
     {
         std::wstring tex_Path;
-        FileLoad(L"default.DDS", &tex_Path);
+        FileLoad(L"MK_tex1.png", &tex_Path);
 
         TexMetadata data = {};
         ScratchImage image = {};
@@ -939,13 +940,21 @@ void D3d::Update()
 
             float v = i ;
 
-            XMMATRIX mat = XMMatrixRotationY(v);
-
-            SB[IND_frame].view[i].wld = mat;
+            SB[IND_frame].view[i].wld = XMMATRIX
+            (
+                1,0,0,0,
+                0,1,0,0,
+                0,0,1,0,
+                v *2,0,0,1
+            );
+            SB[IND_frame].view[i].tick = 0;
         }
     }
 
     CAM::Run();
+
+    auto y = sizeof(ObjInfo);
+    
 }
 
 void D3d::SetHeight(float h)
@@ -1018,7 +1027,7 @@ void D3d::write()
     cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
     cmdlist_->ClearDepthStencilView(h_ZBV, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-    {
+     /* {
         cmdlist_->SetGraphicsRootSignature(rootsig_);
         cmdlist_->SetDescriptorHeaps(1,&heapCBV_SRV_UAV_);
         cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
@@ -1036,15 +1045,21 @@ void D3d::write()
 
 
         auto cnt = static_cast<uint32_t>(mesh_[0].indexes_.size());
-        cmdlist_->DrawIndexedInstanced(cnt, CBCOUNT, 0, 0, 0);
-    }
+        cmdlist_->DrawIndexedInstanced(cnt, 3, 0, 0, 0);
+    }*/
 
-   /* for (auto itr : ResourceManager::models_) {
+    for (auto itr : ResourceManager::models_) {
         for (auto cnt : itr.Mesh_) {
+
+            memcpy(SB[IND_frame].view, &itr.mat[0], itr.mat.size());
 
             cmdlist_->SetGraphicsRootSignature(rootsig_);
             cmdlist_->SetDescriptorHeaps(1, &heapCBV_SRV_UAV_);
-            cmdlist_->SetGraphicsRootDescriptorTable(0, tex.HGPU);
+            cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
+
+            cmdlist_->SetGraphicsRootDescriptorTable(1, tex.HGPU);
+            cmdlist_->SetGraphicsRootDescriptorTable(2, SB[IND_frame].HGPU);
+
             cmdlist_->SetPipelineState(PSO);
 
             cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -1057,7 +1072,8 @@ void D3d::write()
 
             cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_, 0, 0, 0);
         }
-    }*/
+        S_Draw::Flush(&itr);
+    }
 }
 
 void D3d::waitGPU()

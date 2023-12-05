@@ -13,6 +13,36 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Components">
+      <UniqueIdentifier>{7c755a62-0d77-458f-a7d7-326497e7c47f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{e47502f9-093b-41b1-ba1e-4b0491525dc3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene\header">
+      <UniqueIdentifier>{4514a5c5-8d76-4391-bfc0-ff59538782d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene\source">
+      <UniqueIdentifier>{6b1c64a3-723a-43a4-b568-3b164c2575cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\ColocEngine">
+      <UniqueIdentifier>{de8f056e-8ae3-49b0-9ec4-61fafab4d69f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\ColocEngine\header">
+      <UniqueIdentifier>{1ec0d221-6f6f-4ca2-8453-8d5d94fb684f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\ColocEngine\source">
+      <UniqueIdentifier>{8c61b587-e414-462f-bc3c-8cef5c32d68b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\YourComponents">
+      <UniqueIdentifier>{a3818176-f5e4-4baf-b768-f9ebcd51b278}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\YourComponents\source">
+      <UniqueIdentifier>{e5bfff2b-639b-43d2-bddb-8f20ff149f02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\YourComponents\header">
+      <UniqueIdentifier>{69e4ac50-7ced-4f32-a1ed-972a513117b4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MAIN.cpp">
@@ -36,9 +66,6 @@
     <ClCompile Include="DescriptorManager.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="IComp.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="WorldManager.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -51,26 +78,29 @@
     <ClCompile Include="GameMain.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="WW_BlackScreen.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="C_SetColorBG.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="ResourceManager.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="FileLoader.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="C_Trans.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="C_Draw.cpp">
+    <ClCompile Include="S_Draw.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="CAM.cpp">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="WW_BlackScreen.cpp">
+      <Filter>Scene\source</Filter>
+    </ClCompile>
+    <ClCompile Include="C_SetColorBG.cpp">
+      <Filter>Components\YourComponents\source</Filter>
+    </ClCompile>
+    <ClCompile Include="C_Trans.cpp">
+      <Filter>Components\ColocEngine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="IComp.cpp">
+      <Filter>Components\ColocEngine\source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -98,9 +128,6 @@
     <ClInclude Include="Resource.h">
       <Filter>Head</Filter>
     </ClInclude>
-    <ClInclude Include="IComp.h">
-      <Filter>Head</Filter>
-    </ClInclude>
     <ClInclude Include="ResourceManager.h">
       <Filter>Head</Filter>
     </ClInclude>
@@ -113,23 +140,26 @@
     <ClInclude Include="GameMain.h">
       <Filter>Head</Filter>
     </ClInclude>
-    <ClInclude Include="WW_BlackScreen.h">
-      <Filter>Head</Filter>
-    </ClInclude>
-    <ClInclude Include="C_SetColorBG.h">
-      <Filter>Head</Filter>
-    </ClInclude>
-    <ClInclude Include="C_Draw.h">
+    <ClInclude Include="S_Draw.h">
       <Filter>Head</Filter>
     </ClInclude>
     <ClInclude Include="FileLoader.h">
       <Filter>Head</Filter>
     </ClInclude>
-    <ClInclude Include="C_Trans.h">
-      <Filter>Head</Filter>
-    </ClInclude>
     <ClInclude Include="CAM.h">
       <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="WW_BlackScreen.h">
+      <Filter>Scene\header</Filter>
+    </ClInclude>
+    <ClInclude Include="C_SetColorBG.h">
+      <Filter>Components\ColocEngine\header</Filter>
+    </ClInclude>
+    <ClInclude Include="C_Trans.h">
+      <Filter>Components\ColocEngine\header</Filter>
+    </ClInclude>
+    <ClInclude Include="IComp.h">
+      <Filter>Components\ColocEngine\header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

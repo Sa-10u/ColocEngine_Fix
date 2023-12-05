@@ -94,6 +94,10 @@ struct ObjInfo
 {
 	XMMATRIX wld;
 	float tick;
+
+	float val1;
+	float val2;
+	float val3;
 };
 
 struct alignas(256) Util

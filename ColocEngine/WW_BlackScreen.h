@@ -1,5 +1,8 @@
 #pragma once
 #include "WorldManager.h"
+
+class RModel;
+
 class WW_BlackScreen : public WorldWork
 {
 public:
@@ -10,5 +13,6 @@ public:
 private:
 
 	Entity* BG;
+	RModel* md;
 };
 
