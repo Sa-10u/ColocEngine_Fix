@@ -57,51 +57,47 @@ RModel* ResourceManager::ModelLoad(std::wstring str)
                 hp_prop_v.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
                 hp_prop_v.VisibleNodeMask = 1;
             };
+            D3D12_RESOURCE_DESC rc_desc_v = {};
+            {
+                rc_desc_v.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+                rc_desc_v.Alignment = 0;
+                rc_desc_v.Width = size;
+                rc_desc_v.Height = 1;
+                rc_desc_v.DepthOrArraySize = 1;
+                rc_desc_v.MipLevels = 1;
+                rc_desc_v.Format = DXGI_FORMAT_UNKNOWN;
+                rc_desc_v.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+                rc_desc_v.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-            for (auto i = 0u; i < temp.numMesh_; i++) {
-                D3D12_RESOURCE_DESC rc_desc_v = {};
-                {
-                    rc_desc_v.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-                    rc_desc_v.Alignment = 0;
-                    rc_desc_v.Width = size;
-                    rc_desc_v.Height = 1;
-                    rc_desc_v.DepthOrArraySize = 1;
-                    rc_desc_v.MipLevels = 1;
-                    rc_desc_v.Format = DXGI_FORMAT_UNKNOWN;
-                    rc_desc_v.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-                    rc_desc_v.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-                    rc_desc_v.SampleDesc.Count = 1;
-                    rc_desc_v.SampleDesc.Quality = 0;
-                }
-
-                res = device_->CreateCommittedResource
-                (
-                    &hp_prop_v,
-                    D3D12_HEAP_FLAG_NONE,
-                    &rc_desc_v,
-                    D3D12_RESOURCE_STATE_GENERIC_READ,
-                    nullptr,
-                    IID_PPV_ARGS(&(temp.VB[i]))
-                );
-                if (FAILED(res))  return &models_[0];
-
-                //----------------------------------------------------
-                void* ptr = nullptr;
-                res = temp.VB[i]->Map(NULL, 0, &ptr);
-                if (FAILED(res)) return &models_[0];
-
-                memcpy(ptr, vtcs, size);
-
-                temp.VB[i]->Unmap(0, 0);
-
-                temp.VBV[i].StrideInBytes = static_cast <UINT>(sizeof(VERTEX));
-                temp.VBV[i].BufferLocation = temp.VB[i]->GetGPUVirtualAddress();
-                temp.VBV[i].SizeInBytes = static_cast <UINT>(size);
-
+                rc_desc_v.SampleDesc.Count = 1;
+                rc_desc_v.SampleDesc.Quality = 0;
             }
+
+            res = device_->CreateCommittedResource
+            (
+                &hp_prop_v,
+                D3D12_HEAP_FLAG_NONE,
+                &rc_desc_v,
+                D3D12_RESOURCE_STATE_GENERIC_READ,
+                nullptr,
+                IID_PPV_ARGS(&(temp.VB[i]))
+            );
+            if (FAILED(res))  return &models_[0];
+
+            //----------------------------------------------------
+            void* ptr = nullptr;
+            res = temp.VB[i]->Map(NULL, 0, &ptr);
+            if (FAILED(res)) return &models_[0];
+
+            memcpy(ptr, vtcs, size);
+
+            temp.VB[i]->Unmap(0, 0);
+
+            temp.VBV[i].StrideInBytes = static_cast <UINT>(sizeof(VERTEX));
+            temp.VBV[i].BufferLocation = temp.VB[i]->GetGPUVirtualAddress();
+            temp.VBV[i].SizeInBytes = static_cast <UINT>(size);
         }
-        
+    }
         for (auto i = 0u; i < temp.numMesh_; i++) {
             
             auto size = sizeof(uint32_t) * temp.Mesh_[i].indexes_.size();
@@ -154,14 +150,14 @@ RModel* ResourceManager::ModelLoad(std::wstring str)
                 temp.IBV[i].BufferLocation = temp.IB[i]->GetGPUVirtualAddress();
                 temp.IBV[i].Format = DXGI_FORMAT_R32_UINT;
                 temp.IBV[i].SizeInBytes = size;
-            }
+         }
 
             temp.Name_ = path.c_str();
 
 
         ResourceManager::models_.push_back(temp);
         return &ResourceManager::models_.back();
-    }
+    
 }
 
 RTexture* ResourceManager::TexLoad(std::wstring str)

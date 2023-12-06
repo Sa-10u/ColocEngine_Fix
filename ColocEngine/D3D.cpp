@@ -1054,7 +1054,7 @@ void D3d::write()
 
         for (auto cnt : itr.Mesh_) {
 
-            //memcpy(SB[IND_frame].view, &itr.mat[0], itr.mat.size());
+            memcpy(SB[IND_frame].view, &itr.mat[0], itr.mat.size());
 
             cmdlist_->SetGraphicsRootSignature(rootsig_);
             cmdlist_->SetDescriptorHeaps(1, &heapCBV_SRV_UAV_);
