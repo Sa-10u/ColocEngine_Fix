@@ -1075,7 +1075,7 @@ void D3d::write()
             cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
             cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_, 0, 0, 0);
             
-            v++;
+           // v++;
         }
         S_Draw::Flush(&itr);
 

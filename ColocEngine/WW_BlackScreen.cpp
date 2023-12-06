@@ -16,6 +16,8 @@ void WW_BlackScreen::Run(float tick)
 {
 	XMMATRIX mat = XMMatrixIdentity();
 	S_Draw::Draw(&mat , md);
+
+	md;
 }
 
 void WW_BlackScreen::release()

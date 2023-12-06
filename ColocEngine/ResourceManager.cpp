@@ -4,9 +4,9 @@
 
 namespace ResourceManager
 {
-	std::vector<RModel> models_;
-	std::vector<RTexture> textures_;
-};
+    std::vector<RModel> models_;
+    std::vector<RTexture> textures_;
+}
 
 void ResourceManager::Init()
 {
@@ -40,132 +40,128 @@ RModel* ResourceManager::ModelLoad(std::wstring str)
 
     temp.VB.resize(temp.numMesh_);
     temp.IB.resize(temp.numMesh_);
-
-	auto size = new size_t[temp.numMesh_];
-	auto vtcs = new VERTEX*[temp.numMesh_];
+    temp.VBV.resize(temp.numMesh_);
+    temp.IBV.resize(temp.numMesh_);
 	
-	for (auto i = 0; i < temp.numMesh_; i++) {
-		
-		vtcs[i] = temp.Mesh_[i].vtcs_.data();
-        size[i] = sizeof(VERTEX) * temp.Mesh_[i].vtcs_.size();
-	}
-    {
-        D3D12_HEAP_PROPERTIES hp_prop_v = {};
+    for (auto i = 0; i < temp.numMesh_; i++) {
+
+        auto vtcs = temp.Mesh_[i].vtcs_.data();//
+        auto size = temp.Mesh_[i].vtcs_.size() * static_cast <UINT>(sizeof(VERTEX));
+
         {
-            hp_prop_v.Type = D3D12_HEAP_TYPE_UPLOAD;
-            hp_prop_v.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-            hp_prop_v.CreationNodeMask = 1;
-            hp_prop_v.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-            hp_prop_v.VisibleNodeMask = 1;
-        };
-
-        for (auto i = 0u; i < temp.numMesh_; i++) {
-            D3D12_RESOURCE_DESC rc_desc_v = {};
+            D3D12_HEAP_PROPERTIES hp_prop_v = {};
             {
-                rc_desc_v.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-                rc_desc_v.Alignment = 0;
-                rc_desc_v.Width = size[i];
-                rc_desc_v.Height = 1;
-                rc_desc_v.DepthOrArraySize = 1;
-                rc_desc_v.MipLevels = 1;
-                rc_desc_v.Format = DXGI_FORMAT_UNKNOWN;
-                rc_desc_v.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-                rc_desc_v.Flags = D3D12_RESOURCE_FLAG_NONE;
+                hp_prop_v.Type = D3D12_HEAP_TYPE_UPLOAD;
+                hp_prop_v.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+                hp_prop_v.CreationNodeMask = 1;
+                hp_prop_v.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+                hp_prop_v.VisibleNodeMask = 1;
+            };
 
-                rc_desc_v.SampleDesc.Count = 1;
-                rc_desc_v.SampleDesc.Quality = 0;
+            for (auto i = 0u; i < temp.numMesh_; i++) {
+                D3D12_RESOURCE_DESC rc_desc_v = {};
+                {
+                    rc_desc_v.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+                    rc_desc_v.Alignment = 0;
+                    rc_desc_v.Width = size;
+                    rc_desc_v.Height = 1;
+                    rc_desc_v.DepthOrArraySize = 1;
+                    rc_desc_v.MipLevels = 1;
+                    rc_desc_v.Format = DXGI_FORMAT_UNKNOWN;
+                    rc_desc_v.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+                    rc_desc_v.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+                    rc_desc_v.SampleDesc.Count = 1;
+                    rc_desc_v.SampleDesc.Quality = 0;
+                }
+
+                res = device_->CreateCommittedResource
+                (
+                    &hp_prop_v,
+                    D3D12_HEAP_FLAG_NONE,
+                    &rc_desc_v,
+                    D3D12_RESOURCE_STATE_GENERIC_READ,
+                    nullptr,
+                    IID_PPV_ARGS(&(temp.VB[i]))
+                );
+                if (FAILED(res))  return &models_[0];
+
+                //----------------------------------------------------
+                void* ptr = nullptr;
+                res = temp.VB[i]->Map(NULL, 0, &ptr);
+                if (FAILED(res)) return &models_[0];
+
+                memcpy(ptr, vtcs, size);
+
+                temp.VB[i]->Unmap(0, 0);
+
+                temp.VBV[i].StrideInBytes = static_cast <UINT>(sizeof(VERTEX));
+                temp.VBV[i].BufferLocation = temp.VB[i]->GetGPUVirtualAddress();
+                temp.VBV[i].SizeInBytes = static_cast <UINT>(size);
+
             }
-
-            res = device_->CreateCommittedResource
-            (
-                &hp_prop_v,
-                D3D12_HEAP_FLAG_NONE,
-                &rc_desc_v,
-                D3D12_RESOURCE_STATE_GENERIC_READ,
-                nullptr,
-                IID_PPV_ARGS(&(temp.VB[i]))
-            );
-            if (FAILED(res))  return &models_[0];
-
-//----------------------------------------------------
-            void* ptr = nullptr;
-            res = temp.VB[i]->Map(NULL, 0, &ptr);
-            if (FAILED(res)) return &models_[0];
-
-            memcpy(ptr, vtcs[i], size[i]);
-
-            temp.VB[i]->Unmap(0, 0);
-            temp.VBV.StrideInBytes = static_cast <UINT>(sizeof(VERTEX));
-
+        }
+        
+        for (auto i = 0u; i < temp.numMesh_; i++) {
             
-        }
-    }
-    delete[] size;    delete[] vtcs;
+            auto size = sizeof(uint32_t) * temp.Mesh_[i].indexes_.size();
+            auto indcs = temp.Mesh_[i].indexes_.data();
 
-    {
-        auto size = new size_t[temp.numMesh_];
-        auto indcs = new uint32_t * [temp.numMesh_];
-        for (auto i = 0u; i < temp.numMesh_; i++) {
 
-            size[i] = sizeof(uint32_t) * temp.Mesh_[i].indexes_.size();
-            indcs[i] = temp.Mesh_[i].indexes_.data();
-        }
-        for (auto i = 0u; i < temp.numMesh_; i++) {
+                D3D12_HEAP_PROPERTIES hp_prop_i = {};
+                {
+                    hp_prop_i.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+                    hp_prop_i.CreationNodeMask = 1;
+                    hp_prop_i.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+                    hp_prop_i.Type = D3D12_HEAP_TYPE_UPLOAD;
+                    hp_prop_i.VisibleNodeMask = 1;
+                }
 
-            D3D12_HEAP_PROPERTIES hp_prop_i = {};
-            {
-                hp_prop_i.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-                hp_prop_i.CreationNodeMask = 1;
-                hp_prop_i.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-                hp_prop_i.Type = D3D12_HEAP_TYPE_UPLOAD;
-                hp_prop_i.VisibleNodeMask = 1;
+                D3D12_RESOURCE_DESC rc_desc_i = {};
+                {
+                    rc_desc_i.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+                    rc_desc_i.Format = DXGI_FORMAT_UNKNOWN;
+                    rc_desc_i.MipLevels = 1;
+                    rc_desc_i.Alignment = 0;
+                    rc_desc_i.DepthOrArraySize = 1;
+                    rc_desc_i.Flags = D3D12_RESOURCE_FLAG_NONE;
+                    rc_desc_i.Height = 1;
+                    rc_desc_i.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+                    rc_desc_i.SampleDesc.Count = 1;
+                    rc_desc_i.SampleDesc.Quality = 0;
+                    rc_desc_i.Width = size;
+                }
+
+                res = device_->CreateCommittedResource
+                (
+                    &hp_prop_i,
+                    D3D12_HEAP_FLAG_NONE,
+                    &rc_desc_i,
+                    D3D12_RESOURCE_STATE_GENERIC_READ,
+                    nullptr,
+                    IID_PPV_ARGS(&temp.IB[i])
+                );
+                if (FAILED(res)) return 0;
+
+                void* ptr = nullptr;
+                res = temp.IB[i]->Map(0, nullptr, &ptr);
+                if (FAILED(res)) return 0;
+
+                memcpy(ptr, indcs, size);
+                temp.IB[i]->Unmap(0, 0);
+
+                //-----------
+                temp.IBV[i].BufferLocation = temp.IB[i]->GetGPUVirtualAddress();
+                temp.IBV[i].Format = DXGI_FORMAT_R32_UINT;
+                temp.IBV[i].SizeInBytes = size;
             }
 
-            D3D12_RESOURCE_DESC rc_desc_i = {};
-            {
-                rc_desc_i.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-                rc_desc_i.Format = DXGI_FORMAT_UNKNOWN;
-                rc_desc_i.MipLevels = 1;
-                rc_desc_i.Alignment = 0;
-                rc_desc_i.DepthOrArraySize = 1;
-                rc_desc_i.Flags = D3D12_RESOURCE_FLAG_NONE;
-                rc_desc_i.Height = 1;
-                rc_desc_i.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-                rc_desc_i.SampleDesc.Count = 1;
-                rc_desc_i.SampleDesc.Quality = 0;
-                rc_desc_i.Width = size[i];
-            }
+            temp.Name_ = path.c_str();
 
-            res = device_->CreateCommittedResource
-            (
-                &hp_prop_i,
-                D3D12_HEAP_FLAG_NONE,
-                &rc_desc_i,
-                D3D12_RESOURCE_STATE_GENERIC_READ,
-                nullptr,
-                IID_PPV_ARGS(&temp.IB[i])
-            );
-            if (FAILED(res)) return 0;
 
-            void* ptr = nullptr;
-            res = temp.IB[i]->Map(0, nullptr, &ptr);
-            if (FAILED(res)) return 0;
-
-            memcpy(ptr, indcs, *size);
-            temp.IB[i]->Unmap(0, 0);
-
-            //-----------
-            temp.IBV.Format = DXGI_FORMAT_R32_UINT;
-            temp.IBV.SizeInBytes = *size;
-        }
-
-        delete[] size;  delete[] indcs;
-
-        temp.Name_ = path.c_str();
+        ResourceManager::models_.push_back(temp);
+        return &ResourceManager::models_.back();
     }
-
-    ResourceManager::models_.push_back(temp);
-    return &ResourceManager::models_.back();
 }
 
 RTexture* ResourceManager::TexLoad(std::wstring str)
@@ -233,9 +229,6 @@ RTexture* ResourceManager::TexLoad(std::wstring str)
     );
     if (FAILED(res)) return 0;
 
-    
-    
-    
 }
 
 void ResourceManager::ModelFlush()
