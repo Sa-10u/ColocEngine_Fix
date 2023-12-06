@@ -480,7 +480,7 @@ bool D3d::InitGBO()
     //-----------------------------------------------------------------------------------------*****
     {
         std::wstring tex_Path;
-        FileLoad(L"MK_tex1.png", &tex_Path);
+        FileLoad(L"default.dds", &tex_Path);
 
         TexMetadata data = {};
         ScratchImage image = {};
