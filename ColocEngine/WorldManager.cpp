@@ -2,6 +2,7 @@
 #include "IComp.h"
 
 #include"WW_BlackScreen.h"
+#include"WW_Play.h"
 
 void WorldManager::ChangeWorld(WLD_ID next)
 {
@@ -12,7 +13,7 @@ void WorldManager::ChangeWorld(WLD_ID next)
 
 	switch (next)
 	{
-	case WLD_ID::PLAY			:	Scene = nullptr; break;
+	case WLD_ID::PLAY			:	Scene = new WW_Play; break;
 
 	case WLD_ID::SCENE			:	Scene = nullptr; break;
 
@@ -20,6 +21,8 @@ void WorldManager::ChangeWorld(WLD_ID next)
 
 	default:	exit(-1);
 	}
+
+	Scene->Initialize();
 }
 
 void WorldManager::Init()

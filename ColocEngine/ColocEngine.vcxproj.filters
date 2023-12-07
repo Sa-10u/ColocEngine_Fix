@@ -114,6 +114,9 @@
     <ClCompile Include="S_Sound.cpp">
       <Filter>System\source</Filter>
     </ClCompile>
+    <ClCompile Include="WW_Play.cpp">
+      <Filter>Scene\source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinView.h">
@@ -175,6 +178,9 @@
     </ClInclude>
     <ClInclude Include="S_Sound.h">
       <Filter>System\header</Filter>
+    </ClInclude>
+    <ClInclude Include="WW_Play.h">
+      <Filter>Scene\header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

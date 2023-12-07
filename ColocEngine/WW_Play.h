@@ -1,11 +1,9 @@
 #pragma once
 #include "WorldManager.h"
 
-
-class C_Trans;
 class RModel;
 
-class WW_BlackScreen : public WorldWork
+class WW_Play : public WorldWork
 {
 public:
 	void Run(float tick)override;
@@ -15,8 +13,6 @@ public:
 
 private:
 
-	Entity* BG;
-	RModel* md;
-	//C_Trans trans;
+	
 };
 

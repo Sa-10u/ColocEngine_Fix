@@ -152,6 +152,7 @@ void WinView::loop()
 
         else
         {
+            Input_KB::Update();
             GameMain::Update(1.0f);
             D3D->Run(1);
         }
