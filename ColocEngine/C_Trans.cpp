@@ -1,8 +1,12 @@
 #include "C_Trans.h"
 using namespace DirectX;
 
-C_Trans::C_Trans(string tag) : IComp(tag),pos(0),rot(0),scale(0),parent(nullptr)
+C_Trans::C_Trans(string tag) : IComp(tag)
 {
+	pos = {};
+	rot = {};
+	scale = XMFLOAT3(1,1,1);
+	parent = nullptr;
 }
 
 void C_Trans::initialize()

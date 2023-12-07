@@ -268,133 +268,6 @@ bool D3d::InitGBO()
 {
     HRESULT res = FALSE;
 
-    std::wstring path;
-    FileLoad(L"Re_Meta Knigt.fbx", &path);
-
-
-    //path set 3Ddata name
-
-    if (!LoadMesh(path.c_str(), mesh_, mtr_)) return 0;
-
-    //SIMPLEVERTEX vts[] =
-    //{
-    //    {XMFLOAT3(-1.0f,1.0f,0.0f),XMFLOAT2(0.0f,0.0f)},
-    //    {XMFLOAT3(1.0f,1.0f,0.0f),XMFLOAT2(1.0f,0.0f)},
-    //    {XMFLOAT3(1.0f,-1.0f,0.0f),XMFLOAT2(1.0f,1.0f)},
-    //    {XMFLOAT3(-1.0f,-1.0f,0.0f),XMFLOAT2(0.0f,1.0f)},
-    //};
-
-    auto size = sizeof(VERTEX) * mesh_[0].vtcs_.size();
-    auto vtcs = mesh_[0].vtcs_.data();
-    {
-        D3D12_HEAP_PROPERTIES hp_prop_v = {};
-        {
-            hp_prop_v.Type = D3D12_HEAP_TYPE_UPLOAD;
-            hp_prop_v.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-            hp_prop_v.CreationNodeMask = 1;
-            hp_prop_v.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-            hp_prop_v.VisibleNodeMask = 1;
-        };
-
-        D3D12_RESOURCE_DESC rc_desc_v = {};
-        {
-            rc_desc_v.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-            rc_desc_v.Alignment = 0;
-            rc_desc_v.Width = size;
-            rc_desc_v.Height = 1;
-            rc_desc_v.DepthOrArraySize = 1;
-            rc_desc_v.MipLevels = 1;
-            rc_desc_v.Format = DXGI_FORMAT_UNKNOWN;
-            rc_desc_v.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-            rc_desc_v.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-            rc_desc_v.SampleDesc.Count = 1;
-            rc_desc_v.SampleDesc.Quality = 0;
-        }
-
-        res = device_->CreateCommittedResource
-        (
-            &hp_prop_v,
-            D3D12_HEAP_FLAG_NONE,
-            &rc_desc_v,
-            D3D12_RESOURCE_STATE_GENERIC_READ,
-            nullptr,
-            IID_PPV_ARGS(&VB)
-        );
-        if (FAILED(res))  return false;
-    }
-
-    //----------------------------
-    {
-
-        void* ptr = nullptr;
-        res = VB->Map(NULL, 0, &ptr);
-
-        if (FAILED(res)) return false;
-
-        memcpy(ptr, vtcs, size);
-
-        VB->Unmap(0, 0);
-
-        VBV.BufferLocation = VB->GetGPUVirtualAddress();
-        VBV.SizeInBytes = static_cast<UINT>(size);
-        VBV.StrideInBytes = static_cast <UINT>(sizeof(VERTEX));
-    }
-
-    size = sizeof(uint32_t) * mesh_[0].indexes_.size();
-    auto indexes = mesh_[0].indexes_.data();
-
-    {
-        // uint32_t indexes[] = { 0,1,2 ,0,2,3 };
-
-        D3D12_HEAP_PROPERTIES hp_prop_i = {};
-        {
-            hp_prop_i.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-            hp_prop_i.CreationNodeMask = 1;
-            hp_prop_i.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-            hp_prop_i.Type = D3D12_HEAP_TYPE_UPLOAD;
-            hp_prop_i.VisibleNodeMask = 1;
-        }
-
-        D3D12_RESOURCE_DESC rc_desc_i = {};
-        {
-            rc_desc_i.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-            rc_desc_i.Format = DXGI_FORMAT_UNKNOWN;
-            rc_desc_i.MipLevels = 1;
-            rc_desc_i.Alignment = 0;
-            rc_desc_i.DepthOrArraySize = 1;
-            rc_desc_i.Flags = D3D12_RESOURCE_FLAG_NONE;
-            rc_desc_i.Height = 1;
-            rc_desc_i.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-            rc_desc_i.SampleDesc.Count = 1;
-            rc_desc_i.SampleDesc.Quality = 0;
-            rc_desc_i.Width = size;
-        }
-
-        res = device_->CreateCommittedResource
-        (
-            &hp_prop_i,
-            D3D12_HEAP_FLAG_NONE,
-            &rc_desc_i,
-            D3D12_RESOURCE_STATE_GENERIC_READ,
-            nullptr,
-            IID_PPV_ARGS(&IB)
-        );
-        if (FAILED(res)) return 0;
-
-        void* ptr = nullptr;
-        res = IB->Map(0, nullptr, &ptr);
-        if (FAILED(res)) return 0;
-
-        memcpy(ptr, indexes, size);
-        IB->Unmap(0, 0);
-
-        //-----------
-        IBV.BufferLocation = IB->GetGPUVirtualAddress();
-        IBV.Format = DXGI_FORMAT_R32_UINT;
-        IBV.SizeInBytes = size;
-    }
-
     //----------------------------
     {
         {
@@ -935,20 +808,6 @@ void D3d::Update()
 
         CBV[IND_frame].ptr->view = XMMatrixLookAtRH(CAM::Pos, CAM::Tgt, CAM::Head);
         CBV[IND_frame].ptr->proj = XMMatrixPerspectiveFovRH(CAM::Fov, CAM::Aspect, 1.0f, 1000.0f);
-
-        for (auto i = 0u; i < CBCOUNT; i++) {
-
-            float v = i ;
-
-            SB[IND_frame].view[i].wld = XMMATRIX
-            (
-                1,0,0,0,
-                0,1,0,0,
-                0,0,1,0,
-                v *2,0,0,1
-            );
-            SB[IND_frame].view[i].tick = 0;
-        }
     }
 
     CAM::Run();
@@ -1027,34 +886,12 @@ void D3d::write()
     cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
     cmdlist_->ClearDepthStencilView(h_ZBV, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-      /* {
-
-        cmdlist_->SetGraphicsRootSignature(rootsig_);
-        cmdlist_->SetDescriptorHeaps(1,&heapCBV_SRV_UAV_);
-        cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
-
-        cmdlist_->SetGraphicsRootDescriptorTable(1, tex.HGPU);
-        cmdlist_->SetGraphicsRootDescriptorTable(2, SB[IND_frame].HGPU);
-
-        cmdlist_->SetPipelineState(PSO);
-
-        cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        cmdlist_->IASetVertexBuffers(0, 1, &VBV);
-        cmdlist_->IASetIndexBuffer(&IBV);
-        cmdlist_->RSSetViewports(1, &view_);
-        cmdlist_->RSSetScissorRects(1, &rect_);
-
-
-        auto cnt = static_cast<uint32_t>(mesh_[0].indexes_.size());
-        cmdlist_->DrawIndexedInstanced(cnt, 3, 0, 0, 0);
-    }*/
-    
     for (auto &itr : ResourceManager::models_) {
         auto v = 0u;
 
         for (auto cnt : itr.Mesh_) {
 
-            memcpy(SB[IND_frame].view, &itr.mat[0], itr.mat.size());
+            memcpy(SB[IND_frame].view, itr.info.data(), sizeof(ObjInfo) * itr.info.size());
 
             cmdlist_->SetGraphicsRootSignature(rootsig_);
             cmdlist_->SetDescriptorHeaps(1, &heapCBV_SRV_UAV_);
@@ -1078,8 +915,6 @@ void D3d::write()
             v++;
         }
         S_Draw::Flush(&itr);
-
-        auto i = itr;
     }
 }
 

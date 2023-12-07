@@ -74,22 +74,16 @@ private:
 
 	//-----------------
 	ID3D12DescriptorHeap* heapCBV_SRV_UAV_;
-	//ID3D12DescriptorHeap* heapTex_;
-	//ID3D12DescriptorHeap* heapStructureBuffer_;
 	ID3D12RootSignature* rootsig_;
 	ID3D12PipelineState* PSO;
 
-	ID3D12Resource* VB;
 	ID3D12Resource* CB[FrameAmmount];
 	//ID3D12Resource* GPUBuffer[FrameAmmount];
-	ID3D12Resource* IB;
 	ID3D12Resource* ZB;
 	Texture			tex;
 	StructuredBuffer<ObjInfo> SB[FrameAmmount];
-
-	D3D12_VERTEX_BUFFER_VIEW VBV;
+;
 	CBUFFERVIEW<Util>	 CBV[FrameAmmount];
-	D3D12_INDEX_BUFFER_VIEW IBV;
 	ID3D12DescriptorHeap* hp_ZBV;
 
 	//---------------
@@ -103,10 +97,6 @@ private:
 	float Height;
 	float Width;
 
-	//-------
-	vector<MESH> mesh_;
-	vector<MATERIAL> mtr_;
-	UINT meshcnt_;
 	//-----
 	float backcolor_ [4];
 };

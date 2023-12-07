@@ -70,7 +70,7 @@ struct MATERIAL
 	float shin_;
 	string map_;
 
-	MATERIAL() = default;
+	MATERIAL();
 };
 
 struct MESH
@@ -90,14 +90,16 @@ bool LoadMesh(const wchar_t* file, RModel* ptr);
 
 //-----------------------------
 
-struct ObjInfo
+struct alignas(16) ObjInfo
 {
 	XMMATRIX wld;
 	float tick;
 
+	float val0;
 	float val1;
 	float val2;
-	float val3;
+
+	ObjInfo();
 };
 
 struct alignas(256) Util

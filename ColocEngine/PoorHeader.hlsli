@@ -31,9 +31,9 @@ struct PerInstance
 	float4x4 World;
 	float tick;
 
+	float val0;
 	float val1;
 	float val2;
-	float val3;
 };
 
 StructuredBuffer<PerInstance> Data : register(t1);

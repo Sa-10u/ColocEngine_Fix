@@ -43,6 +43,15 @@
     <Filter Include="Components\YourComponents\header">
       <UniqueIdentifier>{69e4ac50-7ced-4f32-a1ed-972a513117b4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="System">
+      <UniqueIdentifier>{58767ba6-d6cf-45f3-b585-c210d6c52642}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="System\header">
+      <UniqueIdentifier>{b91cf43f-bd7d-4175-933b-961e9f6b95bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="System\source">
+      <UniqueIdentifier>{b707f7bd-cd7e-4805-bca9-6a3da65dc28e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MAIN.cpp">
@@ -66,25 +75,7 @@
     <ClCompile Include="DescriptorManager.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="WorldManager.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="WorldWork.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Input.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="GameMain.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="ResourceManager.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="FileLoader.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="S_Draw.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="CAM.cpp">
@@ -93,14 +84,35 @@
     <ClCompile Include="WW_BlackScreen.cpp">
       <Filter>Scene\source</Filter>
     </ClCompile>
-    <ClCompile Include="C_SetColorBG.cpp">
-      <Filter>Components\YourComponents\source</Filter>
-    </ClCompile>
     <ClCompile Include="C_Trans.cpp">
       <Filter>Components\ColocEngine\source</Filter>
     </ClCompile>
     <ClCompile Include="IComp.cpp">
       <Filter>Components\ColocEngine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="C_SetColorBG.cpp">
+      <Filter>Components\ColocEngine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="FileLoader.cpp">
+      <Filter>System\source</Filter>
+    </ClCompile>
+    <ClCompile Include="Input.cpp">
+      <Filter>System\source</Filter>
+    </ClCompile>
+    <ClCompile Include="GameMain.cpp">
+      <Filter>System\source</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>System\source</Filter>
+    </ClCompile>
+    <ClCompile Include="S_Draw.cpp">
+      <Filter>System\source</Filter>
+    </ClCompile>
+    <ClCompile Include="WorldManager.cpp">
+      <Filter>System\source</Filter>
+    </ClCompile>
+    <ClCompile Include="S_Sound.cpp">
+      <Filter>System\source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -128,24 +140,6 @@
     <ClInclude Include="Resource.h">
       <Filter>Head</Filter>
     </ClInclude>
-    <ClInclude Include="ResourceManager.h">
-      <Filter>Head</Filter>
-    </ClInclude>
-    <ClInclude Include="WorldManager.h">
-      <Filter>Head</Filter>
-    </ClInclude>
-    <ClInclude Include="Input.h">
-      <Filter>Head</Filter>
-    </ClInclude>
-    <ClInclude Include="GameMain.h">
-      <Filter>Head</Filter>
-    </ClInclude>
-    <ClInclude Include="S_Draw.h">
-      <Filter>Head</Filter>
-    </ClInclude>
-    <ClInclude Include="FileLoader.h">
-      <Filter>Head</Filter>
-    </ClInclude>
     <ClInclude Include="CAM.h">
       <Filter>Head</Filter>
     </ClInclude>
@@ -160,6 +154,27 @@
     </ClInclude>
     <ClInclude Include="IComp.h">
       <Filter>Components\ColocEngine\header</Filter>
+    </ClInclude>
+    <ClInclude Include="Input.h">
+      <Filter>System\header</Filter>
+    </ClInclude>
+    <ClInclude Include="FileLoader.h">
+      <Filter>System\header</Filter>
+    </ClInclude>
+    <ClInclude Include="GameMain.h">
+      <Filter>System\header</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>System\header</Filter>
+    </ClInclude>
+    <ClInclude Include="S_Draw.h">
+      <Filter>System\header</Filter>
+    </ClInclude>
+    <ClInclude Include="WorldManager.h">
+      <Filter>System\header</Filter>
+    </ClInclude>
+    <ClInclude Include="S_Sound.h">
+      <Filter>System\header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

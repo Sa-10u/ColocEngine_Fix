@@ -23,16 +23,16 @@ void ResourceManager::Term()
 
 RModel* ResourceManager::ModelLoad(std::wstring str)
 {
-	for (auto list : models_) {
-		if (list.Name_ == str)	return &list;
+    std::wstring path;
+    FileLoad(str.c_str(), &path);
+
+	for (auto& list : models_) {
+		if (list.Name_ == path)	return &list;
 	}
 
     ID3D12Device* device_ = PTR_D3D::ptr->GetDevice();
 
 	HRESULT res = E_FAIL;
-
-	std::wstring path;
-	FileLoad(str.c_str(), &path);
 
 	RModel temp;
 	
