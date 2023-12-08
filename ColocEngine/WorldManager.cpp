@@ -6,12 +6,28 @@
 
 void WorldManager::ChangeWorld(WLD_ID next)
 {
-	if (next == NowWorld)	return;
+	NextWorld = next;
+}
+
+void WorldManager::Init()
+{
+	
+}
+
+void WorldManager::Release()
+{
+}
+
+void WorldManager::Changer()
+{
+	if (NextWorld == NowWorld)	return;
+
+	NowWorld = NextWorld;
 
 	Scene->Release();
 	delete Scene;
 
-	switch (next)
+	switch (NextWorld)
 	{
 	case WLD_ID::PLAY			:	Scene = new WW_Play; break;
 
@@ -25,18 +41,10 @@ void WorldManager::ChangeWorld(WLD_ID next)
 	Scene->Initialize();
 }
 
-void WorldManager::Init()
-{
-	
-}
-
-void WorldManager::Release()
-{
-}
-
 namespace WorldManager
 {
 	WLD_ID NowWorld = WLD_ID::BLACK_SCREEN;
 	WorldWork* Scene = new WW_BlackScreen;
+	WLD_ID NextWorld = NowWorld;
 }
 

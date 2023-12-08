@@ -28,8 +28,10 @@ namespace WorldManager
 	void ChangeWorld(WLD_ID next);
 	void Init();
 	void Release();
+	void Changer();
 
 	extern WLD_ID NowWorld;
+	extern WLD_ID NextWorld;
 
 	extern WorldWork* Scene;
 };

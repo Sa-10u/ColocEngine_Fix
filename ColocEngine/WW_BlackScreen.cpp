@@ -28,4 +28,5 @@ void WW_BlackScreen::Run(float tick)
 
 void WW_BlackScreen::release()
 {
+	
 }

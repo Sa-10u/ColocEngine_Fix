@@ -1,4 +1,5 @@
 #include "WorldManager.h"
+#include "ResourceManager.h"
 #include"IComp.h"
 
 void WorldWork::Update(float tick)
@@ -15,4 +16,6 @@ void WorldWork::Release()
 	//------------
 
 	DataManager::ALL_RESET();
+	ResourceManager::ALL_RELEASE_MODEL();
+	ResourceManager::ALL_RELEASE_TEX();
 }

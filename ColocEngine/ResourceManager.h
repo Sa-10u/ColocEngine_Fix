@@ -15,5 +15,8 @@ namespace ResourceManager
 
 	void ModelFlush();
 	void TexFlush();
+	
+	void ALL_RELEASE_MODEL();
+	void ALL_RELEASE_TEX();
 };
 

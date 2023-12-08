@@ -248,3 +248,38 @@ void ResourceManager::TexFlush()
         pic.DHeap->Release();
     }
 }
+
+void ResourceManager::ALL_RELEASE_MODEL()
+{
+    for (auto& itr : models_) {
+        for (auto i = 0u; i < itr.numMesh_; i++) {
+
+            itr.Mesh_[i].vtcs_.clear();
+            itr.Mesh_[i].indexes_.clear();
+
+            itr.IB[i]->Release();
+            itr.VB[i]->Release();
+        }
+        itr.IB.clear();
+        itr.VB.clear();
+
+        itr.VBV.clear();
+        itr.IBV.clear();
+        itr.info.clear();
+        itr.Mesh_.clear();
+        itr.Mtr_.clear();
+       
+    }
+
+    models_.clear();
+}
+
+void ResourceManager::ALL_RELEASE_TEX()
+{
+    for (auto& itr : textures_) {
+        itr.tex_.rsc_ptr->Release();
+        itr.DHeap->Release();
+    }
+
+    textures_.clear();
+}
