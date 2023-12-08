@@ -12,7 +12,13 @@ MESH::MESH():ID_Material(-1),indexes_(),vtcs_()
 
 ObjInfo::ObjInfo():tick(0),val0(0),val1(0),val2(0)
 {
-	wld = {};
+	wld = 
+	{
+		1,0,0,0,
+		0,1,0,0,
+		0,0,1,0,
+		0,0,0,1
+	};
 }
 
 MATERIAL::MATERIAL():alpha_(0),shin_(0)

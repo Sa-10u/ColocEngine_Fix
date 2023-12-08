@@ -1,9 +1,7 @@
 #pragma once
 #include "WorldManager.h"
 
-
-class C_Trans;
-class RModel;
+class C_SetBGColor;
 
 class WW_BlackScreen : public WorldWork
 {
@@ -16,7 +14,5 @@ public:
 private:
 
 	Entity* BG;
-	RModel* md;
-	//C_Trans trans;
 };
 

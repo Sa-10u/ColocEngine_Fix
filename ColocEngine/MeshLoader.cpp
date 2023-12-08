@@ -1,6 +1,7 @@
 #include "MeshLoader.h"
 #include "MACRO.h"
 #include"Resource.h"
+#include<cstdint>
 
 static constexpr unsigned int TRIANGLE = 3;
 
@@ -96,6 +97,14 @@ bool MeshLoader::Load(const wchar_t* file, RModel* ptr)
     ptr->TexName_.resize(ptr->numHasTex_);
     for (auto i = 0u; i < ptr->numMtr_; i++) {
 
+    }
+ //----------
+    
+    for (size_t i = 0; i < ptr->Mesh_.size(); i++) {
+        ptr->Mesh_[i].bnsinfo_.clear();
+        ptr->Mesh_[i].bnsinfo_.resize(ptr->Mesh_[i].vtcs_.size());
+        const auto pm = scene->mMeshes[i];
+       
     }
 
     scene = nullptr;
@@ -216,6 +225,17 @@ void MeshLoader::ParseMaterial(MATERIAL& mtl, const aiMaterial* src)
         }
     }
 }
+
+void MeshLoader::ParseBone(BONE_INFO& bns, const aiMesh* src)
+{
+    for (auto b = 0u; b < src->mNumBones; b++) {
+
+        UINT ind = 0;
+        string bname = src->mBones[b]->mName.data;
+
+    }
+}
+
 //--------------------------------------------
 static auto fmt3 = DXGI_FORMAT_R32G32B32_FLOAT;
 static auto fmt2 = DXGI_FORMAT_R32G32_FLOAT;
@@ -227,12 +247,12 @@ const D3D12_INPUT_ELEMENT_DESC VERTEX::element[] =
     {SEMANTICS_STR::POSITION,0,fmt3,0,append,IL_V,0},
     {SEMANTICS_STR::NORMAL,0,fmt3,0,append,IL_V,0},
     {SEMANTICS_STR::TEXCOORD,0,fmt2,0,append,IL_V,0},
-    {SEMANTICS_STR::TANGENT,0,fmt3,0,append,IL_V,0}
+    {SEMANTICS_STR::TANGENT,0,fmt3,0,append,IL_V,0},
 };
 const D3D12_INPUT_LAYOUT_DESC VERTEX::inp_Layout =
 {
     VERTEX::element,
-    VERTEX::AMMOUNT
+    VERTEX::ELEMENT::AMMOUNT
 };
 
 bool LoadMesh(const wchar_t* file, vector<MESH>& mesh, vector<MATERIAL>& material)

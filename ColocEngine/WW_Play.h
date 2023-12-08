@@ -1,5 +1,6 @@
 #pragma once
 #include "WorldManager.h"
+#include"BUFFER.h"
 
 class RModel;
 
@@ -13,6 +14,8 @@ public:
 
 private:
 
-	
+	RModel* md;
+	ObjInfo info;
+
 };
 

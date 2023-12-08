@@ -20,6 +20,7 @@ private:
 
 	void ParseMesh(MESH& mesh, const aiMesh* src);
 	void ParseMaterial(MATERIAL& mtl, const aiMaterial* src);
+	void ParseBone(BONE_INFO& bns, const aiMesh* src);
 
 private:
 };

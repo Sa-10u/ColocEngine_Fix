@@ -19,6 +19,9 @@ void ResourceManager::Term()
 {
     ModelFlush();
     TexFlush();
+
+    ALL_RELEASE_MODEL();
+    ALL_RELEASE_TEX();
 }
 
 RModel* ResourceManager::ModelLoad(std::wstring str)

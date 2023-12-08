@@ -75,9 +75,6 @@
     <ClCompile Include="DescriptorManager.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="WorldWork.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="CAM.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -116,6 +113,9 @@
     </ClCompile>
     <ClCompile Include="WW_Play.cpp">
       <Filter>Scene\source</Filter>
+    </ClCompile>
+    <ClCompile Include="WorldWork.cpp">
+      <Filter>System\source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

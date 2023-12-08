@@ -4,6 +4,8 @@ struct VSinput
     float3 norm : NORMAL;
 	float2 uv	: TEXCOORD;
     float3 tan  : TANGENT;
+
+
 	uint	ID	: SV_InstanceID;
 };
 
@@ -11,7 +13,8 @@ struct VSoutput
 {
 	float4 pos	: SV_POSITION;
 	float2 uv	: TEXCOORD;
-	float4 eye	: POSITION;
+	float3 tan  : TANGENT;
+	float3 norm : NORMAL;
 };
 
 struct PSoutput

@@ -16,6 +16,6 @@ void WorldWork::Release()
 	//------------
 
 	DataManager::ALL_RESET();
-	ResourceManager::ALL_RELEASE_MODEL();
-	ResourceManager::ALL_RELEASE_TEX();
+	//ResourceManager::ALL_RELEASE_MODEL();
+	//ResourceManager::ALL_RELEASE_TEX();
 }

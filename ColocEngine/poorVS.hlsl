@@ -14,6 +14,8 @@ VSoutput main(VSinput inp)
 	result.pos = posProj;
 
 	result.uv = inp.uv;
+	result.tan = inp.tan;
+	result.norm = inp.norm;
 
 	return result;
 }

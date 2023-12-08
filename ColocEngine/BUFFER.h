@@ -3,6 +3,7 @@
 #include<d3d12.h>
 #include <string>
 #include <vector>
+#include<cstdint>
 
 using std::string;
 using std::vector;
@@ -73,11 +74,19 @@ struct MATERIAL
 	MATERIAL();
 };
 
+struct BONE_INFO
+{
+public:
+	vector<UINT> IDs;
+	vector<float> Weights;
+};
+
 struct MESH
 {
 public:
 	vector<VERTEX> vtcs_;
 	vector<uint32_t> indexes_;
+	vector<BONE_INFO> bnsinfo_;
 
 	uint32_t ID_Material;
 
