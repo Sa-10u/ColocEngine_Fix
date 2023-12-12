@@ -165,25 +165,11 @@ void MeshLoader::ParseMaterial(MATERIAL& mtl, const aiMaterial* src)
              }
              else
              {
+                 ResetColor();
                  mtl.dif_.x = coltemp.r;
                  mtl.dif_.y = coltemp.g;
                  mtl.dif_.z = coltemp.b;
              }
-
-        __CREATE("SPECULAR")
-            if (src->Get(AI_MATKEY_COLOR_SPECULAR, coltemp) == AI_SUCCESS)
-            {
-                mtl.spec_.x = coltemp.r;
-                mtl.spec_.y = coltemp.g;
-                mtl.spec_.z = coltemp.b;
-            }
-            else
-            {
-                ResetColor();
-                mtl.spec_.x = coltemp.r;
-                mtl.spec_.y = coltemp.g;
-                mtl.spec_.z = coltemp.b;
-            }
 
         __CREATE("SPECULAR")
             if (src->Get(AI_MATKEY_COLOR_SPECULAR, coltemp) == AI_SUCCESS)
@@ -207,7 +193,6 @@ void MeshLoader::ParseMaterial(MATERIAL& mtl, const aiMaterial* src)
             }
             else
             {
-                ResetColor();
                 mtl.shin_ = shine;
             }
             
@@ -220,6 +205,12 @@ void MeshLoader::ParseMaterial(MATERIAL& mtl, const aiMaterial* src)
         {
             mtl.map_.clear();
         }
+
+        aiString str = {};
+        auto ret = src->GetTexture(aiTextureType_EMISSIVE, 0, &str);
+
+        auto y = src->GetTextureCount(aiTextureType_EMISSION_COLOR);
+        y = 20;
     }
 }
 

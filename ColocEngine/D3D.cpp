@@ -285,7 +285,7 @@ bool D3d::InitGBO()
                 IID_PPV_ARGS(&heapCBV_SRV_UAV_)
             );
 
-            DHManager = new DH(device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV), &heapCBV_SRV_UAV_);
+            DHH_CbSrUaV = new DH(device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV), &heapCBV_SRV_UAV_);
 
             if (FAILED(res)) return false;
         }
@@ -335,18 +335,13 @@ bool D3d::InitGBO()
             //----------------------------------
 
             auto address = CB[i]->GetGPUVirtualAddress();
-            auto _HCPU = heapCBV_SRV_UAV_->GetCPUDescriptorHandleForHeapStart();
-            auto _HGPU = heapCBV_SRV_UAV_->GetGPUDescriptorHandleForHeapStart();
 
-            _HCPU.ptr += incre * i;
-            _HGPU.ptr += incre * i;
-
-            CBV[i].HCPU = _HCPU;
-            CBV[i].HGPU = _HGPU;
+            CBV[i].HCPU = DHH_CbSrUaV->GetAndIncreCPU();
+            CBV[i].HGPU = DHH_CbSrUaV->GetAndIncreGPU();;
             CBV[i].desc.BufferLocation = address;
             CBV[i].desc.SizeInBytes = sizeof(Util);
 
-            device_->CreateConstantBufferView(&CBV[i].desc, _HCPU);
+            device_->CreateConstantBufferView(&CBV[i].desc, CBV[i].HCPU);
 
             res = CB[i]->Map(0, NULL, reinterpret_cast<void**>(&CBV[i].ptr));
             if (FAILED(res)) return 0;
@@ -416,14 +411,8 @@ bool D3d::InitGBO()
         );
         if (FAILED(res)) return 0;
 
-        //auto HCPU_ = heapTex_->GetCPUDescriptorHandleForHeapStart();
-       // auto HGPU_ = heapTex_->GetGPUDescriptorHandleForHeapStart();
-        auto HCPU_ = heapCBV_SRV_UAV_->GetCPUDescriptorHandleForHeapStart();
-        auto HGPU_ = heapCBV_SRV_UAV_->GetGPUDescriptorHandleForHeapStart();
-        auto incre = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-        tex.HCPU.ptr = HCPU_.ptr + incre * 2;
-        tex.HGPU.ptr = HGPU_.ptr + incre * 2;
+        tex.HCPU = DHH_CbSrUaV->GetAndIncreCPU();
+        tex.HGPU = DHH_CbSrUaV->GetAndIncreGPU();
 
 
         D3D12_SHADER_RESOURCE_VIEW_DESC rsc_v_desc = {};
@@ -498,14 +487,8 @@ bool D3d::InitGBO()
                 srv.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
             }
 
-            auto HCPU_ = heapCBV_SRV_UAV_->GetCPUDescriptorHandleForHeapStart();
-            auto HGPU_ = heapCBV_SRV_UAV_->GetGPUDescriptorHandleForHeapStart();
-
-            HCPU_.ptr = (incre * (i + 3)) + heapCBV_SRV_UAV_->GetCPUDescriptorHandleForHeapStart().ptr;
-            HGPU_.ptr = (incre * (i + 3)) + heapCBV_SRV_UAV_->GetGPUDescriptorHandleForHeapStart().ptr;
-
-            SB[i].HCPU = HCPU_;
-            SB[i].HGPU = HGPU_;
+            SB[i].HCPU = DHH_CbSrUaV->GetAndIncreCPU();
+            SB[i].HGPU = DHH_CbSrUaV->GetAndIncreGPU();
 
             device_->CreateShaderResourceView
             (
@@ -767,7 +750,7 @@ void D3d::Termination()
     SAFE_RELEASE(swpchain_);
 
     SAFE_RELEASE(device_);
-    delete DHManager;
+    delete DHH_CbSrUaV;
 
 }
 
@@ -889,7 +872,7 @@ void D3d::write()
     cmdlist_->ClearDepthStencilView(h_ZBV, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
     cmdlist_->SetGraphicsRootSignature(rootsig_);
-    cmdlist_->SetDescriptorHeaps(1, &heapCBV_SRV_UAV_);
+    cmdlist_->SetDescriptorHeaps(1, DHH_CbSrUaV->ppHeap_);
     cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
 
     cmdlist_->SetGraphicsRootDescriptorTable(1, tex.HGPU);
@@ -963,8 +946,11 @@ namespace PTR_WND
     HWND* ptr = nullptr;
 }
 
-D3d::DH::DH(UINT increSize, ID3D12DescriptorHeap** hp) :incre_(increSize), heap(hp)
+
+D3d::DH::DH(UINT incre, ID3D12DescriptorHeap** pheap):incre_(incre),ppHeap_(pheap)
 {
+    h_cpu = (*ppHeap_)->GetCPUDescriptorHandleForHeapStart();
+    h_gpu = (*ppHeap_)->GetGPUDescriptorHandleForHeapStart();
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE D3d::DH::GetAndIncreCPU()
