@@ -99,6 +99,12 @@ private:
 
 	//-----
 	float backcolor_ [4];
+
+	class DH
+	{
+		DH() = delete;
+	
+	};
 };
 
 namespace PTR_D3D

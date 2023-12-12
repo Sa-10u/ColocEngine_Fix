@@ -285,6 +285,8 @@ bool D3d::InitGBO()
                 IID_PPV_ARGS(&heapCBV_SRV_UAV_)
             );
 
+            DHManager = new DH(device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV), &heapCBV_SRV_UAV_);
+
             if (FAILED(res)) return false;
         }
     }
@@ -366,7 +368,7 @@ bool D3d::InitGBO()
             &data,
             image
         );
-      
+
         rsc = image.GetImage(0, 0, 0);
 
 
@@ -491,7 +493,7 @@ bool D3d::InitGBO()
                 srv.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
                 srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
                 srv.Buffer.FirstElement = 0;
-                srv.Buffer.NumElements = CBCOUNT  ;
+                srv.Buffer.NumElements = CBCOUNT;
                 srv.Buffer.StructureByteStride = sizeof(ObjInfo);
                 srv.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
             }
@@ -518,7 +520,7 @@ bool D3d::InitGBO()
 
         enum
         {
-            CB =0,
+            CB = 0,
             TEX,
             SB,
             AMMOUNT
@@ -565,7 +567,7 @@ bool D3d::InitGBO()
             r_param[SB].DescriptorTable.pDescriptorRanges = &range_SB;
             r_param[SB].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
         }
-        
+
 
         D3D12_STATIC_SAMPLER_DESC sampler = {};
         {
@@ -665,7 +667,7 @@ bool D3d::InitPSO()
     D3D12_RASTERIZER_DESC rs_desc = {};
     {
         rs_desc.FillMode = D3D12_FILL_MODE_SOLID;
-        rs_desc.CullMode = D3D12_CULL_MODE_BACK;
+        rs_desc.CullMode = D3D12_CULL_MODE_FRONT;
         rs_desc.FrontCounterClockwise = false;
         rs_desc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
         rs_desc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
@@ -765,7 +767,7 @@ void D3d::Termination()
     SAFE_RELEASE(swpchain_);
 
     SAFE_RELEASE(device_);
-
+    delete DHManager;
 
 }
 
@@ -813,7 +815,7 @@ void D3d::Update()
     CAM::Run();
 
     auto y = sizeof(ObjInfo);
-    
+
 }
 
 void D3d::SetHeight(float h)
@@ -901,7 +903,7 @@ void D3d::write()
 
     cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
 
-    for (auto &itr : ResourceManager::models_) {
+    for (auto& itr : ResourceManager::models_) {
         auto v = 0u;
 
         for (auto cnt : itr.Mesh_) {
@@ -911,7 +913,7 @@ void D3d::write()
             cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
             cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
             cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_, 0, 0, 0);
-            
+
             v++;
         }
         S_Draw::Flush(&itr);
@@ -959,4 +961,24 @@ namespace PTR_D3D
 namespace PTR_WND
 {
     HWND* ptr = nullptr;
+}
+
+D3d::DH::DH(UINT increSize, ID3D12DescriptorHeap** hp) :incre_(increSize), heap(hp)
+{
+}
+
+D3D12_CPU_DESCRIPTOR_HANDLE D3d::DH::GetAndIncreCPU()
+{
+    auto temp = h_cpu;
+    h_cpu.ptr += incre_;
+
+    return temp;
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE D3d::DH::GetAndIncreGPU()
+{
+    auto temp = h_gpu;
+    h_gpu.ptr += incre_;
+
+    return temp;
 }
