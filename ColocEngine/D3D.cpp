@@ -886,27 +886,27 @@ void D3d::write()
     cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
     cmdlist_->ClearDepthStencilView(h_ZBV, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
+    cmdlist_->SetGraphicsRootSignature(rootsig_);
+    cmdlist_->SetDescriptorHeaps(1, &heapCBV_SRV_UAV_);
+    cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
+
+    cmdlist_->SetGraphicsRootDescriptorTable(1, tex.HGPU);
+    cmdlist_->SetGraphicsRootDescriptorTable(2, SB[IND_frame].HGPU);
+
+    cmdlist_->SetPipelineState(PSO);
+
+    cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    cmdlist_->RSSetViewports(1, &view_);
+    cmdlist_->RSSetScissorRects(1, &rect_);
+
+    cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
+
     for (auto &itr : ResourceManager::models_) {
         auto v = 0u;
 
         for (auto cnt : itr.Mesh_) {
 
             memcpy(SB[IND_frame].view, itr.info.data(), sizeof(ObjInfo) * itr.info.size());
-
-            cmdlist_->SetGraphicsRootSignature(rootsig_);
-            cmdlist_->SetDescriptorHeaps(1, &heapCBV_SRV_UAV_);
-            cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
-
-            cmdlist_->SetGraphicsRootDescriptorTable(1, tex.HGPU);
-            cmdlist_->SetGraphicsRootDescriptorTable(2, SB[IND_frame].HGPU);
-
-            cmdlist_->SetPipelineState(PSO);
-
-            cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-            cmdlist_->RSSetViewports(1, &view_);
-            cmdlist_->RSSetScissorRects(1, &rect_);
-
-            cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
 
             cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
             cmdlist_->IASetIndexBuffer(&itr.IBV[v]);

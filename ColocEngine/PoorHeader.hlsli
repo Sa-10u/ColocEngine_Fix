@@ -39,6 +39,6 @@ struct PerInstance
 	float val2;
 };
 
-StructuredBuffer<PerInstance> Data : register(t1);
+//StructuredBuffer<PerInstance> Data : register(t1);
 
 

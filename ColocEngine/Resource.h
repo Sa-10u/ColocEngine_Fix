@@ -23,10 +23,6 @@ class RModel
 {
 public:
 
-	UINT numMtr_;
-	UINT numMesh_;
-	UINT numHasTex_;
-
 	UINT DrawCount_;
 	vector<ObjInfo> info;
 
@@ -36,7 +32,6 @@ public:
 	std::vector<ID3D12Resource*> VB;
 	std::vector<ID3D12Resource*> IB;
 	
-
 	std::vector<D3D12_VERTEX_BUFFER_VIEW> VBV;
 	std::vector<D3D12_INDEX_BUFFER_VIEW>  IBV;
 

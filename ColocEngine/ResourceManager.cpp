@@ -41,15 +41,15 @@ RModel* ResourceManager::ModelLoad(std::wstring str)
 	
 	if (!LoadMesh(path.c_str(), &temp)) return &models_[0];
 
-    temp.VB.resize(temp.numMesh_);
-    temp.IB.resize(temp.numMesh_);
-    temp.VBV.resize(temp.numMesh_);
-    temp.IBV.resize(temp.numMesh_);
+    temp.VB.resize(temp.Mesh_.size());
+    temp.IB.resize(temp.Mesh_.size());
+    temp.VBV.resize(temp.Mesh_.size());
+    temp.IBV.resize(temp.Mesh_.size());
 	
-    for (auto i = 0; i < temp.numMesh_; i++) {
+    for (auto i = 0; i < temp.Mesh_.size(); i++) {
 
         auto vtcs = temp.Mesh_[i].vtcs_.data();//
-        auto size = temp.Mesh_[i].vtcs_.size() * static_cast <UINT>(sizeof(VERTEX));
+        auto size = temp.Mesh_[i].vtcs_.size() * (sizeof(VERTEX));
 
         {
             D3D12_HEAP_PROPERTIES hp_prop_v = {};
@@ -101,7 +101,7 @@ RModel* ResourceManager::ModelLoad(std::wstring str)
             temp.VBV[i].SizeInBytes = static_cast <UINT>(size);
         }
     }
-        for (auto i = 0u; i < temp.numMesh_; i++) {
+        for (auto i = 0u; i < temp.Mesh_.size(); i++) {
             
             auto size = sizeof(uint32_t) * temp.Mesh_[i].indexes_.size();
             auto indcs = temp.Mesh_[i].indexes_.data();
@@ -255,7 +255,7 @@ void ResourceManager::TexFlush()
 void ResourceManager::ALL_RELEASE_MODEL()
 {
     for (auto& itr : models_) {
-        for (auto i = 0u; i < itr.numMesh_; i++) {
+        for (auto i = 0u; i < itr.Mesh_.size(); i++) {
 
             itr.Mesh_[i].vtcs_.clear();
             itr.Mesh_[i].indexes_.clear();

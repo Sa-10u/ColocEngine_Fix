@@ -72,12 +72,9 @@ bool MeshLoader::Load(const wchar_t* file, RModel* ptr)
     auto scene = imp.ReadFile(path, flag);
     if (scene == nullptr)    return false;
 
-    ptr->numMesh_ = scene->mNumMeshes;
-    ptr->numMtr_ = scene->mNumMaterials;
-    ptr->numHasTex_ = scene->mNumTextures;
 //--------------------------------------------
     ptr->Mesh_.clear();
-    ptr->Mesh_.resize(ptr->numMesh_);
+    ptr->Mesh_.resize(scene->mNumMeshes);
     for (size_t i = 0; i < ptr->Mesh_.size(); i++) {
 
         const auto pm = scene->mMeshes[i];
@@ -85,7 +82,7 @@ bool MeshLoader::Load(const wchar_t* file, RModel* ptr)
     }
 //--------------------------------------------
     ptr->Mtr_.clear();
-    ptr->Mtr_.resize(ptr->numMtr_);
+    ptr->Mtr_.resize(scene->mNumMaterials);
     for (size_t i = 0; i < ptr->Mtr_.size(); i++) {
 
         
@@ -94,8 +91,8 @@ bool MeshLoader::Load(const wchar_t* file, RModel* ptr)
     }
 //--------------------------------------------
     ptr->TexName_.clear();
-    ptr->TexName_.resize(ptr->numHasTex_);
-    for (auto i = 0u; i < ptr->numMtr_; i++) {
+    ptr->TexName_.resize(scene->mNumTextures);
+    for (auto i = 0u; i < scene->mNumMaterials; i++) {
 
     }
  //----------
@@ -267,5 +264,5 @@ bool LoadMesh(const wchar_t* file, RModel* ptr)
 {
     MeshLoader ml = {};
 
-    return (ml.Load(file, ptr));
+    return (ml.Load(file, ptr->Mesh_,ptr->Mtr_));
 }
