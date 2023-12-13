@@ -155,9 +155,6 @@
     <ClInclude Include="C_Trans.h">
       <Filter>Components\ColocEngine\header</Filter>
     </ClInclude>
-    <ClInclude Include="IComp.h">
-      <Filter>Components\ColocEngine\header</Filter>
-    </ClInclude>
     <ClInclude Include="Input.h">
       <Filter>System\header</Filter>
     </ClInclude>
@@ -181,6 +178,9 @@
     </ClInclude>
     <ClInclude Include="WW_Play.h">
       <Filter>Scene\header</Filter>
+    </ClInclude>
+    <ClInclude Include="IComp.h">
+      <Filter>Components\ColocEngine\header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

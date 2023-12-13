@@ -4,8 +4,7 @@ struct VSinput
     float3 norm : NORMAL;
 	float2 uv	: TEXCOORD;
     float3 tan  : TANGENT;
-
-
+	
 	uint	ID	: SV_InstanceID;
 };
 
@@ -39,6 +38,19 @@ struct PerInstance
 	float val2;
 };
 
+cbuffer Material : register(b1)
+{
+	   
+	float3 dif;
+	float3 spec;
+	float alp;
+	float shin;
+};
+
 StructuredBuffer<PerInstance> Data	: register(t1);
+
+SamplerState colsmp : register(s0);
+Texture2D	 colmap : register(t0);
+
 
 

@@ -18,4 +18,5 @@ VSoutput main(VSinput inp)
 	result.norm = inp.norm;
 
 	return result;
+
 }

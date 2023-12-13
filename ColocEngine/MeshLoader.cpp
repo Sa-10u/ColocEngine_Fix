@@ -186,14 +186,24 @@ void MeshLoader::ParseMaterial(MATERIAL& mtl, const aiMaterial* src)
                 mtl.spec_.z = coltemp.b;
             }
         
-        __CREATE("SHININESS")   auto shine = 0.0f;
-            if (src->Get(AI_MATKEY_SHININESS, shine) == AI_SUCCESS)
+        __CREATE("SHININESS")   auto val = 0.0f;
+            if (src->Get(AI_MATKEY_SHININESS, val) == AI_SUCCESS)
             {
-                mtl.shin_ = shine;
+                mtl.shin_ = val;
             }
             else
             {
-                mtl.shin_ = shine;
+                mtl.shin_ = val;
+            }
+
+        __CREATE("ALPHA")   val = 1.0f;
+            if (src->Get(AI_MATKEY_OPACITY, val) == AI_SUCCESS)
+            {
+                mtl.alpha_ = val;
+            }
+            else
+            {
+                mtl.shin_ = val;
             }
             
         __CREATE("DIFFUSEMAP")  aiString path = {};
