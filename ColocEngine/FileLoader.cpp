@@ -60,28 +60,85 @@ bool FileLoad(const wchar_t* str , std::wstring* ptr)
 
 std::string FileNormalization(std::string* str)
 {
-	char* ptr = nullptr;
-	for (auto i = 0; i < str->size(); i++) {
+	path p(*str);
+	auto temp = p.extension();;
 
-		if (str[i] == "\\")
-		{
-			ptr = &str->at(i);;
-		}
-	}
-
-	return std::string(ptr);
+	return std::string(p.filename().string());
 }
 
 std::wstring FileNormalization(std::wstring* str)
 {
-	wchar_t* ptr = nullptr;
-	for (auto i = 0; i < str->size(); i++) {
+	path p(*str);
+	auto temp = p.extension();;
 
-		if (str[i] == L"/" || str[i] == L"'\'")
+	return std::wstring(p.filename().wstring());
+}
+
+std::string FileType(std::string* str)
+{
+	path p(*str);
+	auto temp = p.extension();
+
+	auto type = std::string(p.extension().string());
+	return FileUpperName(&type);
+}
+
+std::wstring FileType(std::wstring* str)
+{
+	path p(*str);
+	auto temp = p.extension();
+
+	auto type = std::wstring(p.extension().wstring());
+	return FileUpperName(&type);
+	
+}
+
+std::string FileUpperName(std::string* str)
+{
+	std::string t = {};
+	constexpr unsigned int  size= ('a' - 'A');
+
+	for (auto i = 1u; i < str->size(); i++) {
+
+		char c = str->at(i);
+
+		if (str->at(i) >= 'a'&& str->at(i) <='z')
 		{
-			ptr = &str->at(i);;
+			c = str->at(i) - size;
 		}
+
+		t.push_back(c);
 	}
 
-	return std::wstring(ptr);
+	return t;
+}
+
+std::wstring FileUpperName(std::wstring* str)
+{
+	std::wstring t = {};
+	constexpr unsigned int  size = (L'a' - L'A');
+
+	for (auto i = 1u; i < str->size(); i++) {
+
+		wchar_t c = str->at(i);
+
+		if (str->at(i) >= L'a' && str->at(i) <= L'z')
+		{
+			c = str->at(i) - size;
+		}
+
+		t.push_back(c);
+	}
+
+	return t;
+}
+
+char* FileUpperName(char* str)
+{
+	return nullptr;
+}
+
+wchar_t FileUpperName(wchar_t* str)
+{
+	return L'\0';
 }

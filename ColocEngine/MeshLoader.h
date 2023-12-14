@@ -22,6 +22,14 @@ private:
 	void ParseMaterial(MATERIAL& mtl, const aiMaterial* src);
 	void ParseBone(BONE_INFO& bns, const aiMesh* src);
 
+	void ParseUV(aiVector3D &uv);
+
 private:
+
+	void UVCheck(char* str);
+	void UVCheck(wchar_t* str);
+
+	bool isUrev;
+	bool isVrev;
 };
 

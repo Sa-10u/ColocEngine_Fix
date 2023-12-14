@@ -40,7 +40,6 @@ struct PerInstance
 
 cbuffer Material : register(b1)
 {
-	   
 	float3 dif;
 	float3 spec;
 	float alp;
