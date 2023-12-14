@@ -19,7 +19,7 @@ const char* VrevType[] =
 constexpr auto V_TYPESIZE = _countof(VrevType);
 constexpr auto U_TYPESIZE = _countof(UrevType);
 
-MeshLoader::MeshLoader():isUrev(false),isVrev(false)
+MeshLoader::MeshLoader()
 {
 }
 
@@ -325,23 +325,33 @@ void MeshLoader::ParseBone(BONE_INFO& bns, const aiMesh* src)
 
 void MeshLoader::ParseUV(aiVector3D& uv)
 {
-    if (this->isUrev)    uv.x = 1 - uv.x;
-    if (this->isVrev)    uv.y = 1 - uv.y;
+    (this->*NormU)(uv.x);
+    (this->*NormV)(uv.y);
 };
 
 void MeshLoader::UVCheck(char* str)
 {
     string js(str);
     auto type = FileType(&js);
+
+    NormU = &MeshLoader::UnReverse;
     
     for (auto i = 0u; i < U_TYPESIZE; i++) {
 
-        if (type == UrevType[i]) isUrev = true;
+        if (type == UrevType[i])
+        {
+            NormU = &MeshLoader::Reverse;
+            break;
+        }
     }
 
     for (auto i = 0u; i < V_TYPESIZE; i++) {
 
-        if (type == VrevType[i]) isVrev = true;
+        if (type == VrevType[i])
+        {
+            NormV = &MeshLoader::Reverse;
+            break;
+        }
     }
 }
 
@@ -349,6 +359,15 @@ void MeshLoader::UVCheck(wchar_t* str)
 {
     std::wstring js(str);
     auto type = FileType(&js);
+}
+
+void MeshLoader::Reverse(ai_real& val)
+{
+    val = 1 - val;
+}
+
+void MeshLoader::UnReverse(ai_real& val)
+{
 }
 
 //--------------------------------------------

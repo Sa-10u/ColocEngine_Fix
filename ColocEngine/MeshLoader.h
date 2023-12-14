@@ -29,7 +29,10 @@ private:
 	void UVCheck(char* str);
 	void UVCheck(wchar_t* str);
 
-	bool isUrev;
-	bool isVrev;
+	void(MeshLoader::* NormU)(ai_real& uv);
+	void(MeshLoader::* NormV)(ai_real& uv);
+
+	void Reverse(ai_real& val);
+	void UnReverse(ai_real& val);
 };
 
