@@ -1,6 +1,6 @@
 #include "FileLoader.h"
 #include <filesystem>
-
+#include<sstream>
 
 using namespace std::filesystem;
 
@@ -56,4 +56,32 @@ bool FileLoad(const wchar_t* str , std::wstring* ptr)
 	if (is_regular_file(file_)) { *ptr = file_; return true; }
 
 	return false;
+}
+
+std::string FileNormalization(std::string* str)
+{
+	char* ptr = nullptr;
+	for (auto i = 0; i < str->size(); i++) {
+
+		if (str[i] == "\\")
+		{
+			ptr = &str->at(i);;
+		}
+	}
+
+	return std::string(ptr);
+}
+
+std::wstring FileNormalization(std::wstring* str)
+{
+	wchar_t* ptr = nullptr;
+	for (auto i = 0; i < str->size(); i++) {
+
+		if (str[i] == L"/" || str[i] == L"'\'")
+		{
+			ptr = &str->at(i);;
+		}
+	}
+
+	return std::wstring(ptr);
 }

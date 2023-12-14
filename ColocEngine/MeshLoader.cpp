@@ -2,6 +2,7 @@
 #include "MACRO.h"
 #include"Resource.h"
 #include<cstdint>
+#include"FileLoader.h"
 
 static constexpr unsigned int TRIANGLE = 3;
 
@@ -205,22 +206,87 @@ void MeshLoader::ParseMaterial(MATERIAL& mtl, const aiMaterial* src)
             {
                 mtl.shin_ = val;
             }
+
+        __CREATE("EMISSION")   
+            if (src->Get(AI_MATKEY_EMISSIVE_INTENSITY, coltemp) == AI_SUCCESS)
+            {
+                mtl.emis_.x = coltemp.r;
+                mtl.emis_.y = coltemp.g;
+                mtl.emis_.z = coltemp.b;
+            }
+            else
+            {
+                ResetColor();
+                mtl.emis_.x = coltemp.r;
+                mtl.emis_.y = coltemp.g;
+                mtl.emis_.z = coltemp.b;
+            }
             
-        __CREATE("DIFFUSEMAP")  aiString path = {};
-        if (src->Get(AI_MATKEY_COLOR_DIFFUSE(0), path) == AI_SUCCESS)
+        __CREATE("DIFFUSE_MAP") aiString path = {};
+        if(src->GetTexture(aiTextureType_DIFFUSE ,0 ,&path) == AI_SUCCESS)
         {
-            mtl.map_ = string(path.C_Str());
+            mtl.dmap_ = string(path.C_Str());
         }
         else
         {
-            mtl.map_.clear();
+            mtl.dmap_.clear();
         }
 
-        aiString str = {};
-        auto ret = src->GetTexture(aiTextureType_EMISSIVE, 0, &str);
+        __CREATE("EMISSION_MAP") 
+        if (src->GetTexture(aiTextureType_EMISSIVE, 0, &path) == AI_SUCCESS)
+        {
+            mtl.emap_ = string(path.C_Str());
+            auto str = FileNormalization(&mtl.emap_);
+        }
+        else
+        {
+            mtl.emap_.clear();
+        }
 
-        auto y = src->GetTextureCount(aiTextureType_EMISSION_COLOR);
-        y = 20;
+        __CREATE("NORMAL_MAP") 
+        if (src->GetTexture(aiTextureType_NORMALS, 0, &path) == AI_SUCCESS)
+        {
+            mtl.nmap_ = string(path.C_Str());
+        }
+        else
+        {
+            mtl.nmap_.clear();
+        }
+
+        __CREATE("SPECULAR_MAP") 
+        if (src->GetTexture(aiTextureType_SPECULAR, 0, &path) == AI_SUCCESS)
+        {
+            mtl.smap_ = string(path.C_Str());
+        }
+        else
+        {
+            mtl.smap_.clear();
+        }
+
+        __CREATE("ALPHA_MAP") 
+        if (src->GetTexture(aiTextureType_OPACITY, 0, &path) == AI_SUCCESS)
+        {
+            mtl.ESBAmap_ = string(path.C_Str());
+        }
+        else
+        {
+            mtl.ESBAmap_.clear();
+        }
+
+        __CREATE("SHININESS_MAP") 
+        if (src->GetTexture(aiTextureType_SHININESS, 0, &path) == AI_SUCCESS)
+        {
+            mtl.ESBAmap_ = string(path.C_Str());
+        }
+
+        __CREATE("EMISSIVE_INTENCITY_MAP") 
+        if (src->GetTexture(aiTextureType_EMISSIVE, 0, &path) == AI_SUCCESS)
+        {
+            mtl.ESBAmap_ = string(path.C_Str());
+        }
+  
+          auto u = 0;
+
     }
 }
 

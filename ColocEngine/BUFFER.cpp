@@ -25,5 +25,5 @@ MATERIAL::MATERIAL():alpha_(0),shin_(0)
 {
 	dif_ = {};
 	spec_ = {};
-	map_ = {};
+	dmap_ = {};
 }

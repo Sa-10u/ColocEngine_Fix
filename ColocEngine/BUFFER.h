@@ -75,7 +75,7 @@ struct MATERIAL
 	string smap_;	//for specular .A = Coefficent
 	string emap_;	//for emission .A = Coefficent
 	string nmap_;	//for normal 
-	string SSBAmap_;//R = alpha, G = shineness , B = bamp , A = alpha
+	string ESBAmap_;//R = emissive intensity, G = shineness , B = bamp , A = alpha
 
 	MATERIAL();
 };
