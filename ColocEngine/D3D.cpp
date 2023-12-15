@@ -567,8 +567,6 @@ bool D3d::InitGBO()
             rc_desc.SampleDesc.Count = 1;
         }
 
-        auto incre = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
         for (auto i = 0u; i < FrameAmmount; i++) {
             res = device_->CreateCommittedResource
             (
@@ -606,23 +604,101 @@ bool D3d::InitGBO()
             );
         }
     }
-    //--------------*****
-    {
 
-        enum
+    {
+        D3D12_HEAP_PROPERTIES hp_prop = {};
         {
-            CB = 0,
+            hp_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+            hp_prop.CreationNodeMask = 1;
+            hp_prop.VisibleNodeMask = 1;
+            hp_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+            hp_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
+        }
+
+        D3D12_RESOURCE_DESC rc_desc = {};
+        {
+            rc_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+            rc_desc.Format = DXGI_FORMAT_UNKNOWN;
+            rc_desc.MipLevels = 1;
+            rc_desc.DepthOrArraySize = 1;
+            rc_desc.Height = 1;
+            rc_desc.Width = sizeof(MapBOOL) * CBCOUNT;
+            rc_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+            rc_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+            rc_desc.SampleDesc.Count = 1;
+        }
+
+        for (auto i = 0u; i < FrameAmmount; i++) {
+            res = device_->CreateCommittedResource
+            (
+                &hp_prop,
+                D3D12_HEAP_FLAG_NONE,
+                &rc_desc,
+                D3D12_RESOURCE_STATE_GENERIC_READ,
+                nullptr,
+                IID_PPV_ARGS(&SB_MB[i].rsc_ptr)
+            );
+            if (FAILED(res)) return 0;
+
+            res = SB_MB[i].rsc_ptr->Map(0, nullptr, reinterpret_cast<void**>(&SB_MB[i].view));
+            memset(SB_MB[i].view, 0, CBCOUNT * sizeof(ObjInfo));
+
+            D3D12_SHADER_RESOURCE_VIEW_DESC srv = {};
+            {
+                srv.Format = DXGI_FORMAT_UNKNOWN;
+                srv.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+                srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+                srv.Buffer.FirstElement = 0;
+                srv.Buffer.NumElements = CBCOUNT;
+                srv.Buffer.StructureByteStride = sizeof(ObjInfo);
+                srv.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+            }
+
+            SB_MB[i].HCPU = DHH_CbSrUaV->GetAndIncreCPU();
+            SB_MB[i].HGPU = DHH_CbSrUaV->GetAndIncreGPU();
+
+            device_->CreateShaderResourceView
+            (
+                SB_MB[i].rsc_ptr,
+                &srv,
+                SB_MB[i].HCPU
+            );
+        }
+    }
+    //--------------*****
+
+    {
+        enum 
+        {
+            CB_U = 0,
+            CB_C,
+            CB_M,
             TEX,
-            SB,
+            SB_OI,
+            SB_MB,
             AMMOUNT
         };
 
         D3D12_ROOT_PARAMETER r_param[AMMOUNT] = {};
         {
-            r_param[CB].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-            r_param[CB].Descriptor.RegisterSpace = 0;
-            r_param[CB].Descriptor.ShaderRegister = 0;
-            r_param[CB].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+            r_param[CB_U].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+            r_param[CB_U].Descriptor.RegisterSpace = 0;
+            r_param[CB_U].Descriptor.ShaderRegister = 0;
+            r_param[CB_U].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        }
+
+        {
+            r_param[CB_C].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+            r_param[CB_C].Descriptor.RegisterSpace = 1;
+            r_param[CB_C].Descriptor.ShaderRegister = 0;
+            r_param[CB_C].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        }
+
+        {
+            r_param[CB_M].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+            r_param[CB_M].Descriptor.RegisterSpace = 0;
+            r_param[CB_M].Descriptor.ShaderRegister = 1;
+            r_param[CB_M].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
         }
 
         D3D12_DESCRIPTOR_RANGE range_Tex = {};
@@ -642,23 +718,37 @@ bool D3d::InitGBO()
             r_param[TEX].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
         }
 
-        D3D12_DESCRIPTOR_RANGE range_SB = {};
+        D3D12_DESCRIPTOR_RANGE range_SB_OI = {};
         {
-            range_SB.BaseShaderRegister = 1;
-            range_SB.NumDescriptors = CBCOUNT;
-            range_SB.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-            range_SB.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-            range_SB.RegisterSpace = 0;
+            range_SB_OI.BaseShaderRegister = 1;
+            range_SB_OI.NumDescriptors = CBCOUNT;
+            range_SB_OI.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+            range_SB_OI.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            range_SB_OI.RegisterSpace = 0;
+        }
+        r_param[SB_OI];
+        {
+            r_param[SB_OI].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+            r_param[SB_OI].DescriptorTable.NumDescriptorRanges = 1;
+            r_param[SB_OI].DescriptorTable.pDescriptorRanges = &range_SB_OI;
+            r_param[SB_OI].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
         }
 
-        r_param[SB];
+        D3D12_DESCRIPTOR_RANGE range_SB_MB = {};
         {
-            r_param[SB].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-            r_param[SB].DescriptorTable.NumDescriptorRanges = 1;
-            r_param[SB].DescriptorTable.pDescriptorRanges = &range_SB;
-            r_param[SB].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+            range_SB_OI.BaseShaderRegister = 1;
+            range_SB_OI.NumDescriptors = CBCOUNT;
+            range_SB_OI.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+            range_SB_OI.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            range_SB_OI.RegisterSpace = 1;
         }
-
+        r_param[SB_MB];
+        {
+            r_param[SB_MB].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+            r_param[SB_MB].DescriptorTable.NumDescriptorRanges = 1;
+            r_param[SB_MB].DescriptorTable.pDescriptorRanges = &range_SB_MB;
+            r_param[SB_MB].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        }
 
         D3D12_STATIC_SAMPLER_DESC sampler = {};
         {
@@ -733,28 +823,6 @@ bool D3d::InitGBO()
 
 bool D3d::InitPSO()
 {
-    D3D12_INPUT_ELEMENT_DESC in_e_desc[2];
-    {
-        {
-            in_e_desc[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-            in_e_desc[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-            in_e_desc[0].InputSlot = 0;
-            in_e_desc[0].SemanticName = SEMANTICS_STR::POSITION;
-            in_e_desc[0].SemanticIndex = 0;
-            in_e_desc[0].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-            in_e_desc[0].InstanceDataStepRate = 0;
-        }
-        {
-            in_e_desc[1].Format = DXGI_FORMAT_R32G32_FLOAT;
-            in_e_desc[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-            in_e_desc[1].InputSlot = 0;
-            in_e_desc[1].SemanticName = SEMANTICS_STR::TEXCOORD;
-            in_e_desc[1].SemanticIndex = 0;
-            in_e_desc[1].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-            in_e_desc[1].InstanceDataStepRate = 0;
-        }
-    }
-
     D3D12_RASTERIZER_DESC rs_desc = {};
     {
         rs_desc.FillMode = D3D12_FILL_MODE_SOLID;
@@ -961,6 +1029,17 @@ D3d::D3d()
 
 void D3d::write()
 {
+    enum RP
+    {
+        CBU = 0,
+        CBC,
+        CBM,
+        TEX,
+        SBOI,
+        SBMB,
+        AMMOUNT
+    };
+
     cmdalloc_[IND_frame]->Reset();
     cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
 
@@ -983,10 +1062,14 @@ void D3d::write()
 
     cmdlist_->SetGraphicsRootSignature(rootsig_);
     cmdlist_->SetDescriptorHeaps(1, DHH_CbSrUaV->ppHeap_);
-    cmdlist_->SetGraphicsRootConstantBufferView(0, CBV_Util[IND_frame].desc.BufferLocation);
 
-    cmdlist_->SetGraphicsRootDescriptorTable(1, tex.HGPU);
-    cmdlist_->SetGraphicsRootDescriptorTable(2, SB_OI[IND_frame].HGPU);
+    cmdlist_->SetGraphicsRootConstantBufferView(CBU, CBV_Util[IND_frame].desc.BufferLocation);
+    cmdlist_->SetGraphicsRootConstantBufferView(CBM, CBV_Mtl[IND_frame].desc.BufferLocation);
+    cmdlist_->SetGraphicsRootConstantBufferView(CBC, CBV_Cam[IND_frame].desc.BufferLocation);
+
+    cmdlist_->SetGraphicsRootDescriptorTable(TEX, tex.HGPU);
+    cmdlist_->SetGraphicsRootDescriptorTable(SBOI, SB_OI[IND_frame].HGPU);
+    cmdlist_->SetGraphicsRootDescriptorTable(SBMB, SB_MB[IND_frame].HGPU);
 
     cmdlist_->SetPipelineState(PSO);
 

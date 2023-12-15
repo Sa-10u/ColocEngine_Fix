@@ -69,7 +69,7 @@ cbuffer CAM	:register(b0, space1)
 };
 
 StructuredBuffer<PerInstance> Data	: register(t1 , space0);
-//StructuredBuffer<MapBOOL>	Map	: register(t1 , space1);
+StructuredBuffer<MapBOOL>	Map	: register(t1 , space1);
 
 SamplerState colsmp : register(s0);
 Texture2D	 colmap : register(t0 ,space0);
