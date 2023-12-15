@@ -77,13 +77,20 @@ private:
 	ID3D12RootSignature* rootsig_;
 	ID3D12PipelineState* PSO;
 
-	ID3D12Resource* CB[FrameAmmount];
-	//ID3D12Resource* GPUBuffer[FrameAmmount];
+	ID3D12Resource*				CB_Util[FrameAmmount];
+	ID3D12Resource*				CB_CAM[FrameAmmount];
+	ID3D12Resource*				CB_Mtl[FrameAmmount];
+
 	ID3D12Resource* ZB;
 	Texture			tex;
-	StructuredBuffer<ObjInfo> SB[FrameAmmount];
+
+	StructuredBuffer<ObjInfo>	 SB_OI[FrameAmmount];
+	StructuredBuffer<MapBOOL>	 SB_MB[FrameAmmount];
 ;
-	CBUFFERVIEW<Util>	 CBV[FrameAmmount];
+	CBUFFERVIEW<Util>			 CBV_Util[FrameAmmount];
+	CBUFFERVIEW<Cam>			 CBV_Cam[FrameAmmount];
+	CBUFFERVIEW<Material>		 CBV_Mtl[FrameAmmount];
+
 	ID3D12DescriptorHeap* hp_ZBV;
 
 	//---------------

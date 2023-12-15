@@ -10,6 +10,7 @@
 #include"S_Draw.h"
 
 constexpr UINT CBCOUNT = 256;
+constexpr UINT HPSIZE = 10;
 
 bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
 {
@@ -275,7 +276,7 @@ bool D3d::InitGBO()
             {
                 hp_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
                 hp_desc.NodeMask = 0;
-                hp_desc.NumDescriptors = 3 * FrameAmmount;
+                hp_desc.NumDescriptors = HPSIZE * FrameAmmount;
                 hp_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
             }
 
@@ -291,7 +292,7 @@ bool D3d::InitGBO()
         }
     }
 
-    //------------------------
+ //------------------------
     {
         D3D12_HEAP_PROPERTIES hp_proc_c = {};
         {
@@ -318,7 +319,60 @@ bool D3d::InitGBO()
             rc_desc_c.SampleDesc.Quality = 0;
         }
 
-        auto incre = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        for (auto i = 0; i < FrameAmmount; ++i) {
+
+            res = device_->CreateCommittedResource
+            (
+                &hp_proc_c,
+                D3D12_HEAP_FLAG_NONE,
+                &rc_desc_c,
+                D3D12_RESOURCE_STATE_GENERIC_READ,
+                NULL,
+                IID_PPV_ARGS(&CB_Util[i])
+            );
+            if (FAILED(res))     return false;
+            //----------------------------------
+
+            auto address = CB_Util[i]->GetGPUVirtualAddress();
+
+            CBV_Util[i].HCPU = DHH_CbSrUaV->GetAndIncreCPU();
+            CBV_Util[i].HGPU = DHH_CbSrUaV->GetAndIncreGPU();;
+            CBV_Util[i].desc.BufferLocation = address;
+            CBV_Util[i].desc.SizeInBytes = sizeof(Util);
+
+            device_->CreateConstantBufferView(&CBV_Util[i].desc, CBV_Util[i].HCPU);
+
+            res = CB_Util[i]->Map(0, NULL, reinterpret_cast<void**>(&CBV_Util[i].ptr));
+            if (FAILED(res)) return 0;
+        }
+    }
+    //------------------------------------------------------------------
+
+    {
+        D3D12_HEAP_PROPERTIES hp_proc_c = {};
+        {
+            hp_proc_c.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+            hp_proc_c.Type = D3D12_HEAP_TYPE_UPLOAD;
+            hp_proc_c.CreationNodeMask = 1;
+            hp_proc_c.VisibleNodeMask = 1;
+            hp_proc_c.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+        }
+
+        D3D12_RESOURCE_DESC rc_desc_c = {};
+        {
+            rc_desc_c.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+            rc_desc_c.Format = DXGI_FORMAT_UNKNOWN;
+            rc_desc_c.MipLevels = 1;
+            rc_desc_c.Alignment = 0;
+            rc_desc_c.Height = 1;
+            rc_desc_c.Width = sizeof(Cam);
+            rc_desc_c.DepthOrArraySize = 1;
+            rc_desc_c.Flags = D3D12_RESOURCE_FLAG_NONE;
+            rc_desc_c.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+            rc_desc_c.SampleDesc.Count = 1;
+            rc_desc_c.SampleDesc.Quality = 0;
+        }
 
         for (auto i = 0; i < FrameAmmount; ++i) {
 
@@ -329,21 +383,75 @@ bool D3d::InitGBO()
                 &rc_desc_c,
                 D3D12_RESOURCE_STATE_GENERIC_READ,
                 NULL,
-                IID_PPV_ARGS(&CB[i])
+                IID_PPV_ARGS(&CB_CAM[i])
             );
             if (FAILED(res))     return false;
             //----------------------------------
 
-            auto address = CB[i]->GetGPUVirtualAddress();
+            auto address = CB_CAM[i]->GetGPUVirtualAddress();
 
-            CBV[i].HCPU = DHH_CbSrUaV->GetAndIncreCPU();
-            CBV[i].HGPU = DHH_CbSrUaV->GetAndIncreGPU();;
-            CBV[i].desc.BufferLocation = address;
-            CBV[i].desc.SizeInBytes = sizeof(Util);
+            CBV_Cam[i].HCPU = DHH_CbSrUaV->GetAndIncreCPU();
+            CBV_Cam[i].HGPU = DHH_CbSrUaV->GetAndIncreGPU();;
+            CBV_Cam[i].desc.BufferLocation = address;
+            CBV_Cam[i].desc.SizeInBytes = sizeof(Cam);
 
-            device_->CreateConstantBufferView(&CBV[i].desc, CBV[i].HCPU);
+            device_->CreateConstantBufferView(&CBV_Cam[i].desc, CBV_Cam[i].HCPU);
 
-            res = CB[i]->Map(0, NULL, reinterpret_cast<void**>(&CBV[i].ptr));
+            res = CB_CAM[i]->Map(0, NULL, reinterpret_cast<void**>(&CBV_Cam[i].ptr));
+            if (FAILED(res)) return 0;
+        }
+    }
+    //------------------------------------------------------------------
+    {
+        D3D12_HEAP_PROPERTIES hp_proc_c = {};
+        {
+            hp_proc_c.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+            hp_proc_c.Type = D3D12_HEAP_TYPE_UPLOAD;
+            hp_proc_c.CreationNodeMask = 1;
+            hp_proc_c.VisibleNodeMask = 1;
+            hp_proc_c.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+        }
+
+        D3D12_RESOURCE_DESC rc_desc_c = {};
+        {
+            rc_desc_c.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+            rc_desc_c.Format = DXGI_FORMAT_UNKNOWN;
+            rc_desc_c.MipLevels = 1;
+            rc_desc_c.Alignment = 0;
+            rc_desc_c.Height = 1;
+            rc_desc_c.Width = sizeof(Material);
+            rc_desc_c.DepthOrArraySize = 1;
+            rc_desc_c.Flags = D3D12_RESOURCE_FLAG_NONE;
+            rc_desc_c.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+            rc_desc_c.SampleDesc.Count = 1;
+            rc_desc_c.SampleDesc.Quality = 0;
+        }
+
+        for (auto i = 0; i < FrameAmmount; ++i) {
+
+            res = device_->CreateCommittedResource
+            (
+                &hp_proc_c,
+                D3D12_HEAP_FLAG_NONE,
+                &rc_desc_c,
+                D3D12_RESOURCE_STATE_GENERIC_READ,
+                NULL,
+                IID_PPV_ARGS(&CB_Mtl[i])
+            );
+            if (FAILED(res))     return false;
+            //----------------------------------
+
+            auto address = CB_Mtl[i]->GetGPUVirtualAddress();
+
+            CBV_Mtl[i].HCPU = DHH_CbSrUaV->GetAndIncreCPU();
+            CBV_Mtl[i].HGPU = DHH_CbSrUaV->GetAndIncreGPU();;
+            CBV_Mtl[i].desc.BufferLocation = address;
+            CBV_Mtl[i].desc.SizeInBytes = sizeof(Material);
+
+            device_->CreateConstantBufferView(&CBV_Mtl[i].desc, CBV_Mtl[i].HCPU);
+
+            res = CB_Mtl[i]->Map(0, NULL, reinterpret_cast<void**>(&CBV_Mtl[i].ptr));
             if (FAILED(res)) return 0;
         }
     }
@@ -469,12 +577,12 @@ bool D3d::InitGBO()
                 &rc_desc,
                 D3D12_RESOURCE_STATE_GENERIC_READ,
                 nullptr,
-                IID_PPV_ARGS(&SB[i].rsc_ptr)
+                IID_PPV_ARGS(&SB_OI[i].rsc_ptr)
             );
             if (FAILED(res)) return 0;
 
-            res = SB[i].rsc_ptr->Map(0, nullptr, reinterpret_cast<void**>(&SB[i].view));
-            memset(SB[i].view, 0, CBCOUNT * sizeof(ObjInfo));
+            res = SB_OI[i].rsc_ptr->Map(0, nullptr, reinterpret_cast<void**>(&SB_OI[i].view));
+            memset(SB_OI[i].view, 0, CBCOUNT * sizeof(ObjInfo));
 
             D3D12_SHADER_RESOURCE_VIEW_DESC srv = {};
             {
@@ -487,14 +595,14 @@ bool D3d::InitGBO()
                 srv.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
             }
 
-            SB[i].HCPU = DHH_CbSrUaV->GetAndIncreCPU();
-            SB[i].HGPU = DHH_CbSrUaV->GetAndIncreGPU();
+            SB_OI[i].HCPU = DHH_CbSrUaV->GetAndIncreCPU();
+            SB_OI[i].HGPU = DHH_CbSrUaV->GetAndIncreGPU();
 
             device_->CreateShaderResourceView
             (
-                SB[i].rsc_ptr,
+                SB_OI[i].rsc_ptr,
                 &srv,
-                SB[i].HCPU
+                SB_OI[i].HCPU
             );
         }
     }
@@ -789,10 +897,12 @@ void D3d::Update()
         constexpr float incre = 1.0f / 60.0f;
 
         time_ += incre;
-        CBV[IND_frame].ptr->time = time_;
+        CBV_Util[IND_frame].ptr->time = time_;
+        CBV_Util[IND_frame].ptr->view = XMMatrixLookAtRH(CAM::Pos, CAM::Tgt, CAM::Head);
+        CBV_Util[IND_frame].ptr->proj = XMMatrixPerspectiveFovRH(CAM::Fov, CAM::Aspect, 1.0f, 1000.0f);
 
-        CBV[IND_frame].ptr->view = XMMatrixLookAtRH(CAM::Pos, CAM::Tgt, CAM::Head);
-        CBV[IND_frame].ptr->proj = XMMatrixPerspectiveFovRH(CAM::Fov, CAM::Aspect, 1.0f, 1000.0f);
+        XMStoreFloat3(&CBV_Cam[IND_frame].ptr->pos, CAM::Pos);
+        XMStoreFloat3(&CBV_Cam[IND_frame].ptr->tgt, CAM::Tgt);
     }
 
     CAM::Run();
@@ -873,10 +983,10 @@ void D3d::write()
 
     cmdlist_->SetGraphicsRootSignature(rootsig_);
     cmdlist_->SetDescriptorHeaps(1, DHH_CbSrUaV->ppHeap_);
-    cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
+    cmdlist_->SetGraphicsRootConstantBufferView(0, CBV_Util[IND_frame].desc.BufferLocation);
 
     cmdlist_->SetGraphicsRootDescriptorTable(1, tex.HGPU);
-    cmdlist_->SetGraphicsRootDescriptorTable(2, SB[IND_frame].HGPU);
+    cmdlist_->SetGraphicsRootDescriptorTable(2, SB_OI[IND_frame].HGPU);
 
     cmdlist_->SetPipelineState(PSO);
 
@@ -884,15 +994,23 @@ void D3d::write()
     cmdlist_->RSSetViewports(1, &view_);
     cmdlist_->RSSetScissorRects(1, &rect_);
 
-    cmdlist_->SetGraphicsRootConstantBufferView(0, CBV[IND_frame].desc.BufferLocation);
+    cmdlist_->SetGraphicsRootConstantBufferView(0, CBV_Util[IND_frame].desc.BufferLocation);
 
     for (auto& itr : ResourceManager::models_) {
         auto v = 0u;
 
         for (auto cnt : itr.Mesh_) {
 
-            memcpy(SB[IND_frame].view, itr.info.data(), sizeof(ObjInfo) * itr.info.size());
+            memcpy(SB_OI[IND_frame].view, itr.info.data(), sizeof(ObjInfo) * itr.info.size());
 
+            {
+                CBV_Mtl[IND_frame].ptr->alp = itr.Mtr_[v].alpha_;
+                CBV_Mtl[IND_frame].ptr->dif = itr.Mtr_[v].dif_;
+                CBV_Mtl[IND_frame].ptr->emis = itr.Mtr_[v].emis_;
+                CBV_Mtl[IND_frame].ptr->shin = itr.Mtr_[v].shin_;
+                CBV_Mtl[IND_frame].ptr->spec = itr.Mtr_[v].spec_;
+            }
+            
             cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
             cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
             cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_, 0, 0, 0);

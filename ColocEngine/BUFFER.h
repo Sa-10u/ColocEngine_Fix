@@ -71,9 +71,9 @@ struct MATERIAL
 	float alpha_;
 	float shin_;
 
-	string dmap_;	//for diffuse . A = Coefficent
-	string smap_;	//for specular .A = Coefficent
-	string emap_;	//for emission .A = Coefficent
+	string dmap_;	//for diffuse . A = Coefficient
+	string smap_;	//for specular .A = Coefficient
+	string emap_;	//for emission .A = Coefficient
 	string nmap_;	//for normal 
 	string ESBAmap_;//R = emissive intensity, G = shineness , B = bamp , A = alpha
 
@@ -103,7 +103,7 @@ public:
 bool LoadMesh(const wchar_t* file, vector<MESH>& mesh, vector<MATERIAL>& material);
 bool LoadMesh(const wchar_t* file, RModel* ptr);
 
-//-----------------------------
+//-----------------------------for S buffer
 
 struct alignas(16) ObjInfo
 {
@@ -117,11 +117,38 @@ struct alignas(16) ObjInfo
 	ObjInfo();
 };
 
+struct alignas(16) MapBOOL
+{
+	int isD;
+	int isS;
+	int isE;
+	int isN;
+	int isESB;
+
+	MapBOOL();
+};
+
+//--------------------------------for C buufer
 struct alignas(256) Util
 {
 	XMMATRIX view;
 	XMMATRIX proj;
 	float time;
+};
+
+struct alignas(256) Cam
+{
+	XMFLOAT3 pos;
+	XMFLOAT3 tgt;
+};
+
+struct alignas(256) Material
+{
+	XMFLOAT3 dif;
+	XMFLOAT3 spec;
+	XMFLOAT3 emis;
+	float alp;
+	float shin;
 };
 
 template <typename T>

@@ -27,3 +27,7 @@ MATERIAL::MATERIAL():alpha_(0),shin_(0)
 	spec_ = {};
 	dmap_ = {};
 }
+
+MapBOOL::MapBOOL():isD(NULL),isS(NULL),isE(NULL),isN(NULL),isESB(NULL)
+{
+}
