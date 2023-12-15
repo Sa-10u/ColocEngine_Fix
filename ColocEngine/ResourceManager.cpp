@@ -6,6 +6,8 @@ namespace ResourceManager
 {
     std::vector<RModel> models_;
     std::vector<RTexture> textures_;
+    RModel E_Model;
+    RTexture E_Tex;
 }
 
 void ResourceManager::Init()
@@ -13,6 +15,9 @@ void ResourceManager::Init()
 	models_.clear();
 	textures_.clear();
 	
+    {
+        E_Model.DrawCount_;
+    }
 }
 
 void ResourceManager::Term()
@@ -27,7 +32,7 @@ void ResourceManager::Term()
 RModel* ResourceManager::ModelLoad(std::wstring str)
 {
     std::wstring path;
-    FileLoad(str.c_str(), &path);
+    if(!FileLoad(str.c_str(), &path))    return &E_Model;
 
 	for (auto& list : models_) {
 		if (list.Name_ == path)	return &list;

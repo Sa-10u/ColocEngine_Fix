@@ -5,7 +5,7 @@
 
 void WW_Play::Initialize()
 {
-	md = ResourceManager::ModelLoad(L"Re_Meta Knigt.fbx");
+	md = ResourceManager::ModelLoad(L"E_Model.fbx");
 }
 
 void WW_Play::Run(float tick)

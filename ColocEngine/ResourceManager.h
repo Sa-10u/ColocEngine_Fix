@@ -18,5 +18,8 @@ namespace ResourceManager
 	
 	void ALL_RELEASE_MODEL();
 	void ALL_RELEASE_TEX();
+
+	extern RModel E_Model;
+	extern RTexture E_Tex;
 };
 
