@@ -1,6 +1,7 @@
 #include "WinView.h"
 #include <chrono>
 #include"CAM.h"
+#include"FileLoader.h"
 
 using namespace std::chrono;
 
@@ -65,7 +66,8 @@ bool WinView::initialize()
 
     {
         auto color = CreateSolidBrush(RGB(1, 10, 100));
-
+        std::wstring str = L"CE_Icon.ico";
+        
         wcex.lpfnWndProc = WndProc;
         wcex.lpszClassName = WND_NAME::smp;
         wcex.lpszMenuName = nullptr;

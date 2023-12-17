@@ -35,7 +35,7 @@ PSoutput main(VSoutput inp)
     
     float2 UV = float2(inp.uv.x ,  inp.uv.y);
     res.color = colmap.Sample(colsmp,UV);
-
+    res.color = float4(norm,1);
     //res.color = float4(inp.uv,0,1);
     
     return res;

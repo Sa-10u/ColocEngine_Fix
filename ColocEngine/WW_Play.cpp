@@ -5,12 +5,22 @@
 
 void WW_Play::Initialize()
 {
-	md = ResourceManager::ModelLoad(L"E_Model.fbx");
+	md = ResourceManager::ModelLoad(L"Re_Meta Knigt.fbx");
 }
 
 void WW_Play::Run(float tick)
 {
 	S_Draw::Draw(&info, md);
+
+	ObjInfo i;
+	i.wld =
+	{
+		1,0,0,0,
+		0,1,0,0,
+		0,0,1,0,
+		1,0,0,1
+	};
+	//S_Draw::Draw(&i, md);
 }
 
 void WW_Play::release()

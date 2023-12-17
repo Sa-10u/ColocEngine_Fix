@@ -184,13 +184,13 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="poorVS.hlsl">
-      <Filter>shader</Filter>
-    </FxCompile>
     <FxCompile Include="PoorPS.hlsl">
       <Filter>shader</Filter>
     </FxCompile>
     <FxCompile Include="Lambert.hlsl">
+      <Filter>shader</Filter>
+    </FxCompile>
+    <FxCompile Include="poorVS.hlsl">
       <Filter>shader</Filter>
     </FxCompile>
   </ItemGroup>

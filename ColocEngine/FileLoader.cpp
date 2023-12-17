@@ -28,6 +28,9 @@ bool FileLoad(const char* str ,std::string* ptr)
 	file_ = "../" + std::string(str);
 	if (is_regular_file(file_)) { *ptr = file_; return true; }
 
+	file_ = "Resource/Others/" + std::string(str);
+	if (is_regular_file(file_)) { *ptr = file_; return true; }
+
 	return false;
 }
 
@@ -53,6 +56,9 @@ bool FileLoad(const wchar_t* str , std::wstring* ptr)
 	if (is_regular_file(file_)) { *ptr = file_; return true; }
 
 	file_ = L"../" + std::wstring(str);
+	if (is_regular_file(file_)) { *ptr = file_; return true; }
+
+	file_ = L"Resource/Others/" + std::wstring(str);
 	if (is_regular_file(file_)) { *ptr = file_; return true; }
 
 	return false;

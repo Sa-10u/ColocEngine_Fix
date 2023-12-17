@@ -668,14 +668,16 @@ bool D3d::InitGBO()
     //--------------*****
 
     {
-        enum 
+
+        enum
         {
             CB_U = 0,
             CB_C,
             CB_M,
-            TEX,
             SB_OI,
             SB_MB,
+            TEX,
+            
             AMMOUNT
         };
 
@@ -690,20 +692,54 @@ bool D3d::InitGBO()
         {
             r_param[CB_C].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
             r_param[CB_C].Descriptor.RegisterSpace = 0;
-            r_param[CB_C].Descriptor.ShaderRegister = 1;
+            r_param[CB_C].Descriptor.ShaderRegister = 256;
             r_param[CB_C].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
         }
 
         {
             r_param[CB_M].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
             r_param[CB_M].Descriptor.RegisterSpace = 0;
-            r_param[CB_M].Descriptor.ShaderRegister = 2;
+            r_param[CB_M].Descriptor.ShaderRegister = 512;
             r_param[CB_M].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        }
+
+        D3D12_DESCRIPTOR_RANGE range_SBOI = {};
+        {
+            range_SBOI.BaseShaderRegister = 0;
+            range_SBOI.NumDescriptors = CBCOUNT;
+            range_SBOI.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+            range_SBOI.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            range_SBOI.RegisterSpace = 0;
+        }
+
+        r_param[SB_OI];
+        {
+            r_param[SB_OI].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+            r_param[SB_OI].DescriptorTable.NumDescriptorRanges = 1;
+            r_param[SB_OI].DescriptorTable.pDescriptorRanges = &range_SBOI;
+            r_param[SB_OI].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        }
+
+        D3D12_DESCRIPTOR_RANGE range_SBMB = {};
+        {
+            range_SBMB.BaseShaderRegister = 512;
+            range_SBMB.NumDescriptors = CBCOUNT;
+            range_SBMB.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+            range_SBMB.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            range_SBMB.RegisterSpace = 0;
+        }
+
+        r_param[SB_MB];
+        {
+            r_param[SB_MB].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+            r_param[SB_MB].DescriptorTable.NumDescriptorRanges = 1;
+            r_param[SB_MB].DescriptorTable.pDescriptorRanges = &range_SBMB;
+            r_param[SB_MB].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
         }
 
         D3D12_DESCRIPTOR_RANGE range_Tex = {};
         {
-            range_Tex.BaseShaderRegister = 3;
+            range_Tex.BaseShaderRegister = 1024;
             range_Tex.NumDescriptors = 1;
             range_Tex.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
             range_Tex.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -716,47 +752,6 @@ bool D3d::InitGBO()
             r_param[TEX].DescriptorTable.NumDescriptorRanges = 1;
             r_param[TEX].DescriptorTable.pDescriptorRanges = &range_Tex;
             r_param[TEX].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-
-            r_param[TEX].Descriptor.RegisterSpace = 0;
-            r_param[TEX].Descriptor.ShaderRegister = 3;
-        }
-
-        D3D12_DESCRIPTOR_RANGE range_SB_OI = {};
-        {
-            range_SB_OI.BaseShaderRegister = 0;
-            range_SB_OI.NumDescriptors = CBCOUNT;
-            range_SB_OI.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-            range_SB_OI.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-            range_SB_OI.RegisterSpace = 0;
-        }
-        r_param[SB_OI];
-        {
-            r_param[SB_OI].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-            r_param[SB_OI].DescriptorTable.NumDescriptorRanges = 1;
-            r_param[SB_OI].DescriptorTable.pDescriptorRanges = &range_SB_OI;
-            r_param[SB_OI].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
-            r_param[SB_OI].Descriptor.RegisterSpace = 0;
-            r_param[SB_OI].Descriptor.ShaderRegister = 0;
-        }
-
-        D3D12_DESCRIPTOR_RANGE range_SB_MB = {};
-        {
-            range_SB_MB.BaseShaderRegister = 1;
-            range_SB_MB.NumDescriptors = CBCOUNT;
-            range_SB_MB.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-            range_SB_MB.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-            range_SB_MB.RegisterSpace = 0;
-        }
-        r_param[SB_MB];
-        {
-            r_param[SB_MB].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-            r_param[SB_MB].DescriptorTable.NumDescriptorRanges = 1;
-            r_param[SB_MB].DescriptorTable.pDescriptorRanges = &range_SB_MB;
-            r_param[SB_MB].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
-            r_param[SB_MB].Descriptor.RegisterSpace = 0;
-            r_param[SB_MB].Descriptor.ShaderRegister = 1;
         }
 
         D3D12_STATIC_SAMPLER_DESC sampler = {};
@@ -800,7 +795,7 @@ bool D3d::InitGBO()
             D3D_ROOT_SIGNATURE_VERSION_1_0,
             &S_blob,
             &E_blob
-        );
+        ); 
         if (FAILED(res))     return 0;
 
         res = device_->CreateRootSignature
@@ -1043,9 +1038,9 @@ void D3d::write()
         CBU = 0,
         CBC,
         CBM,
-        TEX,
         SBOI,
         SBMB,
+        TEX,
         AMMOUNT
     };
 
@@ -1094,6 +1089,7 @@ void D3d::write()
         for (auto cnt : itr.Mesh_) {
 
             memcpy(SB_OI[IND_frame].view, itr.info.data(), sizeof(ObjInfo) * itr.info.size());
+           // memcpy(SB_MB[IND_frame].view, itr.), sizeof(MapBOOL)* itr.info.size());
 
             {
                 CBV_Mtl[IND_frame].ptr->alp = itr.Mtr_[v].alpha_;
@@ -1106,7 +1102,7 @@ void D3d::write()
             cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
             cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
             cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_, 0, 0, 0);
-
+            
             v++;
         }
         S_Draw::Flush(&itr);

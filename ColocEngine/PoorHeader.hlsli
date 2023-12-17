@@ -54,13 +54,13 @@ cbuffer Util : register(b0)
 	float Time : packoffset(c8);
 };
 
-cbuffer CAM	:register(b1)
+cbuffer CAM	:register(b256)
 {
 	float3 pos;
 	float3 tgt;
 };
 
-cbuffer Material : register(b2)
+cbuffer Material : register(b512)
 {
 	float3 dif;
 	float3 spec;
@@ -70,10 +70,10 @@ cbuffer Material : register(b2)
 };
 
 StructuredBuffer<PerInstance> Data	: register(t0);
-StructuredBuffer<MapBOOL>	Map	: register(t1);
+StructuredBuffer<MapBOOL>	Map	: register(t512);
 
 SamplerState colsmp : register(s0);
-Texture2D	 colmap : register(t3);
+Texture2D	 colmap : register(t1024);
 
 
 
