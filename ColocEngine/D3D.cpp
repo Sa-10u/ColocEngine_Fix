@@ -401,60 +401,6 @@ bool D3d::InitGBO()
             if (FAILED(res)) return 0;
         }
     }
-    //------------------------------------------------------------------
-    {
-        D3D12_HEAP_PROPERTIES hp_proc_c = {};
-        {
-            hp_proc_c.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-            hp_proc_c.Type = D3D12_HEAP_TYPE_UPLOAD;
-            hp_proc_c.CreationNodeMask = 1;
-            hp_proc_c.VisibleNodeMask = 1;
-            hp_proc_c.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-        }
-
-        D3D12_RESOURCE_DESC rc_desc_c = {};
-        {
-            rc_desc_c.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-            rc_desc_c.Format = DXGI_FORMAT_UNKNOWN;
-            rc_desc_c.MipLevels = 1;
-            rc_desc_c.Alignment = 0;
-            rc_desc_c.Height = 1;
-            rc_desc_c.Width = sizeof(Material);
-            rc_desc_c.DepthOrArraySize = 1;
-            rc_desc_c.Flags = D3D12_RESOURCE_FLAG_NONE;
-            rc_desc_c.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-
-            rc_desc_c.SampleDesc.Count = 1;
-            rc_desc_c.SampleDesc.Quality = 0;
-        }
-
-        for (auto i = 0; i < FrameAmmount; ++i) {
-
-            res = device_->CreateCommittedResource
-            (
-                &hp_proc_c,
-                D3D12_HEAP_FLAG_NONE,
-                &rc_desc_c,
-                D3D12_RESOURCE_STATE_GENERIC_READ,
-                NULL,
-                IID_PPV_ARGS(&CB_Mtl[i])
-            );
-            if (FAILED(res))     return false;
-            //----------------------------------
-
-            auto address = CB_Mtl[i]->GetGPUVirtualAddress();
-
-            CBV_Mtl[i].HCPU = DHH_CbSrUaV->GetAndIncreCPU();
-            CBV_Mtl[i].HGPU = DHH_CbSrUaV->GetAndIncreGPU();;
-            CBV_Mtl[i].desc.BufferLocation = address;
-            CBV_Mtl[i].desc.SizeInBytes = sizeof(Material);
-
-            device_->CreateConstantBufferView(&CBV_Mtl[i].desc, CBV_Mtl[i].HCPU);
-
-            res = CB_Mtl[i]->Map(0, NULL, reinterpret_cast<void**>(&CBV_Mtl[i].ptr));
-            if (FAILED(res)) return 0;
-        }
-    }
     //-----------------------------------------------------------------------------------------*****
     {
         std::wstring tex_Path;
@@ -665,6 +611,67 @@ bool D3d::InitGBO()
             );
         }
     }
+
+    {
+        D3D12_HEAP_PROPERTIES hp_prop = {};
+        {
+            hp_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+            hp_prop.CreationNodeMask = 1;
+            hp_prop.VisibleNodeMask = 1;
+            hp_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+            hp_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
+        }
+
+        D3D12_RESOURCE_DESC rc_desc = {};
+        {
+            rc_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+            rc_desc.Format = DXGI_FORMAT_UNKNOWN;
+            rc_desc.MipLevels = 1;
+            rc_desc.DepthOrArraySize = 1;
+            rc_desc.Height = 1;
+            rc_desc.Width = sizeof(Material) * CBCOUNT;
+            rc_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+            rc_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+            rc_desc.SampleDesc.Count = 1;
+        }
+
+        for (auto i = 0u; i < FrameAmmount; i++) {
+            res = device_->CreateCommittedResource
+            (
+                &hp_prop,
+                D3D12_HEAP_FLAG_NONE,
+                &rc_desc,
+                D3D12_RESOURCE_STATE_GENERIC_READ,
+                nullptr,
+                IID_PPV_ARGS(&SB_MTL[i].rsc_ptr)
+            );
+            if (FAILED(res)) return 0;
+
+            res = SB_MTL[i].rsc_ptr->Map(0, nullptr, reinterpret_cast<void**>(&SB_MTL[i].view));
+            memset(SB_MTL[i].view, 0, CBCOUNT * sizeof(Material));
+
+            D3D12_SHADER_RESOURCE_VIEW_DESC srv = {};
+            {
+                srv.Format = DXGI_FORMAT_UNKNOWN;
+                srv.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+                srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+                srv.Buffer.FirstElement = 0;
+                srv.Buffer.NumElements = CBCOUNT;
+                srv.Buffer.StructureByteStride = sizeof(Material);
+                srv.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+            }
+
+            SB_MTL[i].HCPU = DHH_CbSrUaV->GetAndIncreCPU();
+            SB_MTL[i].HGPU = DHH_CbSrUaV->GetAndIncreGPU();
+
+            device_->CreateShaderResourceView
+            (
+                SB_MTL[i].rsc_ptr,
+                &srv,
+                SB_MTL[i].HCPU
+            );
+        }
+    }
     //--------------*****
 
     {
@@ -673,7 +680,7 @@ bool D3d::InitGBO()
         {
             CB_U = 0,
             CB_C,
-            CB_M,
+            SB_MTL,
             SB_OI,
             SB_MB,
             TEX,
@@ -694,13 +701,6 @@ bool D3d::InitGBO()
             r_param[CB_C].Descriptor.RegisterSpace = 0;
             r_param[CB_C].Descriptor.ShaderRegister = 256;
             r_param[CB_C].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-        }
-
-        {
-            r_param[CB_M].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-            r_param[CB_M].Descriptor.RegisterSpace = 0;
-            r_param[CB_M].Descriptor.ShaderRegister = 512;
-            r_param[CB_M].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
         }
 
         D3D12_DESCRIPTOR_RANGE range_SBOI = {};
@@ -737,9 +737,26 @@ bool D3d::InitGBO()
             r_param[SB_MB].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
         }
 
+        D3D12_DESCRIPTOR_RANGE range_SBMTL = {};
+        {
+            range_SBMTL.BaseShaderRegister = 1024;
+            range_SBMTL.NumDescriptors = CBCOUNT;
+            range_SBMTL.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+            range_SBMTL.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            range_SBMTL.RegisterSpace = 0;
+        }
+
+        r_param[SB_MTL];
+        {
+            r_param[SB_MTL].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+            r_param[SB_MTL].DescriptorTable.NumDescriptorRanges = 1;
+            r_param[SB_MTL].DescriptorTable.pDescriptorRanges = &range_SBMTL;
+            r_param[SB_MTL].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        }
+
         D3D12_DESCRIPTOR_RANGE range_Tex = {};
         {
-            range_Tex.BaseShaderRegister = 1024;
+            range_Tex.BaseShaderRegister = 1792;
             range_Tex.NumDescriptors = 1;
             range_Tex.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
             range_Tex.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -1037,7 +1054,7 @@ void D3d::write()
     {
         CBU = 0,
         CBC,
-        CBM,
+        SBMTL,
         SBOI,
         SBMB,
         TEX,
@@ -1068,10 +1085,10 @@ void D3d::write()
     cmdlist_->SetDescriptorHeaps(1, DHH_CbSrUaV->ppHeap_);
 
     cmdlist_->SetGraphicsRootConstantBufferView(CBU, CBV_Util[IND_frame].desc.BufferLocation);
-    cmdlist_->SetGraphicsRootConstantBufferView(CBM, CBV_Mtl[IND_frame].desc.BufferLocation);
     cmdlist_->SetGraphicsRootConstantBufferView(CBC, CBV_Cam[IND_frame].desc.BufferLocation);
 
     cmdlist_->SetGraphicsRootDescriptorTable(TEX, tex.HGPU);
+    cmdlist_->SetGraphicsRootDescriptorTable(SBMTL, SB_MTL[IND_frame].HGPU);
     cmdlist_->SetGraphicsRootDescriptorTable(SBOI, SB_OI[IND_frame].HGPU);
     cmdlist_->SetGraphicsRootDescriptorTable(SBMB, SB_MB[IND_frame].HGPU);
 
@@ -1089,14 +1106,21 @@ void D3d::write()
         for (auto cnt : itr.Mesh_) {
 
             memcpy(SB_OI[IND_frame].view, itr.info.data(), sizeof(ObjInfo) * itr.info.size());
-           // memcpy(SB_MB[IND_frame].view, itr.), sizeof(MapBOOL)* itr.info.size());
+            {
+                SB_MTL[IND_frame].view[v].alp = itr.Mtr_[v].alpha_;
+                SB_MTL[IND_frame].view[v].dif = itr.Mtr_[v].dif_;
+                SB_MTL[IND_frame].view[v].emis = itr.Mtr_[v].emis_;
+                SB_MTL[IND_frame].view[v].shin = itr.Mtr_[v].shin_;
+                SB_MTL[IND_frame].view[v].spec = itr.Mtr_[v].spec_;
+                SB_MTL[IND_frame].view[v].val0 = 0;
+            }
 
             {
-                CBV_Mtl[IND_frame].ptr->alp = itr.Mtr_[v].alpha_;
-                CBV_Mtl[IND_frame].ptr->dif = itr.Mtr_[v].dif_;
-                CBV_Mtl[IND_frame].ptr->emis = itr.Mtr_[v].emis_;
-                CBV_Mtl[IND_frame].ptr->shin = itr.Mtr_[v].shin_;
-                CBV_Mtl[IND_frame].ptr->spec = itr.Mtr_[v].spec_;
+                SB_MB[IND_frame].view[v].isD = itr.Mtr_[v].dmap_ != "" ? true : false;
+                SB_MB[IND_frame].view[v].isE = itr.Mtr_[v].emap_ != "" ? true : false;
+                SB_MB[IND_frame].view[v].isESB = itr.Mtr_[v].ESBAmap_ != "" ? true : false;
+                SB_MB[IND_frame].view[v].isN = itr.Mtr_[v].nmap_ != "" ? true : false;
+                SB_MB[IND_frame].view[v].isS = itr.Mtr_[v].smap_ != "" ? true : false;
             }
             
             cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);

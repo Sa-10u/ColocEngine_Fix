@@ -1,7 +1,8 @@
 #include "BUFFER.h"
 #include<assert.h>
 
-VERTEX::VERTEX(XMFLOAT3 const& pos, XMFLOAT3 const& norm, XMFLOAT2 const& uv, XMFLOAT3 const& tan):pos_(pos),norm_(norm),uv_(uv),tan_(tan)
+VERTEX::VERTEX(XMFLOAT3 const& pos, XMFLOAT3 const& norm, XMFLOAT2 const& uv, XMFLOAT3 const& tan ,UINT const& MID)
+	:pos_(pos),norm_(norm),uv_(uv),tan_(tan),mtlID_(MID)
 {
 }
 

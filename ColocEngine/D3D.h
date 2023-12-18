@@ -79,17 +79,16 @@ private:
 
 	ID3D12Resource*				CB_Util[FrameAmmount];
 	ID3D12Resource*				CB_CAM[FrameAmmount];
-	ID3D12Resource*				CB_Mtl[FrameAmmount];
 
 	ID3D12Resource* ZB;
 	Texture			tex;
 
 	StructuredBuffer<ObjInfo>	 SB_OI[FrameAmmount];
 	StructuredBuffer<MapBOOL>	 SB_MB[FrameAmmount];
+	StructuredBuffer<Material>	 SB_MTL[FrameAmmount];
 ;
 	CBUFFERVIEW<Util>			 CBV_Util[FrameAmmount];
 	CBUFFERVIEW<Cam>			 CBV_Cam[FrameAmmount];
-	CBUFFERVIEW<Material>		 CBV_Mtl[FrameAmmount];
 
 	ID3D12DescriptorHeap* hp_ZBV;
 

@@ -43,6 +43,7 @@ namespace SEMANTICS_STR
 	extern LPCSTR TEXCOORD;
 	extern LPCSTR TANGENT;
 	extern LPCSTR NORMAL;
+	extern LPCSTR MATERIAL;
 }
 namespace SHADER_FILENAME
 {

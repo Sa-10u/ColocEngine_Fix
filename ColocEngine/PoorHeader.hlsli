@@ -4,6 +4,8 @@ struct VSinput
     float3 norm : NORMAL;
 	float2 uv	: TEXCOORD;
     float3 tan  : TANGENT;
+
+	uint MID	: MATERIAL_ID;
 	
 	uint	ID	: SV_InstanceID;
 };
@@ -14,6 +16,8 @@ struct VSoutput
 	float2 uv	: TEXCOORD;
 	float3 tan  : TANGENT;
 	float3 norm : NORMAL;
+
+	uint MID	: MATERIAL_ID;
 };
 
 struct PSoutput
@@ -45,6 +49,18 @@ struct MapBOOL
 	float val2;
 };
 
+struct Material
+{
+	float3 dif;
+	float shin;
+
+	float3 spec;
+	float alp;
+
+	float3 emis;
+	float val0;	
+};
+
 //------------------------
 
 cbuffer Util : register(b0)
@@ -60,20 +76,12 @@ cbuffer CAM	:register(b256)
 	float3 tgt;
 };
 
-cbuffer Material : register(b512)
-{
-	float3 dif;
-	float3 spec;
-	float3 emis;
-	float alp;
-	float shin;
-};
-
 StructuredBuffer<PerInstance> Data	: register(t0);
 StructuredBuffer<MapBOOL>	Map	: register(t512);
+StructuredBuffer<Material>  Mtl : register(t1024);
 
 SamplerState colsmp : register(s0);
-Texture2D	 colmap : register(t1024);
+Texture2D	 colmap : register(t1792);
 
 
 

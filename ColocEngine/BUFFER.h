@@ -23,11 +23,12 @@ struct VERTEX
 	XMFLOAT3 norm_;
 	XMFLOAT2 uv_;
 	XMFLOAT3 tan_;
+	UINT	 mtlID_;
 
 	static const D3D12_INPUT_LAYOUT_DESC inp_Layout;
 
 	VERTEX() = default;
-	VERTEX(XMFLOAT3 const& pos, XMFLOAT3 const& norm, XMFLOAT2 const& uv, XMFLOAT3 const& tan);
+	VERTEX(XMFLOAT3 const& pos, XMFLOAT3 const& norm, XMFLOAT2 const& uv, XMFLOAT3 const& tan , UINT const& MID);
 
 
 	enum ELEMENT
@@ -36,6 +37,7 @@ struct VERTEX
 		NORMAL,
 		UV,
 		TANGENT,
+		MTLID,
 
 		AMMOUNT
 	};
@@ -66,10 +68,13 @@ struct StructuredBuffer
 struct MATERIAL
 {
 	XMFLOAT3 dif_;
-	XMFLOAT3 spec_;
-	XMFLOAT3 emis_;
 	float alpha_;
+
+	XMFLOAT3 spec_;
 	float shin_;
+
+	XMFLOAT3 emis_;
+	float val0;
 
 	string dmap_;	//for diffuse . A = Coefficient
 	string smap_;	//for specular .A = Coefficient
@@ -128,6 +133,18 @@ struct alignas(16) MapBOOL
 	MapBOOL();
 };
 
+struct alignas(16) Material
+{
+	XMFLOAT3 dif;
+	float alp;
+
+	XMFLOAT3 spec;
+	float shin;
+
+	XMFLOAT3 emis;
+	float val0;
+};
+
 //--------------------------------for C buufer
 struct alignas(256) Util
 {
@@ -140,15 +157,6 @@ struct alignas(256) Cam
 {
 	XMFLOAT3 pos;
 	XMFLOAT3 tgt;
-};
-
-struct alignas(256) Material
-{
-	XMFLOAT3 dif;
-	XMFLOAT3 spec;
-	XMFLOAT3 emis;
-	float alp;
-	float shin;
 };
 
 template <typename T>

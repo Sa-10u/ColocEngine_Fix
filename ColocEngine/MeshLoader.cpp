@@ -139,6 +139,7 @@ void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src)
         auto norm = &(src->mNormals[i]);
         auto uv = (src->HasTextureCoords(0)) ? &(src->mTextureCoords[0][i]) : &vecdef;
         auto tan =(src->HasTangentsAndBitangents())? & (src->mTangents[i]) : &vecdef;
+        auto Mtl_ID = mesh.ID_Material;
 
         ParseUV(*uv);
        
@@ -147,7 +148,8 @@ void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src)
             XMFLOAT3(pos->x, pos->y, pos->z),
             XMFLOAT3(norm->x, norm->y, norm->z),
             XMFLOAT2(uv->x, uv->y),
-            XMFLOAT3(tan->x, tan->y, tan->z)
+            XMFLOAT3(tan->x, tan->y, tan->z),
+            Mtl_ID
         );
     }
 
@@ -371,6 +373,7 @@ void MeshLoader::UnReverse(ai_real& val)
 }
 
 //--------------------------------------------
+static auto fmt1 = DXGI_FORMAT_R32G32B32A32_UINT;
 static auto fmt3 = DXGI_FORMAT_R32G32B32_FLOAT;
 static auto fmt2 = DXGI_FORMAT_R32G32_FLOAT;
 static auto append = D3D12_APPEND_ALIGNED_ELEMENT;
@@ -382,6 +385,7 @@ const D3D12_INPUT_ELEMENT_DESC VERTEX::element[] =
     {SEMANTICS_STR::NORMAL,0,fmt3,0,append,IL_V,0},
     {SEMANTICS_STR::TEXCOORD,0,fmt2,0,append,IL_V,0},
     {SEMANTICS_STR::TANGENT,0,fmt3,0,append,IL_V,0},
+    {SEMANTICS_STR::MATERIAL,0,fmt1,0,append,IL_V ,0},
 };
 const D3D12_INPUT_LAYOUT_DESC VERTEX::inp_Layout =
 {
