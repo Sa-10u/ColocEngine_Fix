@@ -1133,6 +1133,24 @@ void D3d::write()
 
         S_Draw::Flush(MDIND);
         MDIND++;
+
+
+        {
+            brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+            brr.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+            brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+            brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+            brr.Transition.pResource = colbuf_[IND_frame];
+            brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        }
+
+        cmdlist_->ResourceBarrier(1, &brr);
+        cmdlist_->Close();
+
+
+        ID3D12CommandList* commands[] = { cmdlist_ };
+        cmdque_->ExecuteCommandLists(1, commands);
+        swpchain_->Present(0, 0);
     }
 }
 

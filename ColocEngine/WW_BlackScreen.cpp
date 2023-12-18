@@ -15,9 +15,7 @@ void WW_BlackScreen::Initialize()
 
 void WW_BlackScreen::Run(float tick)
 {
-	
-		WorldManager::ChangeWorld(WLD_ID::PLAY);
-	
+		WorldManager::ChangeWorld(WLD_ID::PLAY);	
 }
 
 void WW_BlackScreen::release()
