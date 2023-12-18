@@ -5,11 +5,12 @@
 PSoutput main(VSoutput inp)
 {
 	PSoutput resÅ@= (PSoutput)0;
-    
-    res.color = float4(Mtl[inp.MID].spec, 1);
-    res.color = float4(inp.norm,1) * abs(sin(Time));
 
-    res.color = floor(res.color*3);
+    float3 Lpos = float3(1, 0, 0);
+
+    float3 Ray = tgt - pos;
     
+    res.color = float4(inp.norm,1);
+    res.color.a = 1;
     return res;
 }

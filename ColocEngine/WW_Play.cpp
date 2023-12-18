@@ -19,9 +19,9 @@ void WW_Play::Run(float tick)
 		1,0,0,0,
 		0,1,0,0,
 		0,0,1,0,
-		1,0,0,1
+		1.5,0,0,1
 	};
-	S_Draw::Draw(&i, md0);
+	S_Draw::Draw(&i, md);
 }
 
 void WW_Play::release()

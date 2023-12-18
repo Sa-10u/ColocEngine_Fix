@@ -861,8 +861,8 @@ bool D3d::InitPSO()
 
     D3D12_RENDER_TARGET_BLEND_DESC rtb_desc =
     {
-        false,false,
-        D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
+        true,false,
+        D3D12_BLEND_SRC_ALPHA, D3D12_BLEND_INV_SRC_ALPHA, D3D12_BLEND_OP_ADD,
         D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
         D3D12_LOGIC_OP_NOOP,D3D12_COLOR_WRITE_ENABLE_ALL
     };
@@ -960,22 +960,8 @@ void D3d::Run(int interval)
     Update();
     write();
     //waitGPU();
-    {
-        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-        brr.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-        brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        brr.Transition.pResource = colbuf_[IND_frame];
-        brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-    }
-
-    cmdlist_->ResourceBarrier(1, &brr);
-    cmdlist_->Close();
-
-
-    ID3D12CommandList* commands[] = { cmdlist_ };
-    cmdque_->ExecuteCommandLists(1, commands);
-    present(interval);
+    render(1);
+    present();
 
 }
 
@@ -1060,6 +1046,8 @@ void D3d::write()
         TEX,
         AMMOUNT
     };
+    //auto MDIND = 0u;
+   // for (auto& itr : ResourceManager::models_) {
 
     cmdalloc_[IND_frame]->Reset();
     cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
@@ -1101,12 +1089,12 @@ void D3d::write()
     cmdlist_->SetGraphicsRootConstantBufferView(0, CBV_Util[IND_frame].desc.BufferLocation);
 
     auto MDIND = 0u;
-    for (auto& itr : ResourceManager::models_) {
+      for (auto& itr : ResourceManager::models_) {
         auto v = 0u;
+        memcpy(SB_OI[IND_frame].view, itr.info.data(), sizeof(ObjInfo) * itr.info.size());
 
         for (auto cnt : itr.Mesh_) {
 
-            memcpy(SB_OI[IND_frame].view, itr.info.data(), sizeof(ObjInfo) * itr.info.size());
             {
                 SB_MTL[IND_frame].view[v].alp = itr.Mtr_[v].alpha_;
                 SB_MTL[IND_frame].view[v].dif = itr.Mtr_[v].dif_;
@@ -1117,40 +1105,22 @@ void D3d::write()
             }
 
             {
-                SB_MB[IND_frame].view[v].isD = itr.Mtr_[v].dmap_         != "" ? true : false;
-                SB_MB[IND_frame].view[v].isE = itr.Mtr_[v].emap_         != "" ? true : false;
-                SB_MB[IND_frame].view[v].isESB = itr.Mtr_[v].ESBAmap_    != "" ? true : false;
-                SB_MB[IND_frame].view[v].isN = itr.Mtr_[v].nmap_         != "" ? true : false;
-                SB_MB[IND_frame].view[v].isS = itr.Mtr_[v].smap_         != "" ? true : false;
+                SB_MB[IND_frame].view[v].isD = itr.Mtr_[v].dmap_ != "" ? true : false;
+                SB_MB[IND_frame].view[v].isE = itr.Mtr_[v].emap_ != "" ? true : false;
+                SB_MB[IND_frame].view[v].isESB = itr.Mtr_[v].ESBAmap_ != "" ? true : false;
+                SB_MB[IND_frame].view[v].isN = itr.Mtr_[v].nmap_ != "" ? true : false;
+                SB_MB[IND_frame].view[v].isS = itr.Mtr_[v].smap_ != "" ? true : false;
             }
-            
+
             cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
             cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
             cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_, 0, 0, 0);
 
             v++;
-        }
 
+        }
         S_Draw::Flush(MDIND);
         MDIND++;
-
-
-        {
-            brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-            brr.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-            brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-            brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-            brr.Transition.pResource = colbuf_[IND_frame];
-            brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-        }
-
-        cmdlist_->ResourceBarrier(1, &brr);
-        cmdlist_->Close();
-
-
-        ID3D12CommandList* commands[] = { cmdlist_ };
-        cmdque_->ExecuteCommandLists(1, commands);
-        swpchain_->Present(0, 0);
     }
 }
 
@@ -1169,10 +1139,8 @@ void D3d::waitGPU()
     fencecnt_[IND_frame]++;
 }
 
-void D3d::present(uint32_t itv)
+void D3d::present()
 {
-    if (FAILED(swpchain_->Present(itv, 0))) return;
-
     const auto curval = fencecnt_[IND_frame];
     cmdque_->Signal(fence_, curval);
 
@@ -1185,6 +1153,27 @@ void D3d::present(uint32_t itv)
     }
 
     fencecnt_[IND_frame] = curval + 1;
+}
+
+void D3d::render(uint32_t itv)
+{
+    {
+        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        brr.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+        brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        brr.Transition.pResource = colbuf_[IND_frame];
+        brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    }
+
+    cmdlist_->ResourceBarrier(1, &brr);
+    cmdlist_->Close();
+
+
+    ID3D12CommandList* commands[] = { cmdlist_ };
+    cmdque_->ExecuteCommandLists(1, commands);
+
+    swpchain_->Present(itv, 0);
 }
 
 namespace PTR_D3D
