@@ -1,44 +1,44 @@
 #include "S_Draw.h"
 #include"C_Trans.h"
 
-void S_Draw::Draw(XMMATRIX* wld, RModel* md)
+void S_Draw::Draw(XMMATRIX* wld, UINT md)
 {
-	md->DrawCount_++;
+	ResourceManager::models_[md].DrawCount_++;
 
 	ObjInfo i;
 	i.wld = *wld;
 
-	md->info.push_back(i);
+	ResourceManager::models_[md].info.push_back(i);
 }
 
-void S_Draw::Draw(C_Trans* trans, RModel* md)
+void S_Draw::Draw(C_Trans* trans, UINT md)
 {
-	md->DrawCount_++;
+	ResourceManager::models_[md].DrawCount_++;
 
 	ObjInfo i;
 	i.wld = trans->WLDGetMTX();
 
-	md->info.push_back(i);
+	ResourceManager::models_[md].info.push_back(i);
 }
 
-void S_Draw::Draw(XMMATRIX mat, RModel* md)
+void S_Draw::Draw(XMMATRIX mat, UINT md)
 {
-	md->DrawCount_++;
+	ResourceManager::models_[md].DrawCount_++;
 
 	ObjInfo i;
 	i.wld = mat;
 
-	md->info.push_back(i);
+	ResourceManager::models_[md].info.push_back(i);
 }
 
-void S_Draw::Draw(ObjInfo* info, RModel* md)
+void S_Draw::Draw(ObjInfo* info, UINT md)
 {
-	md->DrawCount_++;
-	md->info.push_back(*info);
+	ResourceManager::models_[md].DrawCount_++;
+	ResourceManager::models_[md].info.push_back(*info);
 }
 
-void S_Draw::Flush(RModel* md)
+void S_Draw::Flush(UINT md)
 {
-	md->DrawCount_ = NULL;
-	md->info.clear();
+	ResourceManager::models_[md].DrawCount_ = NULL;
+	ResourceManager::models_[md].info.clear();
 }

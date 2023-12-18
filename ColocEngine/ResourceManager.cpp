@@ -29,13 +29,13 @@ void ResourceManager::Term()
     ALL_RELEASE_TEX();
 }
 
-RModel* ResourceManager::ModelLoad(std::wstring str)
+UINT ResourceManager::ModelLoad(std::wstring str)
 {
     std::wstring path;
-    if(!FileLoad(str.c_str(), &path))    return &E_Model;
+    if(!FileLoad(str.c_str(), &path))    return 0;
 
-	for (auto& list : models_) {
-		if (list.Name_ == path)	return &list;
+    for (int v = 0; v < models_.size();v++) {
+		if (models_[v].Name_ == path)	return v;
 	}
 
     ID3D12Device* device_ = PTR_D3D::ptr->GetDevice();
@@ -44,7 +44,7 @@ RModel* ResourceManager::ModelLoad(std::wstring str)
 
 	RModel temp;
 	
-	if (!LoadMesh(path.c_str(), &temp)) return &models_[0];
+	if (!LoadMesh(path.c_str(), &temp)) return 0;
 
     temp.VB.resize(temp.Mesh_.size());
     temp.IB.resize(temp.Mesh_.size());
@@ -90,12 +90,12 @@ RModel* ResourceManager::ModelLoad(std::wstring str)
                 nullptr,
                 IID_PPV_ARGS(&(temp.VB[i]))
             );
-            if (FAILED(res))  return &models_[0];
+            if (FAILED(res))  return 0;
 
             //----------------------------------------------------
             void* ptr = nullptr;
             res = temp.VB[i]->Map(NULL, 0, &ptr);
-            if (FAILED(res)) return &models_[0];
+            if (FAILED(res)) return 0;
 
             memcpy(ptr, vtcs, size);
 
@@ -164,16 +164,16 @@ RModel* ResourceManager::ModelLoad(std::wstring str)
 
 
         ResourceManager::models_.push_back(temp);
-        return &ResourceManager::models_.back();
+        return ResourceManager::models_.size() - 1;
     
 }
 
-RTexture* ResourceManager::TexLoad(std::wstring str)
+UINT ResourceManager::TexLoad(std::wstring str)
 {
     ID3D12Device* device_ = PTR_D3D::ptr->GetDevice();
 
-    for (auto list : textures_) {
-        if (list.Name_ == str)	return &list;
+    for (auto v = 0u; v < textures_.size();v++) {
+        if (textures_[v].Name_ == str)	return v;
     }
 
     RTexture temp = {};
@@ -195,7 +195,7 @@ RTexture* ResourceManager::TexLoad(std::wstring str)
         &data,
         scr
     );
-    if (FAILED(res)) return &textures_[0];
+    if (FAILED(res)) return 0;
 
     image = scr.GetImage(0, 0, 0);
 

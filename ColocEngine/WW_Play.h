@@ -14,8 +14,8 @@ public:
 
 private:
 
-	RModel* md;
+	int md;
 	ObjInfo info;
-
+	int md0;
 };
 

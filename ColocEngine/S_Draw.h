@@ -7,11 +7,11 @@ class C_Trans;
 
 namespace S_Draw
 {
-	void Draw(XMMATRIX* wld, RModel* md);
-	void Draw(C_Trans* trans, RModel* md);
-	void Draw(XMMATRIX mat, RModel* md);
+	void Draw(XMMATRIX* wld, UINT md);
+	void Draw(C_Trans* trans, UINT md);
+	void Draw(XMMATRIX mat, UINT md);
 
-	void Draw(ObjInfo *info, RModel* md);
+	void Draw(ObjInfo *info, UINT md);
 
-	void Flush(RModel* md);
+	void Flush(UINT md);
 }

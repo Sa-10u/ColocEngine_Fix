@@ -1100,6 +1100,7 @@ void D3d::write()
 
     cmdlist_->SetGraphicsRootConstantBufferView(0, CBV_Util[IND_frame].desc.BufferLocation);
 
+    auto MDIND = 0u;
     for (auto& itr : ResourceManager::models_) {
         auto v = 0u;
 
@@ -1116,20 +1117,22 @@ void D3d::write()
             }
 
             {
-                SB_MB[IND_frame].view[v].isD = itr.Mtr_[v].dmap_ != "" ? true : false;
-                SB_MB[IND_frame].view[v].isE = itr.Mtr_[v].emap_ != "" ? true : false;
-                SB_MB[IND_frame].view[v].isESB = itr.Mtr_[v].ESBAmap_ != "" ? true : false;
-                SB_MB[IND_frame].view[v].isN = itr.Mtr_[v].nmap_ != "" ? true : false;
-                SB_MB[IND_frame].view[v].isS = itr.Mtr_[v].smap_ != "" ? true : false;
+                SB_MB[IND_frame].view[v].isD = itr.Mtr_[v].dmap_         != "" ? true : false;
+                SB_MB[IND_frame].view[v].isE = itr.Mtr_[v].emap_         != "" ? true : false;
+                SB_MB[IND_frame].view[v].isESB = itr.Mtr_[v].ESBAmap_    != "" ? true : false;
+                SB_MB[IND_frame].view[v].isN = itr.Mtr_[v].nmap_         != "" ? true : false;
+                SB_MB[IND_frame].view[v].isS = itr.Mtr_[v].smap_         != "" ? true : false;
             }
             
             cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
             cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
             cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_, 0, 0, 0);
-            
+
             v++;
         }
-        S_Draw::Flush(&itr);
+
+        S_Draw::Flush(MDIND);
+        MDIND++;
     }
 }
 

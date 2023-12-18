@@ -10,8 +10,8 @@ namespace ResourceManager
 	extern std::vector<RModel> models_;
 	extern std::vector<RTexture> textures_;
 	
-	RModel* ModelLoad(std::wstring str);
-	RTexture* TexLoad(std::wstring str);
+	UINT ModelLoad(std::wstring str);
+	UINT TexLoad(std::wstring str);
 
 	void ModelFlush();
 	void TexFlush();
