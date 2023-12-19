@@ -2,6 +2,7 @@
 #include <chrono>
 #include"CAM.h"
 #include"FileLoader.h"
+#include<thread>
 
 using namespace std::chrono;
 
@@ -56,6 +57,8 @@ bool WinView::setup()
 
 bool WinView::initialize()
 {
+    fps = 1000.0f * (1.0f / 60.0f);
+
     constexpr bool FAIL = 0;
 
     WNDCLASSEX wcex = {};
@@ -144,6 +147,10 @@ void WinView::loop()
 {
     MSG msg = {};
 
+    auto st = system_clock::now();
+    auto ed = system_clock::now();
+    
+
     while (msg.message != WM_QUIT) {
 
         if (PeekMessage(&msg, _ALL, 0, 0, PM_REMOVE))
@@ -154,10 +161,20 @@ void WinView::loop()
 
         else
         {
+            st = system_clock::now();
+            //duration_cast<std::chrono::milliseconds>(time).count()
+            //std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
             Input_KB::Update();
             GameMain::Update(1.0f);
             D3D->Run(1);
             WorldManager::Changer();
+
+            ed = system_clock::now();
+
+            auto str = duration_cast<milliseconds>(ed - st).count();
+
+            SetWindowText(h_wnd, std::to_wstring(str).c_str());
         }
     }
 }

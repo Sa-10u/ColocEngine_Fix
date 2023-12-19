@@ -7,7 +7,7 @@ struct VSinput
 
 	uint MID	: MATERIAL_ID;
 	
-	uint	ID	: SV_InstanceID;
+	uint ID		: SV_InstanceID;
 };
 
 struct VSoutput
@@ -19,6 +19,7 @@ struct VSoutput
 	float3 norm : NORMAL;
 
 	uint MID	: MATERIAL_ID;
+	uint ID		: InstanceID;
 };
 
 struct PSoutput

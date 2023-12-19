@@ -6,6 +6,7 @@
 #include"IComp.h"
 #include"WorldManager.h"
 #include"Input.h"
+#include<chrono>
 
 #include<DirectXMath.h>
 #include<d3d12.h>
@@ -31,6 +32,7 @@ private:
 	uint32_t w_;
 
 	D3d* D3D;
+	float fps;
 
 private:
 

@@ -18,6 +18,7 @@ VSoutput main(VSinput inp)
 	result.tan = inp.tan;
 	result.norm = inp.norm;
 	result.MID = inp.MID;
+	result.ID = inp.ID;
 
 	return result;
 

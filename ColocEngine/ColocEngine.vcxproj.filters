@@ -120,6 +120,9 @@
     <ClCompile Include="Light.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="LightManager.cpp">
+      <Filter>System\source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinView.h">
@@ -187,6 +190,9 @@
     </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="LightManager.h">
+      <Filter>System\header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

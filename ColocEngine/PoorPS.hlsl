@@ -6,8 +6,6 @@ PSoutput main(VSoutput inp)
 {
 	PSoutput resÅ@= (PSoutput)0;
 
-    //float3 spec = isS ? 
-
     float3 Lpos = float3(1, 0, 0);
     float3 Lvec = normalize(Lpos);
 
@@ -18,7 +16,7 @@ PSoutput main(VSoutput inp)
     float rvec = dot(inp.norm, Lvec) * inp.norm;
     float rct =  2 *inp.norm* rvec - Lvec;
     rct = saturate(rct);
-    rct = pow(rct, p) * intens;
+    rct = pow(rct, Mtl[inp.MID].shin) * intens;
     rct = saturate(rct);
 
     float near = 1/pow((distance(inp.Wpos , Lpos )),2);
@@ -28,9 +26,10 @@ PSoutput main(VSoutput inp)
     ct = ct* intens* (near);
     ct = saturate(ct * 0.01);
     
-    res.color = colmap.Sample(colsmp, inp.uv) * (ct + rct);
+    res.color = float4(Mtl[inp.MID].dif * ct + Mtl[inp.MID].spec * rct, Mtl[inp.MID].alp);
 
     res.color.a = 1;
+    res.color.rgb = res.color.rgb * abs(sin(Time));
 
     return res;
 }

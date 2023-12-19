@@ -97,8 +97,14 @@ private:
 		D3D12_CPU_DESCRIPTOR_HANDLE HCPU;
 		D3D12_GPU_DESCRIPTOR_HANDLE HGPU;
 
-
-	}CBV_LGT[FrameAmount];
+		uint16_t point_cnt;
+		uint16_t dir_cnt;
+		uint16_t amb_cnt;
+		uint16_t area_cnt;
+		uint16_t vol_cnt;
+		uint16_t spot_cnt;
+	}
+								 CBV_LGT[FrameAmount];
 
 	ID3D12DescriptorHeap* hp_ZBV;
 
