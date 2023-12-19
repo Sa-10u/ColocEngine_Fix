@@ -7,7 +7,6 @@ typedef DirectX::XMFLOAT3 Rotation;
 typedef DirectX::XMFLOAT3 Scale;
 
 
-
 struct C_Trans : public IComp
 {
 	Position pos;

@@ -9,6 +9,7 @@
 #include<d3dcompiler.h>
 #include "MeshLoader.h"
 #include<DirectXTex.h>
+#include"Light.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -53,43 +54,51 @@ private:
 	void render(uint32_t itv);
 
 private:
-	static const uint32_t FrameAmmount = 2;
+	static const uint32_t FrameAmount = 2;
 
 	ID3D12Device* device_;
 	IDXGISwapChain3* swpchain_;
-	ID3D12Resource* colbuf_[FrameAmmount];
+	ID3D12Resource* colbuf_[FrameAmount];
 	ID3D12CommandQueue* cmdque_;
-	ID3D12CommandAllocator* cmdalloc_[FrameAmmount];
+	ID3D12CommandAllocator* cmdalloc_[FrameAmount];
 	ID3D12GraphicsCommandList* cmdlist_;
 	ID3D12DescriptorHeap* heapRTV_;
 
 	ID3D12Fence* fence_;
 	HANDLE event_fence;
-	uint64_t fencecnt_[FrameAmmount];
+	uint64_t fencecnt_[FrameAmount];
 	uint64_t IND_frame;
-	D3D12_CPU_DESCRIPTOR_HANDLE h_RTV[FrameAmmount];
+	D3D12_CPU_DESCRIPTOR_HANDLE h_RTV[FrameAmount];
 	D3D12_CPU_DESCRIPTOR_HANDLE h_ZBV;
 
 	D3D12_RESOURCE_BARRIER brr;
-
 
 	//-----------------
 	ID3D12DescriptorHeap* heapCBV_SRV_UAV_;
 	ID3D12RootSignature* rootsig_;
 	ID3D12PipelineState* PSO;
 
-	ID3D12Resource*				CB_Util[FrameAmmount];
-	ID3D12Resource*				CB_CAM[FrameAmmount];
+	ID3D12Resource*				CB_Util[FrameAmount];
+	ID3D12Resource*				CB_CAM[FrameAmount];
+	ID3D12Resource*				CB_LGT[FrameAmount];
 
 	ID3D12Resource* ZB;
 	Texture			tex;
 
-	StructuredBuffer<ObjInfo>	 SB_OI[FrameAmmount];
-	StructuredBuffer<MapBOOL>	 SB_MB[FrameAmmount];
-	StructuredBuffer<Material>	 SB_MTL[FrameAmmount];
+	StructuredBuffer<ObjInfo>	 SB_OI[FrameAmount];
+	StructuredBuffer<MapBOOL>	 SB_MB[FrameAmount];
+	StructuredBuffer<Material>	 SB_MTL[FrameAmount];
 ;
-	CBUFFERVIEW<Util>			 CBV_Util[FrameAmmount];
-	CBUFFERVIEW<Cam>			 CBV_Cam[FrameAmmount];
+	CBUFFERVIEW<Util>			 CBV_Util[FrameAmount];
+	CBUFFERVIEW<Cam>			 CBV_Cam[FrameAmount];
+	struct CBUFFER_LIGHT
+	{
+		D3D12_CONSTANT_BUFFER_VIEW_DESC desc;
+		D3D12_CPU_DESCRIPTOR_HANDLE HCPU;
+		D3D12_GPU_DESCRIPTOR_HANDLE HGPU;
+
+
+	}CBV_LGT[FrameAmount];
 
 	ID3D12DescriptorHeap* hp_ZBV;
 

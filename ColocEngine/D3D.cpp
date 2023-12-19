@@ -22,7 +22,7 @@ bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
     backcolor_[2] = .5f;
     backcolor_[3] = 1.0f;
 
-    for (auto i = 0u; i < FrameAmmount; ++i) {
+    for (auto i = 0u; i < FrameAmount; ++i) {
 
         colbuf_[i] = nullptr;
         cmdalloc_[i] = nullptr;
@@ -74,7 +74,7 @@ bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
         desc.SampleDesc.Count = 1;
         desc.SampleDesc.Quality = 0;
         desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        desc.BufferCount = FrameAmmount;
+        desc.BufferCount = FrameAmount;
         desc.OutputWindow = hwnd;
         desc.Windowed = TRUE;
         desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
@@ -100,7 +100,7 @@ bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
     SAFE_RELEASE(p_swch);
 
 
-    for (int i = 0u; i < FrameAmmount; ++i) {
+    for (int i = 0u; i < FrameAmount; ++i) {
 
         res = device_->CreateCommandAllocator
         (
@@ -123,7 +123,7 @@ bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
 
     D3D12_DESCRIPTOR_HEAP_DESC hpdesc;
     {
-        hpdesc.NumDescriptors = FrameAmmount;
+        hpdesc.NumDescriptors = FrameAmount;
         hpdesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
         hpdesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
         hpdesc.NodeMask = 0;
@@ -134,7 +134,7 @@ bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
     D3D12_CPU_DESCRIPTOR_HANDLE handle = heapRTV_->GetCPUDescriptorHandleForHeapStart();
     UINT incre = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
-    for (UINT i = 0u; i < FrameAmmount; ++i) {
+    for (UINT i = 0u; i < FrameAmount; ++i) {
 
         res = swpchain_->GetBuffer(i, IID_PPV_ARGS(&colbuf_[i]));
         if (FAILED(res))     return FAIL;
@@ -234,7 +234,7 @@ bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
 
 
     {
-        for (auto i = 0u; i < FrameAmmount; ++i) {
+        for (auto i = 0u; i < FrameAmount; ++i) {
             fencecnt_[i] = 0;
 
             res = device_->CreateFence
@@ -276,7 +276,7 @@ bool D3d::InitGBO()
             {
                 hp_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
                 hp_desc.NodeMask = 0;
-                hp_desc.NumDescriptors = HPSIZE * FrameAmmount;
+                hp_desc.NumDescriptors = HPSIZE * FrameAmount;
                 hp_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
             }
 
@@ -319,7 +319,7 @@ bool D3d::InitGBO()
             rc_desc_c.SampleDesc.Quality = 0;
         }
 
-        for (auto i = 0; i < FrameAmmount; ++i) {
+        for (auto i = 0; i < FrameAmount; ++i) {
 
             res = device_->CreateCommittedResource
             (
@@ -374,7 +374,7 @@ bool D3d::InitGBO()
             rc_desc_c.SampleDesc.Quality = 0;
         }
 
-        for (auto i = 0; i < FrameAmmount; ++i) {
+        for (auto i = 0; i < FrameAmount; ++i) {
 
             res = device_->CreateCommittedResource
             (
@@ -513,7 +513,7 @@ bool D3d::InitGBO()
             rc_desc.SampleDesc.Count = 1;
         }
 
-        for (auto i = 0u; i < FrameAmmount; i++) {
+        for (auto i = 0u; i < FrameAmount; i++) {
             res = device_->CreateCommittedResource
             (
                 &hp_prop,
@@ -574,7 +574,7 @@ bool D3d::InitGBO()
             rc_desc.SampleDesc.Count = 1;
         }
 
-        for (auto i = 0u; i < FrameAmmount; i++) {
+        for (auto i = 0u; i < FrameAmount; i++) {
             res = device_->CreateCommittedResource
             (
                 &hp_prop,
@@ -635,7 +635,7 @@ bool D3d::InitGBO()
             rc_desc.SampleDesc.Count = 1;
         }
 
-        for (auto i = 0u; i < FrameAmmount; i++) {
+        for (auto i = 0u; i < FrameAmount; i++) {
             res = device_->CreateCommittedResource
             (
                 &hp_prop,
@@ -685,10 +685,10 @@ bool D3d::InitGBO()
             SB_MB,
             TEX,
             
-            AMMOUNT
+            Amount
         };
 
-        D3D12_ROOT_PARAMETER r_param[AMMOUNT] = {};
+        D3D12_ROOT_PARAMETER r_param[Amount] = {};
         {
             r_param[CB_U].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
             r_param[CB_U].Descriptor.RegisterSpace = 0;
@@ -799,7 +799,7 @@ bool D3d::InitGBO()
             r_s_desc.pParameters = r_param;
             r_s_desc.pStaticSamplers = &sampler;
             r_s_desc.Flags = flag;
-            r_s_desc.NumParameters = AMMOUNT;
+            r_s_desc.NumParameters = Amount;
             r_s_desc.NumStaticSamplers = 1;
         }
 
@@ -938,7 +938,7 @@ void D3d::Termination()
 
     SAFE_RELEASE(fence_);
     SAFE_RELEASE(heapRTV_);
-    for (int i = 0; i < FrameAmmount; i++) {
+    for (int i = 0; i < FrameAmount; i++) {
         SAFE_RELEASE(colbuf_[i]);
         SAFE_RELEASE(cmdalloc_[i]);
     }
@@ -1044,7 +1044,7 @@ void D3d::write()
         SBOI,
         SBMB,
         TEX,
-        AMMOUNT
+        Amount
     };
     //auto MDIND = 0u;
    // for (auto& itr : ResourceManager::models_) {

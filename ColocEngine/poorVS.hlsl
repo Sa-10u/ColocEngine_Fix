@@ -11,7 +11,8 @@ VSoutput main(VSinput inp)
 	float4 posView = mul(View, posWld);
 	float4 posProj = mul(Projection, posView);
 
-	result.pos = posProj;
+	result.Ppos = posProj;
+	result.Wpos = posWld;
 
 	result.uv = inp.uv;
 	result.tan = inp.tan;

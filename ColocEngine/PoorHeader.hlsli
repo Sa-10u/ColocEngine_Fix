@@ -12,7 +12,8 @@ struct VSinput
 
 struct VSoutput
 {
-	float4 pos	: SV_POSITION;
+	float4 Ppos	: SV_POSITION;
+	float3 Wpos	: POSITION;
 	float2 uv	: TEXCOORD;
 	float3 tan  : TANGENT;
 	float3 norm : NORMAL;
@@ -61,6 +62,13 @@ struct Material
 	float val0;	
 };
 
+struct P_LIGHT
+{
+	float4 col;
+	float3 pos;
+	float  isON;
+};
+
 //------------------------
 
 cbuffer Util : register(b0)
@@ -75,6 +83,16 @@ cbuffer CAM	:register(b256)
 	float3 pos;
 	float3 tgt;
 };
+
+cbuffer Light : register(b512)
+{
+	uint point_cnt;
+	uint dir_cnt;
+	uint amb_cnt;
+	uint area_cnt;
+	uint vol_cnt;
+	uint spot_cnt;
+}
 
 StructuredBuffer<PerInstance> Data	: register(t0);
 StructuredBuffer<MapBOOL>	Map	: register(t512);

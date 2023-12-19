@@ -309,9 +309,6 @@ void MeshLoader::ParseMaterial(MATERIAL& mtl, const aiMaterial* src)
             auto str = string(path.C_Str());
             mtl.ESBAmap_ = FileNormalization(&str);
         }
-  
-          auto u = 0;
-
     }
 }
 

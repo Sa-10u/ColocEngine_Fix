@@ -117,6 +117,9 @@
     <ClCompile Include="WorldWork.cpp">
       <Filter>System\source</Filter>
     </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinView.h">
@@ -181,6 +184,9 @@
     </ClInclude>
     <ClInclude Include="IComp.h">
       <Filter>Components\ColocEngine\header</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Head</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
