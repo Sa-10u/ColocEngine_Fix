@@ -9,6 +9,8 @@ using namespace std::chrono;
 #define _ALL NULL
 #define _THIS NULL
 
+//typedef floatMS = chrono::duration
+
 WinView::WinView(uint32_t h, uint32_t w) :h_ins(nullptr), h_wnd(nullptr), h_(h), w_(w),D3D(nullptr)
 {
 }
@@ -57,7 +59,8 @@ bool WinView::setup()
 
 bool WinView::initialize()
 {
-    fps = 1000.0f * (1.0f / 60.0f);
+    auto Frame =60.0f;
+    fps = 1000.0f / Frame;
 
     constexpr bool FAIL = 0;
 
@@ -162,8 +165,7 @@ void WinView::loop()
         else
         {
             st = system_clock::now();
-            //duration_cast<std::chrono::milliseconds>(time).count()
-            //std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            std::this_thread::sleep_for(std::chrono::milliseconds(-10));
 
             Input_KB::Update();
             GameMain::Update(1.0f);
@@ -171,8 +173,10 @@ void WinView::loop()
             WorldManager::Changer();
 
             ed = system_clock::now();
+            auto t = ed - st;
 
             auto str = duration_cast<milliseconds>(ed - st).count();
+            str = 1000.0f / str;
 
             SetWindowText(h_wnd, std::to_wstring(str).c_str());
         }

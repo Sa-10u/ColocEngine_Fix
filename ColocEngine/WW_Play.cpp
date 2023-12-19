@@ -21,7 +21,7 @@ void WW_Play::Run(float tick)
 		0,0,1,0,
 		1.5,0,0,1
 	};
-	//S_Draw::Draw(&i, md);
+	//S_Draw::Draw(&i, md0);
 }
 
 void WW_Play::release()

@@ -9,7 +9,7 @@ PSoutput main(VSoutput inp)
     float3 Lpos = float3(1, 0, 0);
     float3 Lvec = normalize(Lpos);
 
-    float3 Ray = tgt - pos;
+    float3 Ray = normalize(tgt - pos);
     float intens = 100;
 
     float p = 4;
@@ -29,7 +29,25 @@ PSoutput main(VSoutput inp)
     res.color = float4(Mtl[inp.MID].dif * ct + Mtl[inp.MID].spec * rct, Mtl[inp.MID].alp);
 
     res.color.a = 1;
-    res.color.rgb = res.color.rgb * abs(sin(Time));
+    float grad = 15;
+
+    res.color.rgb = floor(res.color.rgb *grad) / grad ;
+    //res.color.rgb = floor(inp.norm * 5);
+
+    float ol = dot(normalize(inp.norm), Ray);
+    ol = abs(ol);
+
+    float s = 4.5;
+    float tra = floor(ol * 9) /9;
+    ol = floor(ol *s);
+
+    ol = saturate(1-ol);
+    tra= 1 - tra;
+    tra = saturate(tra);
+
+    res.color = 1;
+    res.color.gb = res.color.gb - ol;
+    res.color.a = tra + ol ;
 
     return res;
 }

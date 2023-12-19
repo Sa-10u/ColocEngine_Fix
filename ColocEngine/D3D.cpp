@@ -960,8 +960,8 @@ void D3d::Run(int interval)
     Update();
     write();
     //waitGPU();
-    render(1);
-    present();
+    render();
+    present(1);
 
 }
 
@@ -1114,6 +1114,7 @@ void D3d::write()
 
             cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
             cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
+            if (v == 4) continue;
             cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_, 0, 0, 0);
 
             v++;
@@ -1121,6 +1122,7 @@ void D3d::write()
         }
         S_Draw::Flush(MDIND);
         MDIND++;
+        //render();
     }
 }
 
@@ -1139,8 +1141,10 @@ void D3d::waitGPU()
     fencecnt_[IND_frame]++;
 }
 
-void D3d::present()
+void D3d::present(int itv)
 {
+    swpchain_->Present(itv, 0);
+
     const auto curval = fencecnt_[IND_frame];
     cmdque_->Signal(fence_, curval);
 
@@ -1155,7 +1159,7 @@ void D3d::present()
     fencecnt_[IND_frame] = curval + 1;
 }
 
-void D3d::render(uint32_t itv)
+void D3d::render()
 {
     {
         brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -1172,8 +1176,6 @@ void D3d::render(uint32_t itv)
 
     ID3D12CommandList* commands[] = { cmdlist_ };
     cmdque_->ExecuteCommandLists(1, commands);
-
-    swpchain_->Present(itv, 0);
 }
 
 namespace PTR_D3D

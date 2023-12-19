@@ -50,8 +50,8 @@ private:
 
 	void write();
 	void waitGPU();
-	void present();
-	void render(uint32_t itv);
+	void present(int itv);
+	void render();
 
 private:
 	static const uint32_t FrameAmount = 2;
