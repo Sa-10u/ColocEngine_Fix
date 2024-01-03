@@ -31,6 +31,7 @@ public:
 	bool Initialize(HWND hwnd , uint32_t h , uint32_t w);
 	bool InitGBO();
 	bool InitPSO();
+	bool InitPost();
 	void Termination();
 	void TermGBO();		//Graphic Buffer Object
 	void Run(int interval);
@@ -63,6 +64,10 @@ private:
 	ID3D12CommandAllocator* cmdalloc_[FrameAmount];
 	ID3D12GraphicsCommandList* cmdlist_;
 	ID3D12DescriptorHeap* heapRTV_;
+	
+	ID3D12Resource* post_;
+	ID3D12DescriptorHeap* postRTV_;
+	ID3D12DescriptorHeap* postSRV_;
 
 	ID3D12Fence* fence_;
 	HANDLE event_fence;
@@ -70,6 +75,8 @@ private:
 	uint64_t IND_frame;
 	D3D12_CPU_DESCRIPTOR_HANDLE h_RTV[FrameAmount];
 	D3D12_CPU_DESCRIPTOR_HANDLE h_ZBV;
+	D3D12_CPU_DESCRIPTOR_HANDLE h_pRTV;
+	D3D12_CPU_DESCRIPTOR_HANDLE h_pSRV;
 
 	D3D12_RESOURCE_BARRIER brr;
 

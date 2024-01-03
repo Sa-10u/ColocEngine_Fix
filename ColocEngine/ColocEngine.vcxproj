@@ -118,6 +118,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Functions.hlsli" />
+    <None Include="Keyword.hlsli" />
     <None Include="packages.config" />
     <None Include="PoorHeader.hlsli">
       <FileType>Document</FileType>

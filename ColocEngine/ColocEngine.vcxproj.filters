@@ -214,5 +214,8 @@
     <None Include="Functions.hlsli">
       <Filter>shader</Filter>
     </None>
+    <None Include="Keyword.hlsli">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

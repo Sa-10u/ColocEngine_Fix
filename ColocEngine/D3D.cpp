@@ -262,6 +262,10 @@ bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
         if (!InitPSO())      return 0;
     }
 
+    __CREATE("Buffer for Post Effect")
+    {
+        if (!InitPost())      return 0;
+    }
     return true;
 }
 
@@ -327,7 +331,7 @@ bool D3d::InitGBO()
                 D3D12_HEAP_FLAG_NONE,
                 &rc_desc_c,
                 D3D12_RESOURCE_STATE_GENERIC_READ,
-                NULL,
+                nullptr,
                 IID_PPV_ARGS(&CB_Util[i])
             );
             if (FAILED(res))     return false;
@@ -382,7 +386,7 @@ bool D3d::InitGBO()
                 D3D12_HEAP_FLAG_NONE,
                 &rc_desc_c,
                 D3D12_RESOURCE_STATE_GENERIC_READ,
-                NULL,
+                nullptr,
                 IID_PPV_ARGS(&CB_CAM[i])
             );
             if (FAILED(res))     return false;
@@ -926,6 +930,47 @@ bool D3d::InitPSO()
     return true;
 }
 
+bool D3d::InitPost()
+{
+    HRESULT res = {};
+
+    auto desc_hp = heapRTV_->GetDesc();
+
+    auto desc_rsc = colbuf_[0]->GetDesc();
+
+    D3D12_HEAP_PROPERTIES prop_hp = {};
+    {
+        prop_hp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+        prop_hp.CreationNodeMask = 1;
+        prop_hp.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+        prop_hp.Type = D3D12_HEAP_TYPE_DEFAULT;
+        prop_hp.VisibleNodeMask = 1;
+    }
+    D3D12_CLEAR_VALUE val = {};
+    {
+        val.DepthStencil.Depth = 1.0f;
+        val.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+        val.Color[0] = backcolor_[0];
+        val.Color[1] = backcolor_[1];
+        val.Color[2] = backcolor_[2];
+        val.Color[3] = backcolor_[3];
+    }
+
+    res = device_->CreateCommittedResource
+    (
+        &prop_hp,
+        D3D12_HEAP_FLAG_NONE,
+        &desc_rsc,
+        D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+        &val,
+        IID_PPV_ARGS(&post_)
+    );
+    if (FAILED(res)) return false;
+
+    return true;
+}
+
 void D3d::Termination()
 {
     TermGBO();
@@ -961,7 +1006,7 @@ void D3d::Run(int interval)
     write();
     //waitGPU();
     render();
-    present(1);
+    present(0);
 
 }
 
@@ -1046,12 +1091,6 @@ void D3d::write()
         TEX,
         Amount
     };
-    //auto MDIND = 0u;
-   // for (auto& itr : ResourceManager::models_) {
-
-    cmdalloc_[IND_frame]->Reset();
-    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
-
     brr = {};
     {
         brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -1065,64 +1104,79 @@ void D3d::write()
     }
     cmdlist_->ResourceBarrier(1, &brr);
 
+    cmdalloc_[IND_frame]->Reset();
+    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
+
     cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], FALSE, &h_ZBV);
     cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
     cmdlist_->ClearDepthStencilView(h_ZBV, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-    cmdlist_->SetGraphicsRootSignature(rootsig_);
-    cmdlist_->SetDescriptorHeaps(1, DHH_CbSrUaV->ppHeap_);
-
-    cmdlist_->SetGraphicsRootConstantBufferView(CBU, CBV_Util[IND_frame].desc.BufferLocation);
-    cmdlist_->SetGraphicsRootConstantBufferView(CBC, CBV_Cam[IND_frame].desc.BufferLocation);
-
-    cmdlist_->SetGraphicsRootDescriptorTable(TEX, tex.HGPU);
-    cmdlist_->SetGraphicsRootDescriptorTable(SBMTL, SB_MTL[IND_frame].HGPU);
-    cmdlist_->SetGraphicsRootDescriptorTable(SBOI, SB_OI[IND_frame].HGPU);
-    cmdlist_->SetGraphicsRootDescriptorTable(SBMB, SB_MB[IND_frame].HGPU);
-
-    cmdlist_->SetPipelineState(PSO);
-
-    cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    cmdlist_->RSSetViewports(1, &view_);
-    cmdlist_->RSSetScissorRects(1, &rect_);
-
-    cmdlist_->SetGraphicsRootConstantBufferView(0, CBV_Util[IND_frame].desc.BufferLocation);
-
     auto MDIND = 0u;
-      for (auto& itr : ResourceManager::models_) {
-        auto v = 0u;
-        memcpy(SB_OI[IND_frame].view, itr.info.data(), sizeof(ObjInfo) * itr.info.size());
+    for (auto& itr : ResourceManager::models_) {
 
-        for (auto cnt : itr.Mesh_) {
+        cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], FALSE, &h_ZBV);
 
-            {
-                SB_MTL[IND_frame].view[v].alp = itr.Mtr_[v].alpha_;
-                SB_MTL[IND_frame].view[v].dif = itr.Mtr_[v].dif_;
-                SB_MTL[IND_frame].view[v].emis = itr.Mtr_[v].emis_;
-                SB_MTL[IND_frame].view[v].shin = itr.Mtr_[v].shin_;
-                SB_MTL[IND_frame].view[v].spec = itr.Mtr_[v].spec_;
-                SB_MTL[IND_frame].view[v].val0 = 0;
+        cmdlist_->SetGraphicsRootSignature(rootsig_);
+        cmdlist_->SetDescriptorHeaps(1, DHH_CbSrUaV->ppHeap_);
+
+        cmdlist_->SetGraphicsRootConstantBufferView(CBU, CBV_Util[IND_frame].desc.BufferLocation);
+        cmdlist_->SetGraphicsRootConstantBufferView(CBC, CBV_Cam[IND_frame].desc.BufferLocation);
+
+        cmdlist_->SetGraphicsRootDescriptorTable(TEX, tex.HGPU);
+        cmdlist_->SetGraphicsRootDescriptorTable(SBMTL, SB_MTL[IND_frame].HGPU);
+        cmdlist_->SetGraphicsRootDescriptorTable(SBOI, SB_OI[IND_frame].HGPU);
+        cmdlist_->SetGraphicsRootDescriptorTable(SBMB, SB_MB[IND_frame].HGPU);
+
+        cmdlist_->SetPipelineState(PSO);
+
+        cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        cmdlist_->RSSetViewports(1, &view_);
+        cmdlist_->RSSetScissorRects(1, &rect_);
+
+        cmdlist_->SetGraphicsRootConstantBufferView(0, CBV_Util[IND_frame].desc.BufferLocation);
+
+        {
+            auto v = 0u;
+            memcpy(SB_OI[IND_frame].view, itr.info.data(), sizeof(ObjInfo) * itr.info.size());
+
+            for (auto cnt : itr.Mesh_) {
+
+                {
+                    SB_MTL[IND_frame].view[v].alp = itr.Mtr_[v].alpha_;
+                    SB_MTL[IND_frame].view[v].dif = itr.Mtr_[v].dif_;
+                    SB_MTL[IND_frame].view[v].emis = itr.Mtr_[v].emis_;
+                    SB_MTL[IND_frame].view[v].shin = itr.Mtr_[v].shin_;
+                    SB_MTL[IND_frame].view[v].spec = itr.Mtr_[v].spec_;
+                    SB_MTL[IND_frame].view[v].val0 = 0;
+                }
+
+                {
+                    SB_MB[IND_frame].view[v].isD = itr.Mtr_[v].dmap_ != "" ? true : false;
+                    SB_MB[IND_frame].view[v].isE = itr.Mtr_[v].emap_ != "" ? true : false;
+                    SB_MB[IND_frame].view[v].isESB = itr.Mtr_[v].ESBAmap_ != "" ? true : false;
+                    SB_MB[IND_frame].view[v].isN = itr.Mtr_[v].nmap_ != "" ? true : false;
+                    SB_MB[IND_frame].view[v].isS = itr.Mtr_[v].smap_ != "" ? true : false;
+                }
+
+                cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
+                cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
+                if (v == 4) continue;
+                cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_, 0, 0, 0);
+
+                v++;
+
             }
+            S_Draw::Flush(MDIND);
+            MDIND++;
+            cmdlist_->Close();
+            ID3D12CommandList* commands[] = { cmdlist_ };
+            cmdque_->ExecuteCommandLists(1, commands);
 
-            {
-                SB_MB[IND_frame].view[v].isD = itr.Mtr_[v].dmap_ != "" ? true : false;
-                SB_MB[IND_frame].view[v].isE = itr.Mtr_[v].emap_ != "" ? true : false;
-                SB_MB[IND_frame].view[v].isESB = itr.Mtr_[v].ESBAmap_ != "" ? true : false;
-                SB_MB[IND_frame].view[v].isN = itr.Mtr_[v].nmap_ != "" ? true : false;
-                SB_MB[IND_frame].view[v].isS = itr.Mtr_[v].smap_ != "" ? true : false;
-            }
-
-            cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
-            cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
-            if (v == 4) continue;
-            cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_, 0, 0, 0);
-
-            v++;
-
+            waitGPU();
+            cmdalloc_[IND_frame]->Reset();
+            cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
+            //render();
         }
-        S_Draw::Flush(MDIND);
-        MDIND++;
-        //render();
     }
 }
 

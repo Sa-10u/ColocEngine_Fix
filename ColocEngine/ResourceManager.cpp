@@ -14,9 +14,9 @@ void ResourceManager::Init()
 {
 	models_.clear();
 	textures_.clear();
-	
+
     {
-        E_Model.DrawCount_;
+        Texture tex = {};
     }
 }
 
