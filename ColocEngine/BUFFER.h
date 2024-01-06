@@ -15,6 +15,20 @@ struct SIMPLEVERTEX
 {
 	XMFLOAT3 pos  ;
 	XMFLOAT2 uv ;
+
+	static const D3D12_INPUT_LAYOUT_DESC inp_Layout;
+
+	enum ELEMENT
+	{
+		POSITION = 0,
+		UV,
+
+		AMMOUNT
+	};
+
+private:
+
+	static const D3D12_INPUT_ELEMENT_DESC element[AMMOUNT];
 };
 
 struct VERTEX

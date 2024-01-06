@@ -22,6 +22,9 @@ bool FileLoad(const char* str ,std::string* ptr)
 	file_ = "Resource/Texture/" + std::string(str);
 	if (is_regular_file(file_)) { *ptr = file_; return true; }
 
+	file_ = "Resource/Shader/" + std::string(str);
+	if (is_regular_file(file_)) { *ptr = file_;	return true; }
+
 	file_ = "Resource/" + std::string(str);
 	if (is_regular_file(file_)) { *ptr = file_; return true; }
 
@@ -51,6 +54,9 @@ bool FileLoad(const wchar_t* str , std::wstring* ptr)
 
 	file_ = L"Resource/Texture/" + std::wstring(str);
 	if (is_regular_file(file_)) { *ptr = file_; return true; }
+
+	file_ = L"Resource/Shader/" + std::wstring(str);
+	if (is_regular_file(file_)) { *ptr = file_;	return true; }
 
 	file_ = L"Resource/" + std::wstring(str);
 	if (is_regular_file(file_)) { *ptr = file_; return true; }

@@ -52,6 +52,12 @@
     <Filter Include="System\source">
       <UniqueIdentifier>{b707f7bd-cd7e-4805-bca9-6a3da65dc28e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shader\PostEffect">
+      <UniqueIdentifier>{ed4a306b-7be5-4460-8f0a-73ce185cf590}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shader\ModelRendaring">
+      <UniqueIdentifier>{0bbd68d0-a726-4ba7-8aed-e41d3b92f9e5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MAIN.cpp">
@@ -196,26 +202,35 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="PoorPS.hlsl">
-      <Filter>shader</Filter>
-    </FxCompile>
     <FxCompile Include="Lambert.hlsl">
-      <Filter>shader</Filter>
+      <Filter>shader\ModelRendaring</Filter>
+    </FxCompile>
+    <FxCompile Include="PoorPS.hlsl">
+      <Filter>shader\ModelRendaring</Filter>
     </FxCompile>
     <FxCompile Include="poorVS.hlsl">
-      <Filter>shader</Filter>
+      <Filter>shader\ModelRendaring</Filter>
+    </FxCompile>
+    <FxCompile Include="PostEffect_Default_VS.hlsl">
+      <Filter>shader\PostEffect</Filter>
+    </FxCompile>
+    <FxCompile Include="PostEffect_Default_PS.hlsl">
+      <Filter>shader\PostEffect</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="PoorHeader.hlsli">
-      <Filter>shader</Filter>
-    </None>
     <None Include="packages.config" />
     <None Include="Functions.hlsli">
       <Filter>shader</Filter>
     </None>
     <None Include="Keyword.hlsli">
       <Filter>shader</Filter>
+    </None>
+    <None Include="PoorHeader.hlsli">
+      <Filter>shader\ModelRendaring</Filter>
+    </None>
+    <None Include="BasePost.hlsli">
+      <Filter>shader\PostEffect</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -370,25 +370,7 @@ void MeshLoader::UnReverse(ai_real& val)
 }
 
 //--------------------------------------------
-static auto fmt1 = DXGI_FORMAT_R32G32B32A32_UINT;
-static auto fmt3 = DXGI_FORMAT_R32G32B32_FLOAT;
-static auto fmt2 = DXGI_FORMAT_R32G32_FLOAT;
-static auto append = D3D12_APPEND_ALIGNED_ELEMENT;
-static auto IL_V = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
 
-const D3D12_INPUT_ELEMENT_DESC VERTEX::element[] =
-{
-    {SEMANTICS_STR::POSITION,0,fmt3,0,append,IL_V,0},
-    {SEMANTICS_STR::NORMAL,0,fmt3,0,append,IL_V,0},
-    {SEMANTICS_STR::TEXCOORD,0,fmt2,0,append,IL_V,0},
-    {SEMANTICS_STR::TANGENT,0,fmt3,0,append,IL_V,0},
-    {SEMANTICS_STR::MATERIAL,0,fmt1,0,append,IL_V ,0},
-};
-const D3D12_INPUT_LAYOUT_DESC VERTEX::inp_Layout =
-{
-    VERTEX::element,
-    VERTEX::ELEMENT::AMMOUNT
-};
 
 bool LoadMesh(const wchar_t* file, vector<MESH>& mesh, vector<MATERIAL>& material)
 {

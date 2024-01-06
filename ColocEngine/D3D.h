@@ -52,6 +52,7 @@ private:
 	void write();
 	void waitGPU();
 	void present(int itv);
+	void postEffect();
 	void render();
 
 private:
@@ -75,15 +76,17 @@ private:
 	uint64_t IND_frame;
 	D3D12_CPU_DESCRIPTOR_HANDLE h_RTV[FrameAmount];
 	D3D12_CPU_DESCRIPTOR_HANDLE h_ZBV;
-	D3D12_CPU_DESCRIPTOR_HANDLE h_pRTV;
-	D3D12_CPU_DESCRIPTOR_HANDLE h_pSRV;
 
 	D3D12_RESOURCE_BARRIER brr;
+	D3D12_RESOURCE_BARRIER rtvBrr;
 
 	//-----------------
 	ID3D12DescriptorHeap* heapCBV_SRV_UAV_;
 	ID3D12RootSignature* rootsig_;
+	ID3D12RootSignature* postRTSG_;
+
 	ID3D12PipelineState* PSO;
+	ID3D12PipelineState* postPSO;
 
 	ID3D12Resource*				CB_Util[FrameAmount];
 	ID3D12Resource*				CB_CAM[FrameAmount];
@@ -116,9 +119,11 @@ private:
 	ID3D12DescriptorHeap* hp_ZBV;
 
 	//---------------
+	ID3D12Resource* postVB_;
+	D3D12_VERTEX_BUFFER_VIEW postVBV_;
 	D3D12_VIEWPORT view_;
 	D3D12_RECT rect_;
-
+	
 	float angle_;
 
 	//-----

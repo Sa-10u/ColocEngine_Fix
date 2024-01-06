@@ -933,38 +933,253 @@ bool D3d::InitPSO()
 bool D3d::InitPost()
 {
     HRESULT res = {};
-
     auto desc_hp = heapRTV_->GetDesc();
-
     auto desc_rsc = colbuf_[0]->GetDesc();
 
-    D3D12_HEAP_PROPERTIES prop_hp = {};
     {
-        prop_hp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-        prop_hp.CreationNodeMask = 1;
-        prop_hp.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-        prop_hp.Type = D3D12_HEAP_TYPE_DEFAULT;
-        prop_hp.VisibleNodeMask = 1;
-    }
-    D3D12_CLEAR_VALUE val = {};
-    {
-        val.DepthStencil.Depth = 1.0f;
-        val.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+ 
 
-        val.Color[0] = backcolor_[0];
-        val.Color[1] = backcolor_[1];
-        val.Color[2] = backcolor_[2];
-        val.Color[3] = backcolor_[3];
+        D3D12_HEAP_PROPERTIES prop_hp = {};
+        {
+            prop_hp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+            prop_hp.CreationNodeMask = 1;
+            prop_hp.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+            prop_hp.Type = D3D12_HEAP_TYPE_DEFAULT;
+            prop_hp.VisibleNodeMask = 1;
+        }
+        D3D12_CLEAR_VALUE val = {};
+        {
+            val.DepthStencil.Depth = 1.0f;
+            val.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+            val.Color[0] = backcolor_[0];
+            val.Color[1] = backcolor_[1];
+            val.Color[2] = backcolor_[2];
+            val.Color[3] = backcolor_[3];
+        }
+
+        res = device_->CreateCommittedResource
+        (
+            &prop_hp,
+            D3D12_HEAP_FLAG_NONE,
+            &desc_rsc,
+            D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+            &val,
+            IID_PPV_ARGS(&post_)
+        );
+        if (FAILED(res)) return false;
+    }
+//-----------------------------------------
+
+    {
+        desc_hp.NumDescriptors = 1;
+
+        res = device_->CreateDescriptorHeap
+        (
+            &desc_hp,
+            IID_PPV_ARGS(&postRTV_)
+        );
+        if (FAILED(res)) return false;
+
+        D3D12_RENDER_TARGET_VIEW_DESC desc_prtv = {};
+        {
+            desc_prtv.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+            desc_prtv.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        }
+
+        device_->CreateRenderTargetView
+        (
+            post_,
+            &desc_prtv,
+            postRTV_->GetCPUDescriptorHandleForHeapStart()
+        );
+//-------------------------------------------------------------
+
+        {
+            desc_hp.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+            desc_hp.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+
+            res = device_->CreateDescriptorHeap
+            (
+                &desc_hp,
+                IID_PPV_ARGS(&postSRV_)
+            );
+            if (FAILED(res)) return false;
+
+            D3D12_SHADER_RESOURCE_VIEW_DESC desc_psrv = {};
+            {
+                desc_psrv.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+                desc_psrv.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+                desc_psrv.Texture2D.MipLevels = 1;
+                desc_psrv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+            }
+
+            device_->CreateShaderResourceView
+            (
+                post_,
+                &desc_psrv,
+                postSRV_->GetCPUDescriptorHandleForHeapStart()
+            ); 
+        }
+    }
+//----------------------------------------------
+    const UINT QUAD = 4;
+    SIMPLEVERTEX vxs[QUAD] = {};
+    {
+        vxs[0].pos = { -1,-1,0.1 };
+        vxs[0].uv = { 0,1 };
+
+        vxs[1].pos = { -1,1,0.1 };
+        vxs[1].uv = { 0,0};
+
+        vxs[2].pos = { 1,-1,0.1 };
+        vxs[2].uv = { 1,1 };
+
+        vxs[3].pos = { 1,1,0.1 };
+        vxs[3].uv = { 1,0 };
+    }
+
+    D3D12_HEAP_PROPERTIES hp_prop_v = {};
+    {
+        hp_prop_v.Type = D3D12_HEAP_TYPE_UPLOAD;
+        hp_prop_v.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+        hp_prop_v.CreationNodeMask = 1;
+        hp_prop_v.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+        hp_prop_v.VisibleNodeMask = 1;
+    };
+    D3D12_RESOURCE_DESC rc_desc_v = {};
+    {
+        rc_desc_v.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        rc_desc_v.Alignment = 0;
+        rc_desc_v.Width = sizeof(vxs);
+        rc_desc_v.Height = 1;
+        rc_desc_v.DepthOrArraySize = 1;
+        rc_desc_v.MipLevels = 1;
+        rc_desc_v.Format = DXGI_FORMAT_UNKNOWN;
+        rc_desc_v.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+        rc_desc_v.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+        rc_desc_v.SampleDesc.Count = 1;
+        rc_desc_v.SampleDesc.Quality = 0;
     }
 
     res = device_->CreateCommittedResource
     (
-        &prop_hp,
+        &hp_prop_v,
         D3D12_HEAP_FLAG_NONE,
-        &desc_rsc,
-        D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-        &val,
-        IID_PPV_ARGS(&post_)
+        &rc_desc_v,
+        D3D12_RESOURCE_STATE_GENERIC_READ,
+        nullptr,
+        IID_PPV_ARGS(&postVB_)
+    );
+    if (FAILED(res)) return false;
+
+    postVBV_.BufferLocation = postVB_->GetGPUVirtualAddress();
+    postVBV_.SizeInBytes = sizeof(vxs);
+    postVBV_.StrideInBytes = sizeof(vxs[0]);//datnum of SIMPLEVERTEX;
+
+    void* ptr = nullptr;
+    res = postVB_->Map(0, nullptr, &ptr);
+    if (FAILED(res)) return false;
+    
+    memcpy(ptr, vxs, sizeof(vxs));
+    postVB_->Unmap(0, nullptr);
+//-------------------------------------------------------------
+
+    D3D12_RASTERIZER_DESC rs_desc = {};
+    {
+        rs_desc.FillMode = D3D12_FILL_MODE_SOLID;
+        rs_desc.CullMode = D3D12_CULL_MODE_FRONT;
+        rs_desc.FrontCounterClockwise = false;
+        rs_desc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
+        rs_desc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
+        rs_desc.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
+        rs_desc.AntialiasedLineEnable = false;
+        rs_desc.DepthClipEnable = false;
+        rs_desc.MultisampleEnable = false;
+        rs_desc.ForcedSampleCount = 0;
+        rs_desc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+    }
+
+    D3D12_BLEND_DESC bs_desc = {};
+    {
+        bs_desc.AlphaToCoverageEnable = false;
+        bs_desc.IndependentBlendEnable = false;
+    }
+
+    D3D12_RENDER_TARGET_BLEND_DESC rtb_desc =
+    {
+        false,false,
+        D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
+        D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
+        D3D12_LOGIC_OP_NOOP,D3D12_COLOR_WRITE_ENABLE_ALL
+    };
+
+
+    std::wstring file_str = {};
+
+    ID3DBlob* VSblob = nullptr;
+    FileLoad(L"PostEffect_Default_VS.cso", &file_str);
+    res = D3DReadFileToBlob(file_str.c_str(), &VSblob);
+    if (FAILED(res))     return 0;
+
+    ID3DBlob* PSblob = nullptr;
+    FileLoad(L"PostEffect_Default_PS.cso", &file_str);
+    res = D3DReadFileToBlob(file_str.c_str(), &PSblob);
+    if (FAILED(res))     return 0;
+
+//-------------------------
+    D3D12_ROOT_SIGNATURE_DESC rootsig = {};
+    {
+        rootsig.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+        rootsig.NumParameters = 0;
+        rootsig.NumStaticSamplers = 0;
+    }
+
+    ID3DBlob* Sblob = nullptr;
+    ID3DBlob* Eblob = nullptr;
+
+    res = D3D12SerializeRootSignature
+    (
+        &rootsig,
+        D3D_ROOT_SIGNATURE_VERSION_1_0,
+        &Sblob,
+        &Eblob
+    );
+    if (FAILED(res)) return false;
+
+    res  = device_->CreateRootSignature
+    (
+        0,
+        Sblob->GetBufferPointer(),
+        Sblob->GetBufferSize(),
+        IID_PPV_ARGS(&postRTSG_)
+    );
+    if (FAILED(res)) return false;
+
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC gps_desc = {};
+    {
+        gps_desc.InputLayout = SIMPLEVERTEX::inp_Layout;
+        gps_desc.BlendState = bs_desc;
+        gps_desc.NumRenderTargets = 1;
+        gps_desc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+        gps_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+        gps_desc.RasterizerState = rs_desc;
+        gps_desc.PS.BytecodeLength = PSblob->GetBufferSize();
+        gps_desc.PS.pShaderBytecode = PSblob->GetBufferPointer();
+        gps_desc.VS.BytecodeLength = VSblob->GetBufferSize();
+        gps_desc.VS.pShaderBytecode = VSblob->GetBufferPointer();
+        gps_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+        gps_desc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
+        gps_desc.SampleDesc.Count = 1;
+        gps_desc.SampleDesc.Quality = 0;
+        gps_desc.pRootSignature = postRTSG_;
+    }
+
+    res = device_->CreateGraphicsPipelineState
+    (
+        &gps_desc,
+        IID_PPV_ARGS(&postPSO)
     );
     if (FAILED(res)) return false;
 
@@ -1004,7 +1219,7 @@ void D3d::Run(int interval)
 {
     Update();
     write();
-    //waitGPU();
+    postEffect();
     render();
     present(0);
 
@@ -1096,10 +1311,10 @@ void D3d::write()
         brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
         brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 
-        brr.Transition.pResource = colbuf_[IND_frame];
+        brr.Transition.pResource = post_;
         brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
-        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
         brr.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
     }
     cmdlist_->ResourceBarrier(1, &brr);
@@ -1114,6 +1329,7 @@ void D3d::write()
     auto MDIND = 0u;
     for (auto& itr : ResourceManager::models_) {
 
+        static auto ptr = (postRTV_->GetCPUDescriptorHandleForHeapStart());
         cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], FALSE, &h_ZBV);
 
         cmdlist_->SetGraphicsRootSignature(rootsig_);
@@ -1175,9 +1391,18 @@ void D3d::write()
             waitGPU();
             cmdalloc_[IND_frame]->Reset();
             cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
-            //render();
         }
     }
+
+    {
+        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        brr.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+        brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        brr.Transition.pResource = post_;
+        brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    }
+    cmdlist_->ResourceBarrier(1, &brr);
 }
 
 void D3d::waitGPU()
@@ -1213,18 +1438,52 @@ void D3d::present(int itv)
     fencecnt_[IND_frame] = curval + 1;
 }
 
+void D3d::postEffect()
+{
+    rtvBrr = {};
+    {
+        rtvBrr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        rtvBrr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+
+        rtvBrr.Transition.pResource = colbuf_[IND_frame];
+        rtvBrr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+        rtvBrr.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+        rtvBrr.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    }
+    cmdlist_->ResourceBarrier(1, &rtvBrr);
+
+    cmdalloc_[IND_frame]->Reset();
+    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
+
+    cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], FALSE, &h_ZBV);
+    cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
+    cmdlist_->ClearDepthStencilView(h_ZBV, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+
+    cmdlist_->SetGraphicsRootSignature(postRTSG_);
+    cmdlist_->SetPipelineState(postPSO);
+    cmdlist_->IASetVertexBuffers(0, 1, &postVBV_);
+    cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+    
+    cmdlist_->DrawInstanced(4, 1, 0, 0);
+
+}
+
 void D3d::render()
 {
+    rtvBrr = {};
     {
-        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-        brr.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-        brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        brr.Transition.pResource = colbuf_[IND_frame];
-        brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        rtvBrr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        rtvBrr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+
+        rtvBrr.Transition.pResource = colbuf_[IND_frame];
+        rtvBrr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+        rtvBrr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        rtvBrr.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
     }
 
-    cmdlist_->ResourceBarrier(1, &brr);
+    cmdlist_->ResourceBarrier(1, &rtvBrr);
     cmdlist_->Close();
 
 
