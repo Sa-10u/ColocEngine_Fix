@@ -1075,7 +1075,7 @@ bool D3d::InitPost()
 
     postVBV_.BufferLocation = postVB_->GetGPUVirtualAddress();
     postVBV_.SizeInBytes = sizeof(vxs);
-    postVBV_.StrideInBytes = sizeof(vxs[0]);//datnum of SIMPLEVERTEX;
+    postVBV_.StrideInBytes = sizeof(vxs[0]);//datnum type of SIMPLEVERTEX;
 
     void* ptr = nullptr;
     res = postVB_->Map(0, nullptr, &ptr);
@@ -1100,12 +1100,6 @@ bool D3d::InitPost()
         rs_desc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
     }
 
-    D3D12_BLEND_DESC bs_desc = {};
-    {
-        bs_desc.AlphaToCoverageEnable = false;
-        bs_desc.IndependentBlendEnable = false;
-    }
-
     D3D12_RENDER_TARGET_BLEND_DESC rtb_desc =
     {
         false,false,
@@ -1114,6 +1108,15 @@ bool D3d::InitPost()
         D3D12_LOGIC_OP_NOOP,D3D12_COLOR_WRITE_ENABLE_ALL
     };
 
+    D3D12_BLEND_DESC bs_desc = {};
+    {
+        bs_desc.AlphaToCoverageEnable = false;
+        bs_desc.IndependentBlendEnable = false;
+        for (auto i = 0u; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i) {
+
+            bs_desc.RenderTarget[i] = rtb_desc;
+        }
+    }
 
     std::wstring file_str = {};
 
@@ -1218,7 +1221,7 @@ void D3d::TermGBO()
 void D3d::Run(int interval)
 {
     Update();
-    write();
+    //write();
     postEffect();
     render();
     present(0);
@@ -1296,7 +1299,8 @@ D3d::D3d()
 
 void D3d::write()
 {
-    static auto handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
+    auto handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
+
     enum RP
     {
         CBU = 0,
@@ -1395,10 +1399,6 @@ void D3d::write()
         }
     }
 
-    cmdlist_->Close();
-    cmdalloc_[IND_frame]->Reset();
-    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
-
     brr = {};
     {
         brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -1459,14 +1459,20 @@ void D3d::postEffect()
     }
     cmdlist_->ResourceBarrier(1, &brr);
 
-    cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], FALSE, nullptr);
-    cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
-    cmdlist_->RSSetViewports(1, &view_);
-    cmdlist_->RSSetScissorRects(1, &rect_);
+    cmdalloc_[IND_frame]->Reset();
+    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
 
+    cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
+    cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], FALSE, nullptr);
+   
     cmdlist_->SetGraphicsRootSignature(postRTSG_);
+
+    
+
     cmdlist_->SetPipelineState(postPSO);
     cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+    cmdlist_->RSSetViewports(1, &view_);
+    cmdlist_->RSSetScissorRects(1, &rect_);
     
     cmdlist_->IASetVertexBuffers(0, 1, &postVBV_);
 
