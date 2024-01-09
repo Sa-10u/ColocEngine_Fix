@@ -13,7 +13,7 @@ class RModel;
 
 struct SIMPLEVERTEX
 {
-	XMFLOAT3 pos  ;
+	XMFLOAT3 pos;
 	XMFLOAT2 uv ;
 
 	static const D3D12_INPUT_LAYOUT_DESC inp_Layout;

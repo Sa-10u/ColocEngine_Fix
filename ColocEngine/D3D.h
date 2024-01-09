@@ -78,7 +78,6 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE h_ZBV;
 
 	D3D12_RESOURCE_BARRIER brr;
-	D3D12_RESOURCE_BARRIER rtvBrr;
 
 	//-----------------
 	ID3D12DescriptorHeap* heapCBV_SRV_UAV_;

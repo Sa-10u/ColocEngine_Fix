@@ -937,8 +937,6 @@ bool D3d::InitPost()
     auto desc_rsc = colbuf_[0]->GetDesc();
 
     {
- 
-
         D3D12_HEAP_PROPERTIES prop_hp = {};
         {
             prop_hp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
@@ -1026,16 +1024,17 @@ bool D3d::InitPost()
     const UINT QUAD = 4;
     SIMPLEVERTEX vxs[QUAD] = {};
     {
-        vxs[0].pos = { -1,-1,0.1 };
+        float z = 0.1;
+        vxs[0].pos = { -1,-1,z };
         vxs[0].uv = { 0,1 };
 
-        vxs[1].pos = { -1,1,0.1 };
+        vxs[1].pos = { -1,1,z };
         vxs[1].uv = { 0,0};
 
-        vxs[2].pos = { 1,-1,0.1 };
+        vxs[2].pos = { 1,-1,z };
         vxs[2].uv = { 1,1 };
 
-        vxs[3].pos = { 1,1,0.1 };
+        vxs[3].pos = { 1,1,z };
         vxs[3].uv = { 1,0 };
     }
 
@@ -1089,7 +1088,7 @@ bool D3d::InitPost()
     D3D12_RASTERIZER_DESC rs_desc = {};
     {
         rs_desc.FillMode = D3D12_FILL_MODE_SOLID;
-        rs_desc.CullMode = D3D12_CULL_MODE_FRONT;
+        rs_desc.CullMode = D3D12_CULL_MODE_NONE;
         rs_desc.FrontCounterClockwise = false;
         rs_desc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
         rs_desc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
@@ -1162,7 +1161,7 @@ bool D3d::InitPost()
         gps_desc.InputLayout = SIMPLEVERTEX::inp_Layout;
         gps_desc.BlendState = bs_desc;
         gps_desc.NumRenderTargets = 1;
-        gps_desc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+        gps_desc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
         gps_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
         gps_desc.RasterizerState = rs_desc;
         gps_desc.PS.BytecodeLength = PSblob->GetBufferSize();
@@ -1170,10 +1169,11 @@ bool D3d::InitPost()
         gps_desc.VS.BytecodeLength = VSblob->GetBufferSize();
         gps_desc.VS.pShaderBytecode = VSblob->GetBufferPointer();
         gps_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
-        gps_desc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
+        gps_desc.SampleMask = UINT_MAX;
         gps_desc.SampleDesc.Count = 1;
         gps_desc.SampleDesc.Quality = 0;
         gps_desc.pRootSignature = postRTSG_;
+        gps_desc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
     }
 
     res = device_->CreateGraphicsPipelineState
@@ -1296,6 +1296,7 @@ D3d::D3d()
 
 void D3d::write()
 {
+    static auto handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
     enum RP
     {
         CBU = 0,
@@ -1322,15 +1323,15 @@ void D3d::write()
     cmdalloc_[IND_frame]->Reset();
     cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
 
-    cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], FALSE, &h_ZBV);
-    cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
+    cmdlist_->OMSetRenderTargets(1, &handle, FALSE, &h_ZBV);
+    cmdlist_->ClearRenderTargetView(handle, backcolor_, 0, nullptr);
     cmdlist_->ClearDepthStencilView(h_ZBV, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
     auto MDIND = 0u;
     for (auto& itr : ResourceManager::models_) {
 
         static auto ptr = (postRTV_->GetCPUDescriptorHandleForHeapStart());
-        cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], FALSE, &h_ZBV);
+        cmdlist_->OMSetRenderTargets(1, &handle, FALSE, &h_ZBV);
 
         cmdlist_->SetGraphicsRootSignature(rootsig_);
         cmdlist_->SetDescriptorHeaps(1, DHH_CbSrUaV->ppHeap_);
@@ -1394,6 +1395,11 @@ void D3d::write()
         }
     }
 
+    cmdlist_->Close();
+    cmdalloc_[IND_frame]->Reset();
+    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
+
+    brr = {};
     {
         brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
         brr.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
@@ -1440,52 +1446,48 @@ void D3d::present(int itv)
 
 void D3d::postEffect()
 {
-    rtvBrr = {};
+    brr = {};
     {
-        rtvBrr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        rtvBrr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 
-        rtvBrr.Transition.pResource = colbuf_[IND_frame];
-        rtvBrr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        brr.Transition.pResource = colbuf_[IND_frame];
+        brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
-        rtvBrr.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-        rtvBrr.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+        brr.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
     }
-    cmdlist_->ResourceBarrier(1, &rtvBrr);
+    cmdlist_->ResourceBarrier(1, &brr);
 
-    cmdalloc_[IND_frame]->Reset();
-    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
-
-    cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], FALSE, &h_ZBV);
+    cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], FALSE, nullptr);
     cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
-    cmdlist_->ClearDepthStencilView(h_ZBV, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+    cmdlist_->RSSetViewports(1, &view_);
+    cmdlist_->RSSetScissorRects(1, &rect_);
 
     cmdlist_->SetGraphicsRootSignature(postRTSG_);
     cmdlist_->SetPipelineState(postPSO);
-    cmdlist_->IASetVertexBuffers(0, 1, &postVBV_);
     cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
     
-    cmdlist_->DrawInstanced(4, 1, 0, 0);
+    cmdlist_->IASetVertexBuffers(0, 1, &postVBV_);
 
+    cmdlist_->DrawInstanced(4, 1, 0, 0);
 }
 
 void D3d::render()
 {
-    rtvBrr = {};
+    brr = {};
     {
-        rtvBrr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        rtvBrr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 
-        rtvBrr.Transition.pResource = colbuf_[IND_frame];
-        rtvBrr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        brr.Transition.pResource = colbuf_[IND_frame];
+        brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
-        rtvBrr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-        rtvBrr.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        brr.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
     }
-
-    cmdlist_->ResourceBarrier(1, &rtvBrr);
+    cmdlist_->ResourceBarrier(1, &brr);
     cmdlist_->Close();
-
 
     ID3D12CommandList* commands[] = { cmdlist_ };
     cmdque_->ExecuteCommandLists(1, commands);
