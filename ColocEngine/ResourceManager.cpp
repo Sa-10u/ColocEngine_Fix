@@ -17,6 +17,57 @@ void ResourceManager::Init()
 
     {
         Texture tex = {};
+        const UINT Magenta = 0xFFFF00FF;
+
+        const UINT h_and_w = 2*2;
+
+        UINT col[h_and_w];
+        for (auto i = 0u; i < h_and_w; i++) {
+            col[i] = Magenta;
+        }
+
+        D3D12_RESOURCE_DESC rc_desc_tex = {};
+        {
+            rc_desc_tex.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+            rc_desc_tex.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+            rc_desc_tex.MipLevels = 1;
+            rc_desc_tex.DepthOrArraySize = 1;
+            rc_desc_tex.Flags = D3D12_RESOURCE_FLAG_NONE;
+            rc_desc_tex.Height = 2;
+            rc_desc_tex.Width = 2;
+            rc_desc_tex.SampleDesc.Count = 1;
+            rc_desc_tex.SampleDesc.Quality = 1;
+            rc_desc_tex.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+        }
+
+        D3D12_HEAP_PROPERTIES hp_prop_tex = {};
+        {
+            hp_prop_tex.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
+            hp_prop_tex.CreationNodeMask = 0;
+            hp_prop_tex.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
+            hp_prop_tex.Type = D3D12_HEAP_TYPE_CUSTOM;
+            hp_prop_tex.VisibleNodeMask = 0;
+        }
+
+        HRESULT res = PTR_D3D::ptr->GetDevice()->CreateCommittedResource
+        (
+            &hp_prop_tex,
+            D3D12_HEAP_FLAG_NONE,
+            &rc_desc_tex,
+            D3D12_RESOURCE_STATE_COPY_DEST,
+            nullptr,
+            IID_PPV_ARGS(&tex.rsc_ptr)
+        );
+        assert(!FAILED(res));
+
+        D3D12_SUBRESOURCE_DATA data = {};
+        {
+            data.pData = col;
+            data.RowPitch = h_and_w / 2 * sizeof(uint32_t);
+            data.SlicePitch = h_and_w * sizeof(uint32_t);
+        }
+
+    //Init Texture Magenta color , here is undone 
     }
 }
 
