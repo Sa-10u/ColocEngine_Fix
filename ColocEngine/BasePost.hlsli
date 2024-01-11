@@ -17,3 +17,12 @@ struct PSoutput
 {
     float4 col : SV_TARGET0;
 };
+
+//-------------------------------
+
+cbuffer Util : register(b0)
+{
+    float4x4 View		: packoffset(c0);
+    float4x4 Projection : packoffset(c4);
+    float Time : packoffset(c8);
+};

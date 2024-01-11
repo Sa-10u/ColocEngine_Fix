@@ -81,6 +81,8 @@ private:
 
 	//-----------------
 	ID3D12DescriptorHeap* heapCBV_SRV_UAV_;
+	ID3D12DescriptorHeap* postCBV_SRV_UAV_;
+
 	ID3D12RootSignature* rootsig_;
 	ID3D12RootSignature* postRTSG_;
 
@@ -120,6 +122,9 @@ private:
 	//---------------
 	ID3D12Resource* postVB_;
 	D3D12_VERTEX_BUFFER_VIEW postVBV_;
+	ID3D12Resource* postIB_;
+	D3D12_INDEX_BUFFER_VIEW postIBV_;
+
 	D3D12_VIEWPORT view_;
 	D3D12_RECT rect_;
 	
@@ -143,6 +148,8 @@ private:
 		D3D12_CPU_DESCRIPTOR_HANDLE GetAndIncreCPU();
 		D3D12_GPU_DESCRIPTOR_HANDLE GetAndIncreGPU();
 		ID3D12DescriptorHeap** ppHeap_;
+
+		~DH();
 	
 	private:
 
@@ -151,6 +158,7 @@ private:
 		D3D12_GPU_DESCRIPTOR_HANDLE h_gpu;
 		
 	}*DHH_CbSrUaV;
+	DH* DHPost_CbSrUaV;
 };
 
 namespace PTR_D3D

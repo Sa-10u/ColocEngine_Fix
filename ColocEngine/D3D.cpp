@@ -11,6 +11,7 @@
 
 constexpr UINT CBCOUNT = 256;
 constexpr UINT HPSIZE = 10;
+constexpr UINT POST_HPSIZE = 1;
 
 bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
 {
@@ -1083,12 +1084,65 @@ bool D3d::InitPost()
     
     memcpy(ptr, vxs, sizeof(vxs));
     postVB_->Unmap(0, nullptr);
+
+
+
+    uint32_t idcs[] = { 0,1,2,3 };
+    {
+        D3D12_HEAP_PROPERTIES hp_prop_i = {};
+        {
+            hp_prop_i.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+            hp_prop_i.CreationNodeMask = 1;
+            hp_prop_i.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+            hp_prop_i.Type = D3D12_HEAP_TYPE_UPLOAD;
+            hp_prop_i.VisibleNodeMask = 1;
+        }
+
+        D3D12_RESOURCE_DESC rc_desc_i = {};
+        {
+            rc_desc_i.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+            rc_desc_i.Format = DXGI_FORMAT_UNKNOWN;
+            rc_desc_i.MipLevels = 1;
+            rc_desc_i.Alignment = 0;
+            rc_desc_i.DepthOrArraySize = 1;
+            rc_desc_i.Flags = D3D12_RESOURCE_FLAG_NONE;
+            rc_desc_i.Height = 1;
+            rc_desc_i.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+            rc_desc_i.SampleDesc.Count = 1;
+            rc_desc_i.SampleDesc.Quality = 0;
+            rc_desc_i.Width = sizeof(idcs);
+        }
+
+        device_->CreateCommittedResource
+        (
+            &hp_prop_i,
+            D3D12_HEAP_FLAG_NONE,
+            &rc_desc_i,
+            D3D12_RESOURCE_STATE_GENERIC_READ,
+            nullptr,
+            IID_PPV_ARGS(&postIB_)
+        );
+        if (FAILED(res)) return false;
+
+
+        void* ptr = nullptr;
+        res = postIB_->Map(0, nullptr, &ptr);
+        if (FAILED(res)) return 0;
+
+        memcpy(ptr, idcs, sizeof(idcs));
+        postIB_->Unmap(0, 0);
+
+        //-----------
+        postIBV_.BufferLocation = postIB_->GetGPUVirtualAddress();
+        postIBV_.Format = DXGI_FORMAT_R32_UINT;
+        postIBV_.SizeInBytes = sizeof(idcs);
+    }
 //-------------------------------------------------------------
 
     D3D12_RASTERIZER_DESC rs_desc = {};
     {
         rs_desc.FillMode = D3D12_FILL_MODE_SOLID;
-        rs_desc.CullMode = D3D12_CULL_MODE_NONE;
+        rs_desc.CullMode = D3D12_CULL_MODE_FRONT;
         rs_desc.FrontCounterClockwise = false;
         rs_desc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
         rs_desc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
@@ -1133,7 +1187,12 @@ bool D3d::InitPost()
 //-------------------------
     D3D12_ROOT_SIGNATURE_DESC rootsig = {};
     {
-        rootsig.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+        auto flag = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+        flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS;
+        flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS;
+        flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
+
+        rootsig.Flags = flag;
         rootsig.NumParameters = 0;
         rootsig.NumStaticSamplers = 0;
     }
@@ -1176,7 +1235,6 @@ bool D3d::InitPost()
         gps_desc.SampleDesc.Count = 1;
         gps_desc.SampleDesc.Quality = 0;
         gps_desc.pRootSignature = postRTSG_;
-        gps_desc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
     }
 
     res = device_->CreateGraphicsPipelineState
@@ -1185,6 +1243,26 @@ bool D3d::InitPost()
         IID_PPV_ARGS(&postPSO)
     );
     if (FAILED(res)) return false;
+
+//-----------------------------------
+
+    D3D12_DESCRIPTOR_HEAP_DESC hpd_desc = {};
+    {
+        hpd_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+        hpd_desc.NodeMask = 0;
+        hpd_desc.NumDescriptors = FrameAmount * POST_HPSIZE;
+        hpd_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+    }
+
+    res = device_->CreateDescriptorHeap
+    (
+        &hpd_desc,
+        IID_PPV_ARGS(&postCBV_SRV_UAV_)
+    );
+    DHPost_CbSrUaV = new DH(device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV), &postCBV_SRV_UAV_);
+
+    if (FAILED(res)) return false;
+
 
     return true;
 }
@@ -1211,6 +1289,7 @@ void D3d::Termination()
 
     SAFE_RELEASE(device_);
     delete DHH_CbSrUaV;
+    delete DHPost_CbSrUaV;
 
 }
 
@@ -1334,7 +1413,6 @@ void D3d::write()
     auto MDIND = 0u;
     for (auto& itr : ResourceManager::models_) {
 
-        static auto ptr = (postRTV_->GetCPUDescriptorHandleForHeapStart());
         cmdlist_->OMSetRenderTargets(1, &handle, FALSE, &h_ZBV);
 
         cmdlist_->SetGraphicsRootSignature(rootsig_);
@@ -1464,16 +1542,19 @@ void D3d::postEffect()
 
     cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
     cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], FALSE, nullptr);
-   
+    
     cmdlist_->SetGraphicsRootSignature(postRTSG_);
 
-    
+    cmdlist_->SetDescriptorHeaps(1, DHPost_CbSrUaV->ppHeap_);
+    {
+        //cmdlist_->SetGraphicsRootConstantBufferView(0, CBV_Util[IND_frame].desc.BufferLocation);
+    }
 
     cmdlist_->SetPipelineState(postPSO);
     cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
     cmdlist_->RSSetViewports(1, &view_);
     cmdlist_->RSSetScissorRects(1, &rect_);
-    
+
     cmdlist_->IASetVertexBuffers(0, 1, &postVBV_);
 
     cmdlist_->DrawInstanced(4, 1, 0 ,0);
@@ -1530,4 +1611,9 @@ D3D12_GPU_DESCRIPTOR_HANDLE D3d::DH::GetAndIncreGPU()
     h_gpu.ptr += incre_;
 
     return temp;
+}
+
+D3d::DH::~DH()
+{
+    (*ppHeap_)->Release();
 }
