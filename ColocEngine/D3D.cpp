@@ -852,7 +852,7 @@ bool D3d::InitPSO()
     D3D12_RASTERIZER_DESC rs_desc = {};
     {
         rs_desc.FillMode = D3D12_FILL_MODE_SOLID;
-        rs_desc.CullMode = D3D12_CULL_MODE_FRONT;
+        rs_desc.CullMode = D3D12_CULL_MODE_NONE;
         rs_desc.FrontCounterClockwise = false;
         rs_desc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
         rs_desc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
@@ -949,7 +949,7 @@ bool D3d::InitPost()
         D3D12_CLEAR_VALUE val = {};
         {
             val.DepthStencil.Depth = 1.0f;
-            val.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+            val.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 
             val.Color[0] = backcolor_[0];
             val.Color[1] = backcolor_[1];
@@ -983,7 +983,7 @@ bool D3d::InitPost()
         D3D12_RENDER_TARGET_VIEW_DESC desc_prtv = {};
         {
             desc_prtv.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-            desc_prtv.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+            desc_prtv.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
         }
 
         device_->CreateRenderTargetView
@@ -1007,7 +1007,7 @@ bool D3d::InitPost()
 
             D3D12_SHADER_RESOURCE_VIEW_DESC desc_psrv = {};
             {
-                desc_psrv.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+                desc_psrv.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
                 desc_psrv.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
                 desc_psrv.Texture2D.MipLevels = 1;
                 desc_psrv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -1074,18 +1074,16 @@ bool D3d::InitPost()
     );
     if (FAILED(res)) return false;
 
-    postVBV_.BufferLocation = postVB_->GetGPUVirtualAddress();
-    postVBV_.SizeInBytes = sizeof(vxs);
-    postVBV_.StrideInBytes = sizeof(vxs[0]);//datnum type of SIMPLEVERTEX;
-
     void* ptr = nullptr;
     res = postVB_->Map(0, nullptr, &ptr);
     if (FAILED(res)) return false;
-    
+
     memcpy(ptr, vxs, sizeof(vxs));
     postVB_->Unmap(0, nullptr);
 
-
+    postVBV_.BufferLocation = postVB_->GetGPUVirtualAddress();
+    postVBV_.SizeInBytes = sizeof(vxs);
+    postVBV_.StrideInBytes = sizeof(vxs[0]);//datnum type of SIMPLEVERTEX;
 
     uint32_t idcs[] = { 0,1,2,3 };
     {
@@ -1524,6 +1522,9 @@ void D3d::present(int itv)
 
 void D3d::postEffect()
 {
+    cmdalloc_[IND_frame]->Reset();
+    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
+
     brr = {};
     {
         brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -1537,11 +1538,8 @@ void D3d::postEffect()
     }
     cmdlist_->ResourceBarrier(1, &brr);
 
-    cmdalloc_[IND_frame]->Reset();
-    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
-
-    cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
     cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], FALSE, nullptr);
+    cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
     
     cmdlist_->SetGraphicsRootSignature(postRTSG_);
 
@@ -1556,6 +1554,7 @@ void D3d::postEffect()
     cmdlist_->RSSetScissorRects(1, &rect_);
 
     cmdlist_->IASetVertexBuffers(0, 1, &postVBV_);
+    cmdlist_->IASetIndexBuffer(&postIBV_);
 
     cmdlist_->DrawInstanced(4, 1, 0 ,0);
 }
