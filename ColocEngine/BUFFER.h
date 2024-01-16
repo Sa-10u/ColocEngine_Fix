@@ -37,6 +37,7 @@ struct VERTEX
 	XMFLOAT3 norm_;
 	XMFLOAT2 uv_;
 	XMFLOAT3 tan_;
+	XMFLOAT3 bitan_;
 	UINT	 mtlID_;
 
 	static const D3D12_INPUT_LAYOUT_DESC inp_Layout;
