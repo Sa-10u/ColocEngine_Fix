@@ -138,26 +138,7 @@ private:
 	//-----
 	float backcolor_ [4];
 
-	class DH
-	{
-	public:
-		DH() = delete;
-		DH(const DH& dh) = delete;
-		DH(const DH&& dh) = delete;
-		DH(UINT incre, ID3D12DescriptorHeap** pheap);
-		D3D12_CPU_DESCRIPTOR_HANDLE GetAndIncreCPU();
-		D3D12_GPU_DESCRIPTOR_HANDLE GetAndIncreGPU();
-		ID3D12DescriptorHeap** ppHeap_;
-
-		~DH();
-	
-	private:
-
-		UINT incre_;
-		D3D12_CPU_DESCRIPTOR_HANDLE h_cpu;
-		D3D12_GPU_DESCRIPTOR_HANDLE h_gpu;
-		
-	}*DHH_CbSrUaV;
+	DH* DHH_CbSrUaV;
 	DH* DHPost_CbSrUaV;
 };
 

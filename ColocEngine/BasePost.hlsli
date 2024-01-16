@@ -3,8 +3,8 @@ SamplerState smp : register(s0);
 
 struct VSinput
 {
-    float3 pos : POSITION;
-    float2 uv : TEXCOORD;
+    float3 pos	: POSITION;
+    float2 uv	: TEXCOORD;
 };
 
 struct VSoutput

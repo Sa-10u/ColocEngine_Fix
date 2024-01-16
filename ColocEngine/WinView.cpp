@@ -3,6 +3,7 @@
 #include"CAM.h"
 #include"FileLoader.h"
 #include<thread>
+#include"ResourceManager.h"
 
 using namespace std::chrono;
 
@@ -48,6 +49,7 @@ bool WinView::setup()
             GameMain::Init();
             DataManager::Init();
             WorldManager::Init();
+            ResourceManager::Init();
             Input_KB::Init();
 
             return true;

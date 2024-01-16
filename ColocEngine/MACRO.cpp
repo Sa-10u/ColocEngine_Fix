@@ -9,6 +9,7 @@ namespace SEMANTICS_STR
 	LPCSTR TEXCOORD = "TEXCOORD";
 	LPCSTR TANGENT = "TANGENT";
 	LPCSTR NORMAL = "NORMAL";
+	LPCSTR BITANGENT = "BITANGENT";
 	LPCSTR MATERIAL = "MATERIAL_ID";
 }
 
@@ -28,4 +29,31 @@ char* wtoc(const wchar_t* str)
 	WideCharToMultiByte(CP_UTF8, 0, str, -1, buf, len, nullptr, nullptr);
 
 	return buf;
+}
+
+DH::DH(UINT incre, ID3D12DescriptorHeap** pheap) :incre_(incre), ppHeap_(pheap)
+{
+	h_cpu = (*ppHeap_)->GetCPUDescriptorHandleForHeapStart();
+	h_gpu = (*ppHeap_)->GetGPUDescriptorHandleForHeapStart();
+}
+
+D3D12_CPU_DESCRIPTOR_HANDLE DH::GetAndIncreCPU()
+{
+	auto temp = h_cpu;
+	h_cpu.ptr += incre_;
+
+	return temp;
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE DH::GetAndIncreGPU()
+{
+	auto temp = h_gpu;
+	h_gpu.ptr += incre_;
+
+	return temp;
+}
+
+DH::~DH()
+{
+	(*ppHeap_)->Release();
 }

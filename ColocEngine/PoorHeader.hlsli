@@ -4,6 +4,7 @@ struct VSinput
     float3 norm : NORMAL;
 	float2 uv	: TEXCOORD;
     float3 tan  : TANGENT;
+	float3 bitan: BITANGENT;
 
 	uint MID	: MATERIAL_ID;
 	
@@ -17,6 +18,7 @@ struct VSoutput
 	float2 uv	: TEXCOORD;
 	float3 tan  : TANGENT;
 	float3 norm : NORMAL;
+	float3 bitan: BITANGENT;
 
 	uint MID	: MATERIAL_ID;
 	uint ID		: InstanceID;

@@ -43,7 +43,7 @@ struct VERTEX
 	static const D3D12_INPUT_LAYOUT_DESC inp_Layout;
 
 	VERTEX() = default;
-	VERTEX(XMFLOAT3 const& pos, XMFLOAT3 const& norm, XMFLOAT2 const& uv, XMFLOAT3 const& tan , UINT const& MID);
+	VERTEX(XMFLOAT3 const& pos, XMFLOAT3 const& norm, XMFLOAT2 const& uv, XMFLOAT3 const& tan ,XMFLOAT3 const& bitan , UINT const& MID);
 
 
 	enum ELEMENT
@@ -52,6 +52,7 @@ struct VERTEX
 		NORMAL,
 		UV,
 		TANGENT,
+		BITANGENT,
 		MTLID,
 
 		AMMOUNT

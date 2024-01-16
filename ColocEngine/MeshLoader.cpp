@@ -139,8 +139,8 @@ void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src)
         auto norm = &(src->mNormals[i]);
         auto uv = (src->HasTextureCoords(0)) ? &(src->mTextureCoords[0][i]) : &vecdef;
         auto tan =(src->HasTangentsAndBitangents())? & (src->mTangents[i]) : &vecdef;
+        auto bitan = (src->HasTangentsAndBitangents()) ? &(src->mBitangents[i]) : &vecdef;
         auto Mtl_ID = mesh.ID_Material;
-
         ParseUV(*uv);
        
         mesh.vtcs_[i] = VERTEX
@@ -149,10 +149,12 @@ void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src)
             XMFLOAT3(norm->x, norm->y, norm->z),
             XMFLOAT2(uv->x, uv->y),
             XMFLOAT3(tan->x, tan->y, tan->z),
+            XMFLOAT3(bitan->x, bitan->y, bitan->z),
             Mtl_ID
         );
     }
 
+    auto n = src->mNumBones;
     mesh.indexes_.resize(src->mNumFaces * TRIANGLE);
 
     for (auto i = 0;i < src->mNumFaces;i++) {

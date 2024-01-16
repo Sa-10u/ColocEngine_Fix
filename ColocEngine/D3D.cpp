@@ -1085,56 +1085,6 @@ bool D3d::InitPost()
     postVBV_.SizeInBytes = sizeof(vxs);
     postVBV_.StrideInBytes = sizeof(vxs[0]);//datnum type of SIMPLEVERTEX;
 
-    uint32_t idcs[] = { 0,1,2,3 };
-    {
-        D3D12_HEAP_PROPERTIES hp_prop_i = {};
-        {
-            hp_prop_i.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-            hp_prop_i.CreationNodeMask = 1;
-            hp_prop_i.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-            hp_prop_i.Type = D3D12_HEAP_TYPE_UPLOAD;
-            hp_prop_i.VisibleNodeMask = 1;
-        }
-
-        D3D12_RESOURCE_DESC rc_desc_i = {};
-        {
-            rc_desc_i.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-            rc_desc_i.Format = DXGI_FORMAT_UNKNOWN;
-            rc_desc_i.MipLevels = 1;
-            rc_desc_i.Alignment = 0;
-            rc_desc_i.DepthOrArraySize = 1;
-            rc_desc_i.Flags = D3D12_RESOURCE_FLAG_NONE;
-            rc_desc_i.Height = 1;
-            rc_desc_i.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-            rc_desc_i.SampleDesc.Count = 1;
-            rc_desc_i.SampleDesc.Quality = 0;
-            rc_desc_i.Width = sizeof(idcs);
-        }
-
-        device_->CreateCommittedResource
-        (
-            &hp_prop_i,
-            D3D12_HEAP_FLAG_NONE,
-            &rc_desc_i,
-            D3D12_RESOURCE_STATE_GENERIC_READ,
-            nullptr,
-            IID_PPV_ARGS(&postIB_)
-        );
-        if (FAILED(res)) return false;
-
-
-        void* ptr = nullptr;
-        res = postIB_->Map(0, nullptr, &ptr);
-        if (FAILED(res)) return 0;
-
-        memcpy(ptr, idcs, sizeof(idcs));
-        postIB_->Unmap(0, 0);
-
-        //-----------
-        postIBV_.BufferLocation = postIB_->GetGPUVirtualAddress();
-        postIBV_.Format = DXGI_FORMAT_R32_UINT;
-        postIBV_.SizeInBytes = sizeof(idcs);
-    }
 //-------------------------------------------------------------
 
     D3D12_RASTERIZER_DESC rs_desc = {};
@@ -1543,7 +1493,7 @@ void D3d::postEffect()
     
     cmdlist_->SetGraphicsRootSignature(postRTSG_);
 
-    cmdlist_->SetDescriptorHeaps(1, DHPost_CbSrUaV->ppHeap_);
+    //cmdlist_->SetDescriptorHeaps(1, DHPost_CbSrUaV->ppHeap_);
     {
         //cmdlist_->SetGraphicsRootConstantBufferView(0, CBV_Util[IND_frame].desc.BufferLocation);
     }
@@ -1587,32 +1537,4 @@ namespace PTR_D3D
 namespace PTR_WND
 {
     HWND* ptr = nullptr;
-}
-
-
-D3d::DH::DH(UINT incre, ID3D12DescriptorHeap** pheap):incre_(incre),ppHeap_(pheap)
-{
-    h_cpu = (*ppHeap_)->GetCPUDescriptorHandleForHeapStart();
-    h_gpu = (*ppHeap_)->GetGPUDescriptorHandleForHeapStart();
-}
-
-D3D12_CPU_DESCRIPTOR_HANDLE D3d::DH::GetAndIncreCPU()
-{
-    auto temp = h_cpu;
-    h_cpu.ptr += incre_;
-
-    return temp;
-}
-
-D3D12_GPU_DESCRIPTOR_HANDLE D3d::DH::GetAndIncreGPU()
-{
-    auto temp = h_gpu;
-    h_gpu.ptr += incre_;
-
-    return temp;
-}
-
-D3d::DH::~DH()
-{
-    (*ppHeap_)->Release();
 }

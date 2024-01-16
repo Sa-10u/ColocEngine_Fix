@@ -19,7 +19,8 @@ void ResourceManager::Init()
         Texture tex = {};
         const UINT Magenta = 0xFFFF00FF;
 
-        const UINT h_and_w = 2*2;
+        const auto th = 2u;     const auto tw = 2u;
+        const UINT h_and_w = th * tw;
 
         UINT col[h_and_w];
         for (auto i = 0u; i < h_and_w; i++) {
@@ -33,10 +34,10 @@ void ResourceManager::Init()
             rc_desc_tex.MipLevels = 1;
             rc_desc_tex.DepthOrArraySize = 1;
             rc_desc_tex.Flags = D3D12_RESOURCE_FLAG_NONE;
-            rc_desc_tex.Height = 2;
-            rc_desc_tex.Width = 2;
+            rc_desc_tex.Height = th;
+            rc_desc_tex.Width = tw;
             rc_desc_tex.SampleDesc.Count = 1;
-            rc_desc_tex.SampleDesc.Quality = 1;
+            rc_desc_tex.SampleDesc.Quality = 0;
             rc_desc_tex.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
         }
 
@@ -63,11 +64,22 @@ void ResourceManager::Init()
         D3D12_SUBRESOURCE_DATA data = {};
         {
             data.pData = col;
-            data.RowPitch = h_and_w / 2 * sizeof(uint32_t);
-            data.SlicePitch = h_and_w * sizeof(uint32_t);
+            data.RowPitch = tw * sizeof(col[0]);
+            data.SlicePitch = data.RowPitch * th;
         }
 
-    //Init Texture Magenta color , here is undone 
+        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        srvDesc.Format = rc_desc_tex.Format;
+        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+        srvDesc.Texture2D.MipLevels = 1;
+        PTR_D3D::ptr->GetDevice()->CreateShaderResourceView
+            (
+                tex.rsc_ptr,
+                &srvDesc,
+                tex.HCPU
+            );
+    
     }
 }
 
