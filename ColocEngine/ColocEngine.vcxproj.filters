@@ -129,6 +129,12 @@
     <ClCompile Include="LightManager.cpp">
       <Filter>System\source</Filter>
     </ClCompile>
+    <ClCompile Include="PSO.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="PSOManager.cpp">
+      <Filter>System\source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinView.h">
@@ -198,6 +204,12 @@
       <Filter>Head</Filter>
     </ClInclude>
     <ClInclude Include="LightManager.h">
+      <Filter>System\header</Filter>
+    </ClInclude>
+    <ClInclude Include="PSO.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="PSOManager.h">
       <Filter>System\header</Filter>
     </ClInclude>
   </ItemGroup>

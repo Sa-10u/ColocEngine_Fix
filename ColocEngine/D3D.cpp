@@ -425,7 +425,6 @@ bool D3d::InitGBO()
 
         rsc = image.GetImage(0, 0, 0);
 
-
         D3D12_RESOURCE_DESC rc_desc_tex = {};
         {
             rc_desc_tex.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;

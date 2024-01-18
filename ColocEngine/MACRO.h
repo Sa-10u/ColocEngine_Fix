@@ -63,8 +63,12 @@ public:
 	DH(const DH& dh) = delete;
 	DH(const DH&& dh) = delete;
 	DH(UINT incre, ID3D12DescriptorHeap** pheap);
+
 	D3D12_CPU_DESCRIPTOR_HANDLE GetAndIncreCPU();
 	D3D12_GPU_DESCRIPTOR_HANDLE GetAndIncreGPU();
+	void ResetHandles(D3D12_CPU_DESCRIPTOR_HANDLE h_cpu, D3D12_GPU_DESCRIPTOR_HANDLE h_gpu);
+	void ResetIncre(UINT incre);
+
 	ID3D12DescriptorHeap** ppHeap_;
 
 	~DH();

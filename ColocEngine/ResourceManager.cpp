@@ -8,78 +8,47 @@ namespace ResourceManager
     std::vector<RTexture> textures_;
     RModel E_Model;
     RTexture E_Tex;
+    DH* heap_;
+    const uint16_t MAX_Textures = 1024;
+    const uint16_t MAT_Models = 1024;
 }
 
 void ResourceManager::Init()
 {
+    {
+        auto r_hp = new ID3D12DescriptorHeap * ();
+        D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+        {
+            desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+            desc.NodeMask = 0;
+            desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+            desc.NumDescriptors = MAX_Textures;
+        }
+
+        PTR_D3D::ptr->GetDevice()->CreateDescriptorHeap
+        (
+            &desc,
+            IID_PPV_ARGS(r_hp)
+        );
+
+        heap_ = new DH(PTR_D3D::ptr->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV), r_hp);
+    }
+//-------------------------------------------------
 	models_.clear();
 	textures_.clear();
 
     {
         Texture tex = {};
-        const UINT Magenta = 0xFFFF00FF;
 
-        const auto th = 2u;     const auto tw = 2u;
-        const UINT h_and_w = th * tw;
+        tex.HCPU = heap_->GetAndIncreCPU();
+        tex.HGPU = heap_->GetAndIncreGPU();
 
-        UINT col[h_and_w];
-        for (auto i = 0u; i < h_and_w; i++) {
-            col[i] = Magenta;
-        }
+        MakeErrorTex(&tex);
+        
+        E_Tex.Name_ = L"TEXTURE_ERROR";
+        E_Tex.tex_ = tex;
 
-        D3D12_RESOURCE_DESC rc_desc_tex = {};
-        {
-            rc_desc_tex.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-            rc_desc_tex.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-            rc_desc_tex.MipLevels = 1;
-            rc_desc_tex.DepthOrArraySize = 1;
-            rc_desc_tex.Flags = D3D12_RESOURCE_FLAG_NONE;
-            rc_desc_tex.Height = th;
-            rc_desc_tex.Width = tw;
-            rc_desc_tex.SampleDesc.Count = 1;
-            rc_desc_tex.SampleDesc.Quality = 0;
-            rc_desc_tex.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-        }
-
-        D3D12_HEAP_PROPERTIES hp_prop_tex = {};
-        {
-            hp_prop_tex.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
-            hp_prop_tex.CreationNodeMask = 0;
-            hp_prop_tex.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
-            hp_prop_tex.Type = D3D12_HEAP_TYPE_CUSTOM;
-            hp_prop_tex.VisibleNodeMask = 0;
-        }
-
-        HRESULT res = PTR_D3D::ptr->GetDevice()->CreateCommittedResource
-        (
-            &hp_prop_tex,
-            D3D12_HEAP_FLAG_NONE,
-            &rc_desc_tex,
-            D3D12_RESOURCE_STATE_COPY_DEST,
-            nullptr,
-            IID_PPV_ARGS(&tex.rsc_ptr)
-        );
-        assert(!FAILED(res));
-
-        D3D12_SUBRESOURCE_DATA data = {};
-        {
-            data.pData = col;
-            data.RowPitch = tw * sizeof(col[0]);
-            data.SlicePitch = data.RowPitch * th;
-        }
-
-        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-        srvDesc.Format = rc_desc_tex.Format;
-        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-        srvDesc.Texture2D.MipLevels = 1;
-        PTR_D3D::ptr->GetDevice()->CreateShaderResourceView
-            (
-                tex.rsc_ptr,
-                &srvDesc,
-                tex.HCPU
-            );
-    
+        textures_.push_back(E_Tex);
     }
 }
 
@@ -90,6 +59,84 @@ void ResourceManager::Term()
 
     ALL_RELEASE_MODEL();
     ALL_RELEASE_TEX();
+
+    delete heap_;
+}
+
+void ResourceManager::MakeErrorTex(Texture* tex)
+{
+    const UINT Magenta = 0xFFFF00FF;
+
+    const auto th = 2u;     const auto tw = 2u;
+    const UINT h_and_w = th * tw;
+
+    UINT col[h_and_w];
+    for (auto i = 0u; i < h_and_w; i++) {
+        col[i] = Magenta;
+    }
+
+    D3D12_RESOURCE_DESC rc_desc_tex = {};
+    {
+        rc_desc_tex.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+        rc_desc_tex.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        rc_desc_tex.MipLevels = 1;
+        rc_desc_tex.DepthOrArraySize = 1;
+        rc_desc_tex.Flags = D3D12_RESOURCE_FLAG_NONE;
+        rc_desc_tex.Height = th;
+        rc_desc_tex.Width = tw;
+        rc_desc_tex.SampleDesc.Count = 1;
+        rc_desc_tex.SampleDesc.Quality = 0;
+        rc_desc_tex.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+    }
+
+    D3D12_HEAP_PROPERTIES hp_prop_tex = {};
+    {
+        hp_prop_tex.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
+        hp_prop_tex.CreationNodeMask = 0;
+        hp_prop_tex.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
+        hp_prop_tex.Type = D3D12_HEAP_TYPE_CUSTOM;
+        hp_prop_tex.VisibleNodeMask = 0;
+    }
+
+    HRESULT res = PTR_D3D::ptr->GetDevice()->CreateCommittedResource
+    (
+        &hp_prop_tex,
+        D3D12_HEAP_FLAG_NONE,
+        &rc_desc_tex,
+        D3D12_RESOURCE_STATE_COPY_DEST,
+        nullptr,
+        IID_PPV_ARGS(&tex->rsc_ptr)
+    );
+    assert(!FAILED(res));
+
+    D3D12_SUBRESOURCE_DATA data = {};
+    {
+        data.pData = col;
+        data.RowPitch = tw * sizeof(col[0]);
+        data.SlicePitch = data.RowPitch * th;
+    }
+
+    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    srvDesc.Format = rc_desc_tex.Format;
+    srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = 1;
+
+    PTR_D3D::ptr->GetDevice()->CreateShaderResourceView
+    (
+        tex->rsc_ptr,
+        &srvDesc,
+        tex->HCPU
+    );
+
+    tex->rsc_ptr->WriteToSubresource
+    (
+        0,
+        nullptr,
+        data.pData,
+        data.RowPitch,
+        data.SlicePitch
+    );
 }
 
 UINT ResourceManager::ModelLoad(std::wstring str)
@@ -233,6 +280,9 @@ UINT ResourceManager::ModelLoad(std::wstring str)
 
 UINT ResourceManager::TexLoad(std::wstring str)
 {
+    std::wstring path;
+    if (!FileLoad(str.c_str(), &path))    return 0;
+
     ID3D12Device* device_ = PTR_D3D::ptr->GetDevice();
 
     for (auto v = 0u; v < textures_.size();v++) {
@@ -241,9 +291,6 @@ UINT ResourceManager::TexLoad(std::wstring str)
 
     RTexture temp = {};
     HRESULT res = E_FAIL;
-
-    std::wstring path;
-    FileLoad(str.c_str(), &path);
 
     res = E_FAIL;
     //-------
@@ -296,6 +343,38 @@ UINT ResourceManager::TexLoad(std::wstring str)
     );
     if (FAILED(res)) return 0;
 
+    temp.tex_.rsc_ptr->WriteToSubresource
+    (
+        0,nullptr,
+        image->pixels,
+        image->rowPitch,
+        image->slicePitch
+    );
+
+    D3D12_SHADER_RESOURCE_VIEW_DESC rsc_v_desc = {};
+    {
+        rsc_v_desc.Format = rc_desc_tex.Format;
+        rsc_v_desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+        rsc_v_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        rsc_v_desc.Texture2D.MipLevels = rc_desc_tex.MipLevels;
+        rsc_v_desc.Texture2D.MostDetailedMip = 0;
+        rsc_v_desc.Texture2D.PlaneSlice = 0;
+        rsc_v_desc.Texture2D.ResourceMinLODClamp = 0.0f;
+    }
+
+    temp.tex_.HCPU = heap_->GetAndIncreCPU();
+    temp.tex_.HGPU = heap_->GetAndIncreGPU();
+    temp.Name_ = path.c_str();
+
+    device_->CreateShaderResourceView
+    (
+        temp.tex_.rsc_ptr,
+        &rsc_v_desc,
+        temp.tex_.HCPU
+    );
+
+    ResourceManager::textures_.push_back(temp);
+    return ResourceManager::textures_.size() - 1;
 }
 
 void ResourceManager::ModelFlush()
@@ -313,11 +392,13 @@ void ResourceManager::ModelFlush()
 
 void ResourceManager::TexFlush()
 {
-    for (auto pic : textures_) {
-
-        pic.Name_.clear();
-        pic.DHeap->Release();
+    for (auto& itr : textures_) {
+        itr.tex_.rsc_ptr->Release();
+        itr.Name_.clear();
     }
+    textures_.clear();
+
+    textures_.push_back(E_Tex);
 }
 
 void ResourceManager::ALL_RELEASE_MODEL()
@@ -339,7 +420,7 @@ void ResourceManager::ALL_RELEASE_MODEL()
         itr.info.clear();
         itr.Mesh_.clear();
         itr.Mtr_.clear();
-       
+        itr.Name_.clear();
     }
 
     models_.clear();
@@ -349,8 +430,8 @@ void ResourceManager::ALL_RELEASE_TEX()
 {
     for (auto& itr : textures_) {
         itr.tex_.rsc_ptr->Release();
-        itr.DHeap->Release();
+        itr.Name_.clear();
     }
-
     textures_.clear();
+
 }

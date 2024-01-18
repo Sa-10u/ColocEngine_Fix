@@ -53,6 +53,17 @@ D3D12_GPU_DESCRIPTOR_HANDLE DH::GetAndIncreGPU()
 	return temp;
 }
 
+void DH::ResetHandles(D3D12_CPU_DESCRIPTOR_HANDLE h_cpu, D3D12_GPU_DESCRIPTOR_HANDLE h_gpu)
+{
+	this->h_cpu = h_cpu;
+	this->h_gpu = h_gpu;
+}
+
+void DH::ResetIncre(UINT incre)
+{
+	this->incre_ = incre;
+}
+
 DH::~DH()
 {
 	(*ppHeap_)->Release();

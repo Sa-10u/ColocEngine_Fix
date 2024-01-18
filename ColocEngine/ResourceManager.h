@@ -1,11 +1,14 @@
 #pragma once
-#include"BUFFER.h"
 #include"Resource.h"
+#include"MACRO.h"
 
 namespace ResourceManager
 {
 	void Init();
 	void Term();
+
+	void MakeErrorTex(Texture* tex);
+
 
 	extern std::vector<RModel> models_;
 	extern std::vector<RTexture> textures_;
@@ -21,5 +24,11 @@ namespace ResourceManager
 
 	extern RModel E_Model;
 	extern RTexture E_Tex;
+
+	extern DH* heap_;
+
+	//-----------
+	extern const uint16_t MAX_Textures;
+	extern const uint16_t MAT_Models;
 };
 
