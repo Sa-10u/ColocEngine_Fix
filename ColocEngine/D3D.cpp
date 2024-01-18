@@ -406,91 +406,7 @@ bool D3d::InitGBO()
             if (FAILED(res)) return 0;
         }
     }
-    //-----------------------------------------------------------------------------------------*****
-    {
-        std::wstring tex_Path;
-        FileLoad(L"default.dds", &tex_Path);
-
-        TexMetadata data = {};
-        ScratchImage image = {};
-        const Image* rsc = nullptr;
-
-        res = LoadFromWICFile
-        (
-            tex_Path.c_str(),
-            WIC_FLAGS_NONE,
-            &data,
-            image
-        );
-
-        rsc = image.GetImage(0, 0, 0);
-
-        D3D12_RESOURCE_DESC rc_desc_tex = {};
-        {
-            rc_desc_tex.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-            rc_desc_tex.Format = rsc->format;
-            rc_desc_tex.MipLevels = 1;
-            rc_desc_tex.DepthOrArraySize = 1;
-            rc_desc_tex.Flags = D3D12_RESOURCE_FLAG_NONE;
-            rc_desc_tex.Height = rsc->height;
-            rc_desc_tex.Width = rsc->width;
-            rc_desc_tex.SampleDesc.Count = 1;
-            rc_desc_tex.SampleDesc.Quality = 1;
-            rc_desc_tex.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-        }
-
-        D3D12_HEAP_PROPERTIES hp_prop_tex = {};
-        {
-            hp_prop_tex.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
-            hp_prop_tex.CreationNodeMask = 0;
-            hp_prop_tex.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
-            hp_prop_tex.Type = D3D12_HEAP_TYPE_CUSTOM;
-            hp_prop_tex.VisibleNodeMask = 0;
-        }
-
-        res = device_->CreateCommittedResource
-        (
-            &hp_prop_tex,
-            D3D12_HEAP_FLAG_NONE,
-            &rc_desc_tex,
-            D3D12_RESOURCE_STATE_COPY_DEST,
-            nullptr,
-            IID_PPV_ARGS(&tex.rsc_ptr)
-        );
-        if (FAILED(res)) return 0;
-
-        res = tex.rsc_ptr->WriteToSubresource
-        (
-            0,
-            nullptr,
-            rsc->pixels,
-            rsc->rowPitch,
-            rsc->slicePitch
-        );
-        if (FAILED(res)) return 0;
-
-        tex.HCPU = DHH_CbSrUaV->GetAndIncreCPU();
-        tex.HGPU = DHH_CbSrUaV->GetAndIncreGPU();
-
-
-        D3D12_SHADER_RESOURCE_VIEW_DESC rsc_v_desc = {};
-        {
-            rsc_v_desc.Format = rc_desc_tex.Format;
-            rsc_v_desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-            rsc_v_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-            rsc_v_desc.Texture2D.MipLevels = rc_desc_tex.MipLevels;
-            rsc_v_desc.Texture2D.MostDetailedMip = 0;
-            rsc_v_desc.Texture2D.PlaneSlice = 0;
-            rsc_v_desc.Texture2D.ResourceMinLODClamp = 0.0f;
-        }
-
-        device_->CreateShaderResourceView
-        (
-            tex.rsc_ptr,
-            &rsc_v_desc,
-            tex.HCPU
-        );
-    }
+    
     //-----------------******
 
      //StructuredBuffer
@@ -761,7 +677,7 @@ bool D3d::InitGBO()
         D3D12_DESCRIPTOR_RANGE range_Tex = {};
         {
             range_Tex.BaseShaderRegister = 1792;
-            range_Tex.NumDescriptors = 1;
+            range_Tex.NumDescriptors = -1;
             range_Tex.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
             range_Tex.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
             range_Tex.RegisterSpace = 0;
@@ -772,7 +688,7 @@ bool D3d::InitGBO()
             r_param[TEX].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
             r_param[TEX].DescriptorTable.NumDescriptorRanges = 1;
             r_param[TEX].DescriptorTable.pDescriptorRanges = &range_Tex;
-            r_param[TEX].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+            r_param[TEX].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
         }
 
         D3D12_STATIC_SAMPLER_DESC sampler = {};
@@ -1247,8 +1163,8 @@ void D3d::TermGBO()
 void D3d::Run(int interval)
 {
     Update();
-    //write();
-    postEffect();
+    write();
+    //postEffect();
     render();
     present(0);
 
@@ -1325,7 +1241,8 @@ D3d::D3d()
 
 void D3d::write()
 {
-    auto handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
+    //auto handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
+    auto handle = h_RTV[IND_frame];
 
     enum RP
     {
@@ -1342,10 +1259,12 @@ void D3d::write()
         brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
         brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 
-        brr.Transition.pResource = post_;
+        //brr.Transition.pResource = post_;
+        brr.Transition.pResource = colbuf_[IND_frame];
         brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
-        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+        //brr.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
         brr.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
     }
     cmdlist_->ResourceBarrier(1, &brr);
@@ -1433,7 +1352,7 @@ void D3d::write()
         brr.Transition.pResource = post_;
         brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
     }
-    cmdlist_->ResourceBarrier(1, &brr);
+    //cmdlist_->ResourceBarrier(1, &brr);
 }
 
 void D3d::waitGPU()
