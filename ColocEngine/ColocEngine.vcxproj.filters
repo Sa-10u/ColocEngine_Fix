@@ -135,6 +135,9 @@
     <ClCompile Include="PSOManager.cpp">
       <Filter>System\source</Filter>
     </ClCompile>
+    <ClCompile Include="Resource.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinView.h">

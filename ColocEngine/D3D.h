@@ -80,8 +80,6 @@ private:
 	D3D12_RESOURCE_BARRIER brr;
 
 	//-----------------
-	ID3D12DescriptorHeap* heapCBV_SRV_UAV_;
-	ID3D12DescriptorHeap* postCBV_SRV_UAV_;
 
 	ID3D12RootSignature* rootsig_;
 	ID3D12RootSignature* postRTSG_;
@@ -137,9 +135,6 @@ private:
 
 	//-----
 	float backcolor_ [4];
-
-	DH* DHH_CbSrUaV;
-	DH* DHPost_CbSrUaV;
 };
 
 namespace PTR_D3D

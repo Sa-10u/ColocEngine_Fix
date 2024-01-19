@@ -25,6 +25,7 @@
     <ClCompile Include="LightManager.cpp" />
     <ClCompile Include="PSO.cpp" />
     <ClCompile Include="PSOManager.cpp" />
+    <ClCompile Include="Resource.cpp" />
     <ClCompile Include="WW_Play.cpp" />
     <ClCompile Include="S_Sound.cpp" />
     <ClCompile Include="S_Draw.cpp" />

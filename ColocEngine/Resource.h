@@ -6,6 +6,9 @@ class RTexture
 public:
 	Texture tex_;
 	std::wstring Name_;
+	bool is_using;
+
+	RTexture();
 };
 
 //------------------------------------------------
@@ -27,5 +30,5 @@ public:
 	std::vector<D3D12_INDEX_BUFFER_VIEW>  IBV;
 
 	std::wstring Name_;
-
+	RModel() = default;
 };

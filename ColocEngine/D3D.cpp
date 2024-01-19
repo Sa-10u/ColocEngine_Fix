@@ -281,17 +281,17 @@ bool D3d::InitGBO()
             {
                 hp_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
                 hp_desc.NodeMask = 0;
-                hp_desc.NumDescriptors = HPSIZE * FrameAmount;
+                hp_desc.NumDescriptors = (HPSIZE * FrameAmount) + ResourceManager::MAX_Textures;
                 hp_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
             }
 
             res = device_->CreateDescriptorHeap
             (
                 &hp_desc,
-                IID_PPV_ARGS(&heapCBV_SRV_UAV_)
+                IID_PPV_ARGS(&ResourceManager::heapCBV_SRV_UAV_)
             );
 
-            DHH_CbSrUaV = new DH(device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV), &heapCBV_SRV_UAV_);
+            ResourceManager::DHH_CbSrUaV = new DH(device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV), &ResourceManager::heapCBV_SRV_UAV_);
 
             if (FAILED(res)) return false;
         }
@@ -340,8 +340,8 @@ bool D3d::InitGBO()
 
             auto address = CB_Util[i]->GetGPUVirtualAddress();
 
-            CBV_Util[i].HCPU = DHH_CbSrUaV->GetAndIncreCPU();
-            CBV_Util[i].HGPU = DHH_CbSrUaV->GetAndIncreGPU();;
+            CBV_Util[i].HCPU = ResourceManager::DHH_CbSrUaV->GetAndIncreCPU();
+            CBV_Util[i].HGPU = ResourceManager::DHH_CbSrUaV->GetAndIncreGPU();;
             CBV_Util[i].desc.BufferLocation = address;
             CBV_Util[i].desc.SizeInBytes = sizeof(Util);
 
@@ -395,8 +395,8 @@ bool D3d::InitGBO()
 
             auto address = CB_CAM[i]->GetGPUVirtualAddress();
 
-            CBV_Cam[i].HCPU = DHH_CbSrUaV->GetAndIncreCPU();
-            CBV_Cam[i].HGPU = DHH_CbSrUaV->GetAndIncreGPU();;
+            CBV_Cam[i].HCPU = ResourceManager::DHH_CbSrUaV->GetAndIncreCPU();
+            CBV_Cam[i].HGPU = ResourceManager::DHH_CbSrUaV->GetAndIncreGPU();;
             CBV_Cam[i].desc.BufferLocation = address;
             CBV_Cam[i].desc.SizeInBytes = sizeof(Cam);
 
@@ -459,8 +459,8 @@ bool D3d::InitGBO()
                 srv.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
             }
 
-            SB_OI[i].HCPU = DHH_CbSrUaV->GetAndIncreCPU();
-            SB_OI[i].HGPU = DHH_CbSrUaV->GetAndIncreGPU();
+            SB_OI[i].HCPU = ResourceManager::DHH_CbSrUaV->GetAndIncreCPU();
+            SB_OI[i].HGPU = ResourceManager::DHH_CbSrUaV->GetAndIncreGPU();
 
             device_->CreateShaderResourceView
             (
@@ -520,8 +520,8 @@ bool D3d::InitGBO()
                 srv.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
             }
 
-            SB_MB[i].HCPU = DHH_CbSrUaV->GetAndIncreCPU();
-            SB_MB[i].HGPU = DHH_CbSrUaV->GetAndIncreGPU();
+            SB_MB[i].HCPU = ResourceManager::DHH_CbSrUaV->GetAndIncreCPU();
+            SB_MB[i].HGPU = ResourceManager::DHH_CbSrUaV->GetAndIncreGPU();
 
             device_->CreateShaderResourceView
             (
@@ -581,8 +581,8 @@ bool D3d::InitGBO()
                 srv.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
             }
 
-            SB_MTL[i].HCPU = DHH_CbSrUaV->GetAndIncreCPU();
-            SB_MTL[i].HGPU = DHH_CbSrUaV->GetAndIncreGPU();
+            SB_MTL[i].HCPU = ResourceManager::DHH_CbSrUaV->GetAndIncreCPU();
+            SB_MTL[i].HGPU = ResourceManager::DHH_CbSrUaV->GetAndIncreGPU();
 
             device_->CreateShaderResourceView
             (
@@ -1120,9 +1120,9 @@ bool D3d::InitPost()
     res = device_->CreateDescriptorHeap
     (
         &hpd_desc,
-        IID_PPV_ARGS(&postCBV_SRV_UAV_)
+        IID_PPV_ARGS(&ResourceManager::postCBV_SRV_UAV_)
     );
-    DHPost_CbSrUaV = new DH(device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV), &postCBV_SRV_UAV_);
+    ResourceManager::DHPost_CbSrUaV = new DH(device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV), &ResourceManager::postCBV_SRV_UAV_);
 
     if (FAILED(res)) return false;
 
@@ -1151,8 +1151,8 @@ void D3d::Termination()
     SAFE_RELEASE(swpchain_);
 
     SAFE_RELEASE(device_);
-    delete DHH_CbSrUaV;
-    delete DHPost_CbSrUaV;
+    delete ResourceManager::DHH_CbSrUaV;
+    delete ResourceManager::DHPost_CbSrUaV;
 
 }
 
@@ -1282,12 +1282,14 @@ void D3d::write()
         cmdlist_->OMSetRenderTargets(1, &handle, FALSE, &h_ZBV);
 
         cmdlist_->SetGraphicsRootSignature(rootsig_);
-        cmdlist_->SetDescriptorHeaps(1, DHH_CbSrUaV->ppHeap_);
+
+        cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
 
         cmdlist_->SetGraphicsRootConstantBufferView(CBU, CBV_Util[IND_frame].desc.BufferLocation);
         cmdlist_->SetGraphicsRootConstantBufferView(CBC, CBV_Cam[IND_frame].desc.BufferLocation);
 
-        cmdlist_->SetGraphicsRootDescriptorTable(TEX, tex.HGPU);
+        cmdlist_->SetGraphicsRootDescriptorTable(TEX, ResourceManager::E_Tex.tex_.HGPU);
+
         cmdlist_->SetGraphicsRootDescriptorTable(SBMTL, SB_MTL[IND_frame].HGPU);
         cmdlist_->SetGraphicsRootDescriptorTable(SBOI, SB_OI[IND_frame].HGPU);
         cmdlist_->SetGraphicsRootDescriptorTable(SBMB, SB_MB[IND_frame].HGPU);

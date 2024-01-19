@@ -8,47 +8,48 @@ namespace ResourceManager
     std::vector<RTexture> textures_;
     RModel E_Model;
     RTexture E_Tex;
-    DH* heap_;
     const uint16_t MAX_Textures = 1024;
     const uint16_t MAT_Models = 1024;
+
+    ID3D12DescriptorHeap* heapCBV_SRV_UAV_;
+    ID3D12DescriptorHeap* postCBV_SRV_UAV_;
+
+    DH* DHH_CbSrUaV;
+    DH* DHPost_CbSrUaV;
 }
 
 void ResourceManager::Init()
 {
-    {
-        auto r_hp = new ID3D12DescriptorHeap * ();
-        D3D12_DESCRIPTOR_HEAP_DESC desc = {};
-        {
-            desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-            desc.NodeMask = 0;
-            desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-            desc.NumDescriptors = MAX_Textures;
-        }
-
-        PTR_D3D::ptr->GetDevice()->CreateDescriptorHeap
-        (
-            &desc,
-            IID_PPV_ARGS(r_hp)
-        );
-
-        heap_ = new DH(PTR_D3D::ptr->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV), r_hp);
-    }
-//-------------------------------------------------
 	models_.clear();
 	textures_.clear();
 
     {
         Texture tex = {};
 
-        tex.HCPU = heap_->GetAndIncreCPU();
-        tex.HGPU = heap_->GetAndIncreGPU();
+        tex.HCPU = DHH_CbSrUaV->GetAndIncreCPU();
+        tex.HGPU = DHH_CbSrUaV->GetAndIncreGPU();
 
         MakeErrorTex(&tex);
         
         E_Tex.Name_ = L"TEXTURE_ERROR";
         E_Tex.tex_ = tex;
+        E_Tex.is_using = true;
 
         textures_.push_back(E_Tex);
+    }
+    //--------Alloc tex 
+
+    for (auto i = 1u; i < MAX_Textures;i++) {
+        Texture tex = {};
+
+        tex.HCPU = DHH_CbSrUaV->GetAndIncreCPU();
+        tex.HGPU = DHH_CbSrUaV->GetAndIncreGPU();
+
+        RTexture temp = {};
+        temp.tex_ = tex;
+        temp.is_using = false;
+
+        textures_.push_back(temp);
     }
 }
 
@@ -60,7 +61,6 @@ void ResourceManager::Term()
     ALL_RELEASE_MODEL();
     ALL_RELEASE_TEX();
 
-    delete heap_;
 }
 
 void ResourceManager::MakeErrorTex(Texture* tex)
@@ -289,8 +289,17 @@ UINT ResourceManager::TexLoad(std::wstring str)
         if (textures_[v].Name_ == str)	return v;
     }
 
-    RTexture temp = {};
+    auto index = NULL;
     HRESULT res = E_FAIL;
+
+    for (auto i = 0u; i < MAX_Textures; i++) {
+
+        if (textures_.at(i).is_using == false)
+        {
+            index = i;
+            break;
+        }
+    }
 
     res = E_FAIL;
     //-------
@@ -339,11 +348,11 @@ UINT ResourceManager::TexLoad(std::wstring str)
         &rc_desc_tex,
         D3D12_RESOURCE_STATE_COPY_DEST,
         nullptr,
-        IID_PPV_ARGS(&temp.tex_.rsc_ptr)
+        IID_PPV_ARGS(&textures_.at(index).tex_.rsc_ptr)
     );
     if (FAILED(res)) return 0;
 
-    temp.tex_.rsc_ptr->WriteToSubresource
+    textures_.at(index).tex_.rsc_ptr->WriteToSubresource
     (
         0,nullptr,
         image->pixels,
@@ -362,19 +371,16 @@ UINT ResourceManager::TexLoad(std::wstring str)
         rsc_v_desc.Texture2D.ResourceMinLODClamp = 0.0f;
     }
 
-    temp.tex_.HCPU = heap_->GetAndIncreCPU();
-    temp.tex_.HGPU = heap_->GetAndIncreGPU();
-    temp.Name_ = path.c_str();
+    textures_.at(index).Name_ = path.c_str();
 
     device_->CreateShaderResourceView
     (
-        temp.tex_.rsc_ptr,
+        textures_.at(index).tex_.rsc_ptr,
         &rsc_v_desc,
-        temp.tex_.HCPU
+        textures_.at(index).tex_.HCPU
     );
 
-    ResourceManager::textures_.push_back(temp);
-    return ResourceManager::textures_.size() - 1;
+    return index;
 }
 
 void ResourceManager::ModelFlush()

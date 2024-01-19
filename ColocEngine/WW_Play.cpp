@@ -8,6 +8,8 @@ void WW_Play::Initialize()
 {
 	md = ResourceManager::ModelLoad(L"TEST_MK.fbx");
 	md0 = ResourceManager::ModelLoad(L"Sphere.fbx");
+
+	ResourceManager::TexLoad(L"default.dds");
 }
 
 void WW_Play::Run(float tick)

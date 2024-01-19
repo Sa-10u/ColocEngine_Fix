@@ -11,7 +11,7 @@ namespace ResourceManager
 
 
 	extern std::vector<RModel> models_;
-	extern std::vector<RTexture> textures_;
+	extern std::vector<RTexture> textures_;	//fix vector to array
 	
 	UINT ModelLoad(std::wstring str);
 	UINT TexLoad(std::wstring str);
@@ -25,7 +25,11 @@ namespace ResourceManager
 	extern RModel E_Model;
 	extern RTexture E_Tex;
 
-	extern DH* heap_;
+	extern ID3D12DescriptorHeap* heapCBV_SRV_UAV_;
+	extern ID3D12DescriptorHeap* postCBV_SRV_UAV_;
+
+	extern DH* DHH_CbSrUaV;
+	extern DH* DHPost_CbSrUaV;
 
 	//-----------
 	extern const uint16_t MAX_Textures;
