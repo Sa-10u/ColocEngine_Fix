@@ -25,3 +25,4 @@ float3 LineNoise(float val, float am, float f)
     
     return float3(1, 1, 1);
 }
+

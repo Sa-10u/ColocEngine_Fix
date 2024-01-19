@@ -55,6 +55,7 @@ namespace SHADER_FILENAME
 }
 
 char* wtoc(const wchar_t* str);
+wchar_t* ctow(const char* str);
 
 class DH
 {

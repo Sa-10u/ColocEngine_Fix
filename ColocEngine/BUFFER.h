@@ -92,11 +92,11 @@ struct MATERIAL
 	XMFLOAT3 emis_;
 	float val0;
 
-	string dmap_;	//for diffuse . A = Coefficient
-	string smap_;	//for specular .A = Coefficient
-	string emap_;	//for emission .A = Coefficient
-	string nmap_;	//for normal 
-	string ESBAmap_;//R = emissive intensity, G = shineness , B = bamp , A = alpha
+	uint16_t dmap_;	//for diffuse . A = Coefficient
+	uint16_t smap_;	//for specular .A = Coefficient
+	uint16_t emap_;	//for emission .A = Coefficient
+	uint16_t nmap_;	//for normal 
+	uint16_t ESBAmap_;//R = emissive intensity, G = shineness , B = bamp , A = alpha
 
 	MATERIAL();
 };

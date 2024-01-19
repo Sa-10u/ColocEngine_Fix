@@ -3,7 +3,7 @@
 #include"Resource.h"
 #include<cstdint>
 #include"FileLoader.h"
-
+#include "ResourceManager.h"
 
 static constexpr unsigned int TRIANGLE = 3;
 
@@ -154,8 +154,10 @@ void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src)
         );
     }
 
-    auto n = src->mNumBones;
-    mesh.indexes_.resize(src->mNumFaces * TRIANGLE);
+    {
+        auto n = src->mNumBones;
+        mesh.indexes_.resize(src->mNumFaces * TRIANGLE);
+    }
 
     for (auto i = 0;i < src->mNumFaces;i++) {
 
@@ -247,69 +249,88 @@ void MeshLoader::ParseMaterial(MATERIAL& mtl, const aiMaterial* src)
         if(src->GetTexture(aiTextureType_DIFFUSE ,0 ,&path) == AI_SUCCESS)
         {
             auto str = string(path.C_Str());
-            mtl.dmap_ = FileNormalization(&str);
+            str = FileNormalization(&str);
+
+            auto wstr = ctow(str.c_str());
+            mtl.dmap_ = ResourceManager::TexLoad(wstr);
         }
         else
         {
-            mtl.dmap_.clear();
+            mtl.dmap_ = NULL;
         }
 
         __CREATE("EMISSION_MAP") 
         if (src->GetTexture(aiTextureType_EMISSIVE, 0, &path) == AI_SUCCESS)
         {
             auto str = string(path.C_Str());
-            mtl.emap_ = FileNormalization(&str);
+            str = FileNormalization(&str);
+
+            auto wstr = ctow(str.c_str());
+            mtl.emap_ = ResourceManager::TexLoad(wstr);
         }
         else
         {
-            mtl.emap_.clear();
+            mtl.emap_ = NULL;
         }
 
         __CREATE("NORMAL_MAP") 
         if (src->GetTexture(aiTextureType_NORMALS, 0, &path) == AI_SUCCESS)
         {
             auto str = string(path.C_Str());
-            mtl.nmap_ = FileNormalization(&str);
+            str = FileNormalization(&str);
+
+            auto wstr = ctow(str.c_str());
+            mtl.nmap_ = ResourceManager::TexLoad(wstr);
         }
         else
         {
-            mtl.nmap_.clear();
+            mtl.nmap_ = NULL;
         }
 
         __CREATE("SPECULAR_MAP") 
         if (src->GetTexture(aiTextureType_SPECULAR, 0, &path) == AI_SUCCESS)
         {
             auto str = string(path.C_Str());
-            mtl.smap_ = FileNormalization(&str);
+            str = FileNormalization(&str);
+
+            auto wstr = ctow(str.c_str());
+            mtl.smap_ = ResourceManager::TexLoad(wstr);
         }
         else
         {
-            mtl.smap_.clear();
+            mtl.smap_ = NULL;
         }
 
         __CREATE("ALPHA_MAP") 
         if (src->GetTexture(aiTextureType_OPACITY, 0, &path) == AI_SUCCESS)
         {
             auto str = string(path.C_Str());
-            mtl.ESBAmap_ = FileNormalization(&str);
+            str = FileNormalization(&str);
+
+            auto wstr = ctow(str.c_str());
+            mtl.ESBAmap_ = ResourceManager::TexLoad(wstr);
         }
         else
         {
-            mtl.ESBAmap_.clear();
+            mtl.ESBAmap_ = NULL;
         }
 
         __CREATE("SHININESS_MAP") 
-        if (src->GetTexture(aiTextureType_SHININESS, 0, &path) == AI_SUCCESS)
         {
             auto str = string(path.C_Str());
-            mtl.ESBAmap_ = FileNormalization(&str);
+            str = FileNormalization(&str);
+
+            auto wstr = ctow(str.c_str());
+            mtl.ESBAmap_ = ResourceManager::TexLoad(wstr);
         }
 
         __CREATE("EMISSIVE_INTENCITY_MAP") 
-        if (src->GetTexture(aiTextureType_EMISSIVE, 0, &path) == AI_SUCCESS)
         {
             auto str = string(path.C_Str());
-            mtl.ESBAmap_ = FileNormalization(&str);
+            str = FileNormalization(&str);
+
+            auto wstr = ctow(str.c_str());
+            mtl.ESBAmap_ = ResourceManager::TexLoad(wstr);
         }
     }
 }

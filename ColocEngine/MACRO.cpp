@@ -31,6 +31,16 @@ char* wtoc(const wchar_t* str)
 	return buf;
 }
 
+wchar_t* ctow(const char* str)
+{
+	auto len = MultiByteToWideChar(CP_ACP, 0, str, -1, (wchar_t*)NULL , 0);
+	auto buf = new wchar_t[len];
+
+	MultiByteToWideChar(CP_ACP, 0, str, -1, buf, len);
+
+	return buf;
+}
+
 DH::DH(UINT incre, ID3D12DescriptorHeap** pheap) :incre_(incre), ppHeap_(pheap)
 {
 	h_cpu = (*ppHeap_)->GetCPUDescriptorHandleForHeapStart();

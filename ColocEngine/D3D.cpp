@@ -1318,11 +1318,11 @@ void D3d::write()
                 }
 
                 {
-                    SB_MB[IND_frame].view[v].isD = itr.Mtr_[v].dmap_ != "" ? true : false;
-                    SB_MB[IND_frame].view[v].isE = itr.Mtr_[v].emap_ != "" ? true : false;
-                    SB_MB[IND_frame].view[v].isESB = itr.Mtr_[v].ESBAmap_ != "" ? true : false;
-                    SB_MB[IND_frame].view[v].isN = itr.Mtr_[v].nmap_ != "" ? true : false;
-                    SB_MB[IND_frame].view[v].isS = itr.Mtr_[v].smap_ != "" ? true : false;
+                    SB_MB[IND_frame].view[v].isD = itr.Mtr_[v].dmap_;
+                    SB_MB[IND_frame].view[v].isE = itr.Mtr_[v].emap_;
+                    SB_MB[IND_frame].view[v].isESB = itr.Mtr_[v].ESBAmap_;
+                    SB_MB[IND_frame].view[v].isN = itr.Mtr_[v].nmap_;
+                    SB_MB[IND_frame].view[v].isS = itr.Mtr_[v].smap_;
                 }
 
                 cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
