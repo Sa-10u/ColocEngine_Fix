@@ -12,7 +12,7 @@ enum FLAG
 	USER_5 = 128,
 };
 
-Light::Light():col(Color(1,1,1,10)),flag(ON)
+Light::Light():col(Color(1,1,1)),flag(ON)
 {
 }
 
@@ -28,6 +28,16 @@ bool Light::isON()
 bool Light::isDisposal()
 {
 	return flag & DISPOSAL;
+}
+
+void Light::ToDisposal()
+{
+	flag &= ~DISPOSAL;
+}
+
+void Light::ToOFF()
+{
+	flag &= ~ON;
 }
 
 P_Light::P_Light():pos(Position(0,0,0))

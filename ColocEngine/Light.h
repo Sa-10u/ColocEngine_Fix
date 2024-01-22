@@ -7,13 +7,15 @@ typedef DirectX::XMFLOAT3 Color;
 struct Light
 {
 	Light();
-	virtual ~Light();
+	virtual ~Light() = 0;
 
 	bool isON();
 	bool isDisposal();
 
-	Color col;
+	void ToOFF();
+	void ToDisposal();
 
+	Color col;
 	int flag;
 	float intensity;
 };

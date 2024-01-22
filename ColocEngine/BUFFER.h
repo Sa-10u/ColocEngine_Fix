@@ -175,6 +175,12 @@ struct alignas(256) Cam
 	XMFLOAT3 tgt;
 };
 
+struct alignas(256)Lights
+{
+	//p,d,a
+	
+};
+
 template <typename T>
 struct CBUFFERVIEW
 {
