@@ -2,7 +2,7 @@
 #include <cstdint>
 #include"C_Trans.h"
 
-typedef DirectX::XMFLOAT4 Color;
+typedef DirectX::XMFLOAT3 Color;
 
 struct Light
 {
@@ -14,7 +14,8 @@ struct Light
 
 	Color col;
 
-	short flag;
+	int flag;
+	float intensity;
 };
 
 struct P_Light : Light

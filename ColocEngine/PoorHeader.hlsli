@@ -1,3 +1,5 @@
+static const uint MAX_LIGHT = 256;
+
 struct VSinput
 {
 	float3 pos	: POSITION;
@@ -65,11 +67,29 @@ struct Material
 	float val0;	
 };
 
+//-------------------
+
 struct P_LIGHT
 {
-	float4 col;
+	float3 col;
+	float inten;
 	float3 pos;
 	float  isON;
+};
+
+struct D_LIGHT
+{
+	float3 col;
+	float inten;
+	float3 pos;
+	float  isON;
+};
+
+struct A_LIGHT
+{
+	float3 col;
+	float inten;
+	float isON;
 };
 
 //------------------------
@@ -87,7 +107,7 @@ cbuffer CAM	:register(b256)
 	float3 tgt;
 };
 
-cbuffer Light : register(b512)
+cbuffer Light_cnt : register(b512)
 {
 	uint point_cnt;
 	uint dir_cnt;
@@ -96,6 +116,13 @@ cbuffer Light : register(b512)
 	uint vol_cnt;
 	uint spot_cnt;
 }
+
+cbuffer Lights : register (b768)
+{
+	P_LIGHT[MAX_LIGHT] pl;
+	D_LIGHT[MAX_LISHT] dl;
+	A_LIGHT[MAX_LIGHT] al;
+};
 
 StructuredBuffer<PerInstance> Data	: register(t0);
 StructuredBuffer<MapBOOL>	Map	: register(t512);
