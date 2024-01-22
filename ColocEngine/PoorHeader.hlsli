@@ -119,9 +119,9 @@ cbuffer Light_cnt : register(b512)
 
 cbuffer Lights : register (b768)
 {
-	P_LIGHT[MAX_LIGHT] pl;
-	D_LIGHT[MAX_LISHT] dl;
-	A_LIGHT[MAX_LIGHT] al;
+	P_LIGHT pl[MAX_LIGHT];
+	D_LIGHT dl[MAX_LIGHT];
+	A_LIGHT al[MAX_LIGHT];
 };
 
 StructuredBuffer<PerInstance> Data	: register(t0);

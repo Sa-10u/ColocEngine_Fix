@@ -23,7 +23,7 @@ struct Light
 struct P_Light : Light
 {
 	P_Light();
-	~P_Light();
+	~P_Light() override;
 
 	Position pos;
 };
@@ -31,7 +31,7 @@ struct P_Light : Light
 struct D_Light : Light
 {
 	D_Light();
-	~D_Light();
+	~D_Light() override;
 
 	Position pos;
 	Rotation rot;
@@ -41,5 +41,5 @@ struct D_Light : Light
 struct A_Light : Light
 {
 	A_Light();
-	~A_Light();
+	~A_Light() override;
 };

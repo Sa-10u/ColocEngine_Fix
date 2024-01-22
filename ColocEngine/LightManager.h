@@ -1,8 +1,10 @@
 #pragma once
-#include"Light.h"
-#include<vector>
+#include<array>
 #include<typeinfo>
 #include<cstdint>
+#include<d3d12.h>
+#include"Light.h"
+#include"BUFFER.h"
 
 static enum FLAG
 {
@@ -18,9 +20,23 @@ static enum FLAG
 
 namespace LightManager
 {
-	extern std::vector<P_Light> PointLights;
-	extern std::vector<D_Light> DirLights;
-	extern std::vector<A_Light> AmbLights;
+	constexpr uint16_t Lights_MAX = 256;
+
+	struct Lights
+	{
+		std::array<P_Light, Lights_MAX> point;
+		std::array<D_Light, Lights_MAX> dir;
+		std::array<A_Light, Lights_MAX> amb;
+	};
+	CBUFFERVIEW<Lights> lights;
+
+	enum KIND
+	{
+		P = 0,
+		D,
+		A,
+		AMMOUNT
+	};
 
 	void Init();
 	void Term();
@@ -30,6 +46,11 @@ namespace LightManager
 
 		template<class lgt>
 	void DisposalLight(uint32_t ind);
+
+	//-------------
+	D3D12_CONSTANT_BUFFER_VIEW_DESC desc;
+	D3D12_CPU_DESCRIPTOR_HANDLE HCPU;
+	D3D12_GPU_DESCRIPTOR_HANDLE HGPU;
 };
 
 namespace LightManager
@@ -37,60 +58,29 @@ namespace LightManager
 template<class lgt>
 	uint32_t CreateLight(lgt l)
 	{
-		if (typeid(P_Light) == typeid(lgt))
-		{
-			for (auto ind = 0; ind < PointLights.size();ind++) {
+		auto itr = 0u;
 
-				if (PointLights[ind].isDisposal()) { PointLights[ind] = l; PointLights[ind].flag = ON; return ind; }
+		auto func = [&](Light* type , uint32_t size) 
+		{
+			if (typeid(type[0]) == typeid(l))
+			{
+				for (itr = 0u; itr < size; itr++) {
+
+					if (type[itr].isDisposal()) { type[itr] = l; return true; }
+				}
 			}
 
-			PointLights.push_back(l);
-			return PointLights.size() - 1;
-		}
+			return false;
+		};
 
-		if (typeid(D_Light) == typeid(lgt))
-		{
-			for (auto ind = 0; ind < DirLights.size(); ind++) {
+		auto b = func(lights.ptr->point.data(), lights.ptr->point.size());
 
-				if (DirLights[ind].isDisposal()) { DirLights[ind] = l; DirLights[ind].flag = ON; return ind; }
-			}
-
-			DirLights.push_back(l);
-			return DirLights.size() - 1;
-		}
-
-		if (typeid(A_Light) == typeid(lgt))
-		{
-			for (auto ind = 0; ind < AmbLights.size(); ind++) {
-
-				if (AmbLights[ind].isDisposal()) { AmbLights[ind] = l; AmbLights[ind].flag = ON; return ind; }
-			}
-
-			AmbLights.push_back(l);
-			return AmbLights.size() - 1;
-		}
-
-
-		return 0;
 	}
 
 template<class lgt>
 	void DisposalLight(uint32_t ind)
 	{
-		if (typeid(P_Light) == typeid(lgt))
-		{
-			PointLights[ind].flag = DISPOSAL;
-		}
-
-		if (typeid(D_Light) == typeid(lgt))
-		{
-			DirLights[ind].flag = DISPOSAL;
-		}
-
-		if (typeid(A_Light) == typeid(lgt))
-		{
-			AmbLights[ind].flag = DISPOSAL;
-		}
+	
 	};
 	;
 }

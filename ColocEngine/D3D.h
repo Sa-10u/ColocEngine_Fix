@@ -100,6 +100,7 @@ private:
 ;
 	CBUFFERVIEW<Util>			 CBV_Util[FrameAmount];
 	CBUFFERVIEW<Cam>			 CBV_Cam[FrameAmount];
+
 	struct CBUFFER_LIGHT
 	{
 		D3D12_CONSTANT_BUFFER_VIEW_DESC desc;

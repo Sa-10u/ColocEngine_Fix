@@ -9,6 +9,10 @@ using std::string;
 using std::vector;
 using namespace DirectX;
 
+class P_Light;
+class D_Light;
+class A_Light;
+
 class RModel;
 
 struct SIMPLEVERTEX
@@ -173,12 +177,6 @@ struct alignas(256) Cam
 {
 	XMFLOAT3 pos;
 	XMFLOAT3 tgt;
-};
-
-struct alignas(256)Lights
-{
-	//p,d,a
-	
 };
 
 template <typename T>

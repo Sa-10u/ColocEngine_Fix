@@ -122,7 +122,7 @@ bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
     );
     if (FAILED(res)) return FAIL;
 
-    D3D12_DESCRIPTOR_HEAP_DESC hpdesc;
+    D3D12_DESCRIPTOR_HEAP_DESC hpdesc = {};
     {
         hpdesc.NumDescriptors = FrameAmount;
         hpdesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
@@ -591,6 +591,8 @@ bool D3d::InitGBO()
                 SB_MTL[i].HCPU
             );
         }
+
+
     }
     //--------------*****
 
@@ -1306,7 +1308,7 @@ void D3d::write()
             auto v = 0u;
             memcpy(SB_OI[IND_frame].view, itr.info.data(), sizeof(ObjInfo) * itr.info.size());
 
-            for (auto cnt : itr.Mesh_) {
+            for (auto& cnt : itr.Mesh_) {
 
                 {
                     SB_MTL[IND_frame].view[v].alp = itr.Mtr_[v].alpha_;
