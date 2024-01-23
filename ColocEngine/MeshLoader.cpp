@@ -7,7 +7,7 @@
 
 static constexpr unsigned int TRIANGLE = 3;
 
-const char* UrevType[] = 
+const char* UrevType[] =
 {
     ""
 };
@@ -88,7 +88,7 @@ bool MeshLoader::Load(const wchar_t* file, RModel* ptr)
     auto scene = imp.ReadFile(path, flag);
     if (scene == nullptr)    return false;
 
-//--------------------------------------------
+    //--------------------------------------------
     ptr->Mesh_.clear();
     ptr->Mesh_.resize(scene->mNumMeshes);
     for (size_t i = 0; i < ptr->Mesh_.size(); i++) {
@@ -96,28 +96,28 @@ bool MeshLoader::Load(const wchar_t* file, RModel* ptr)
         const auto pm = scene->mMeshes[i];
         ParseMesh(ptr->Mesh_[i], pm);
     }
-//--------------------------------------------
+    //--------------------------------------------
     ptr->Mtr_.clear();
     ptr->Mtr_.resize(scene->mNumMaterials);
     for (size_t i = 0; i < ptr->Mtr_.size(); i++) {
 
-        
+
         const auto pm = scene->mMaterials[i];
         ParseMaterial(ptr->Mtr_[i], pm);
     }
-//--------------------------------------------
+    //--------------------------------------------
     ptr->TexName_.clear();
     ptr->TexName_.resize(scene->mNumTextures);
     for (auto i = 0u; i < scene->mNumMaterials; i++) {
 
     }
- //----------
-    
+    //----------
+
     for (size_t i = 0; i < ptr->Mesh_.size(); i++) {
         ptr->Mesh_[i].bnsinfo_.clear();
         ptr->Mesh_[i].bnsinfo_.resize(ptr->Mesh_[i].vtcs_.size());
         const auto pm = scene->mMeshes[i];
-       
+
     }
 
     scene = nullptr;
@@ -130,7 +130,7 @@ void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src)
     mesh.ID_Material = src->mMaterialIndex;
 
     aiVector3D vecdef(0.0f, 0.0f, 0.0f);
-    
+
     mesh.vtcs_.resize(src->mNumVertices);
 
     for (auto i = 0u; i < src->mNumVertices; i++) {
@@ -138,11 +138,11 @@ void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src)
         auto pos = &(src->mVertices[i]);
         auto norm = &(src->mNormals[i]);
         auto uv = (src->HasTextureCoords(0)) ? &(src->mTextureCoords[0][i]) : &vecdef;
-        auto tan =(src->HasTangentsAndBitangents())? & (src->mTangents[i]) : &vecdef;
+        auto tan = (src->HasTangentsAndBitangents()) ? &(src->mTangents[i]) : &vecdef;
         auto bitan = (src->HasTangentsAndBitangents()) ? &(src->mBitangents[i]) : &vecdef;
         auto Mtl_ID = mesh.ID_Material;
         ParseUV(*uv);
-       
+
         mesh.vtcs_[i] = VERTEX
         (
             XMFLOAT3(pos->x, pos->y, pos->z),
@@ -159,7 +159,7 @@ void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src)
         mesh.indexes_.resize(src->mNumFaces * TRIANGLE);
     }
 
-    for (auto i = 0;i < src->mNumFaces;i++) {
+    for (auto i = 0; i < src->mNumFaces; i++) {
 
         const auto& face = src->mFaces[i];
 
@@ -174,26 +174,26 @@ void MeshLoader::ParseMaterial(MATERIAL& mtl, const aiMaterial* src)
     {
         aiColor3D coltemp(0.5f, 0.5f, 0.5f);
         auto ResetColor = [&]()
-            {
-                coltemp.r = 0.5f;
-                coltemp.g = 0.5f;
-                coltemp.b = 0.5f;
-            };
+        {
+            coltemp.r = 0.5f;
+            coltemp.g = 0.5f;
+            coltemp.b = 0.5f;
+        };
 
         __CREATE("DIFFUSE")
-             if (src->Get(AI_MATKEY_COLOR_DIFFUSE, coltemp) == AI_SUCCESS)
-             {
-                 mtl.dif_.x = coltemp.r;
-                 mtl.dif_.y = coltemp.g;
-                 mtl.dif_.z = coltemp.b;
-             }
-             else
-             {
-                 ResetColor();
-                 mtl.dif_.x = coltemp.r;
-                 mtl.dif_.y = coltemp.g;
-                 mtl.dif_.z = coltemp.b;
-             }
+            if (src->Get(AI_MATKEY_COLOR_DIFFUSE, coltemp) == AI_SUCCESS)
+            {
+                mtl.dif_.x = coltemp.r;
+                mtl.dif_.y = coltemp.g;
+                mtl.dif_.z = coltemp.b;
+            }
+            else
+            {
+                ResetColor();
+                mtl.dif_.x = coltemp.r;
+                mtl.dif_.y = coltemp.g;
+                mtl.dif_.z = coltemp.b;
+            }
 
         __CREATE("SPECULAR")
             if (src->Get(AI_MATKEY_COLOR_SPECULAR, coltemp) == AI_SUCCESS)
@@ -209,28 +209,28 @@ void MeshLoader::ParseMaterial(MATERIAL& mtl, const aiMaterial* src)
                 mtl.spec_.y = coltemp.g;
                 mtl.spec_.z = coltemp.b;
             }
-        
+
         __CREATE("SHININESS")   auto val = 0.0f;
-            if (src->Get(AI_MATKEY_SHININESS, val) == AI_SUCCESS)
-            {
-                mtl.shin_ = val;
-            }
-            else
-            {
-                mtl.shin_ = val;
-            }
+        if (src->Get(AI_MATKEY_SHININESS, val) == AI_SUCCESS)
+        {
+            mtl.shin_ = val;
+        }
+        else
+        {
+            mtl.shin_ = val;
+        }
 
         __CREATE("ALPHA")   val = 1.0f;
-            if (src->Get(AI_MATKEY_OPACITY, val) == AI_SUCCESS)
-            {
-                mtl.alpha_ = val;
-            }
-            else
-            {
-                mtl.shin_ = val;
-            }
+        if (src->Get(AI_MATKEY_OPACITY, val) == AI_SUCCESS)
+        {
+            mtl.alpha_ = val;
+        }
+        else
+        {
+            mtl.shin_ = val;
+        }
 
-        __CREATE("EMISSION")   
+        __CREATE("EMISSION")
             if (src->Get(AI_MATKEY_EMISSIVE_INTENSITY, coltemp) == AI_SUCCESS)
             {
                 mtl.emis_.x = coltemp.r;
@@ -244,9 +244,9 @@ void MeshLoader::ParseMaterial(MATERIAL& mtl, const aiMaterial* src)
                 mtl.emis_.y = coltemp.g;
                 mtl.emis_.z = coltemp.b;
             }
-            
+
         __CREATE("DIFFUSE_MAP") aiString path = {};
-        if(src->GetTexture(aiTextureType_DIFFUSE ,0 ,&path) == AI_SUCCESS)
+        if (src->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS)
         {
             auto str = string(path.C_Str());
             str = FileNormalization(&str);
@@ -259,50 +259,63 @@ void MeshLoader::ParseMaterial(MATERIAL& mtl, const aiMaterial* src)
             mtl.dmap_ = NULL;
         }
 
-        __CREATE("EMISSION_MAP") 
-        if (src->GetTexture(aiTextureType_EMISSIVE, 0, &path) == AI_SUCCESS)
-        {
-            auto str = string(path.C_Str());
-            str = FileNormalization(&str);
+        __CREATE("EMISSION_MAP")
+            if (src->GetTexture(aiTextureType_EMISSIVE, 0, &path) == AI_SUCCESS)
+            {
+                auto str = string(path.C_Str());
+                str = FileNormalization(&str);
 
-            auto wstr = ctow(str.c_str());
-            mtl.emap_ = ResourceManager::TexLoad(wstr);
-        }
-        else
-        {
-            mtl.emap_ = NULL;
-        }
+                auto wstr = ctow(str.c_str());
+                mtl.emap_ = ResourceManager::TexLoad(wstr);
+            }
+            else
+            {
+                mtl.emap_ = NULL;
+            }
 
-        __CREATE("NORMAL_MAP") 
-        if (src->GetTexture(aiTextureType_NORMALS, 0, &path) == AI_SUCCESS)
-        {
-            auto str = string(path.C_Str());
-            str = FileNormalization(&str);
+        __CREATE("NORMAL_MAP")
+            if (src->GetTexture(aiTextureType_NORMALS, 0, &path) == AI_SUCCESS)
+            {
+                auto str = string(path.C_Str());
+                str = FileNormalization(&str);
 
-            auto wstr = ctow(str.c_str());
-            mtl.nmap_ = ResourceManager::TexLoad(wstr);
-        }
-        else
-        {
-            mtl.nmap_ = NULL;
-        }
+                auto wstr = ctow(str.c_str());
+                mtl.nmap_ = ResourceManager::TexLoad(wstr);
+            }
+            else
+            {
+                mtl.nmap_ = NULL;
+            }
 
-        __CREATE("SPECULAR_MAP") 
-        if (src->GetTexture(aiTextureType_SPECULAR, 0, &path) == AI_SUCCESS)
-        {
-            auto str = string(path.C_Str());
-            str = FileNormalization(&str);
+        __CREATE("SPECULAR_MAP")
+            if (src->GetTexture(aiTextureType_SPECULAR, 0, &path) == AI_SUCCESS)
+            {
+                auto str = string(path.C_Str());
+                str = FileNormalization(&str);
 
-            auto wstr = ctow(str.c_str());
-            mtl.smap_ = ResourceManager::TexLoad(wstr);
-        }
-        else
-        {
-            mtl.smap_ = NULL;
-        }
+                auto wstr = ctow(str.c_str());
+                mtl.smap_ = ResourceManager::TexLoad(wstr);
+            }
+            else
+            {
+                mtl.smap_ = NULL;
+            }
 
-        __CREATE("ALPHA_MAP") 
-        if (src->GetTexture(aiTextureType_OPACITY, 0, &path) == AI_SUCCESS)
+        __CREATE("ALPHA_MAP")
+            if (src->GetTexture(aiTextureType_OPACITY, 0, &path) == AI_SUCCESS)
+            {
+                auto str = string(path.C_Str());
+                str = FileNormalization(&str);
+
+                auto wstr = ctow(str.c_str());
+                mtl.ESBAmap_ = ResourceManager::TexLoad(wstr);
+            }
+            else
+            {
+                mtl.ESBAmap_ = NULL;
+            }
+
+        __CREATE("SHININESS_MAP")
         {
             auto str = string(path.C_Str());
             str = FileNormalization(&str);
@@ -310,21 +323,8 @@ void MeshLoader::ParseMaterial(MATERIAL& mtl, const aiMaterial* src)
             auto wstr = ctow(str.c_str());
             mtl.ESBAmap_ = ResourceManager::TexLoad(wstr);
         }
-        else
-        {
-            mtl.ESBAmap_ = NULL;
-        }
 
-        __CREATE("SHININESS_MAP") 
-        {
-            auto str = string(path.C_Str());
-            str = FileNormalization(&str);
-
-            auto wstr = ctow(str.c_str());
-            mtl.ESBAmap_ = ResourceManager::TexLoad(wstr);
-        }
-
-        __CREATE("EMISSIVE_INTENCITY_MAP") 
+        __CREATE("EMISSIVE_INTENCITY_MAP")
         {
             auto str = string(path.C_Str());
             str = FileNormalization(&str);
@@ -357,7 +357,7 @@ void MeshLoader::UVCheck(char* str)
     auto type = FileType(&js);
 
     NormU = &MeshLoader::UnReverse;
-    
+
     for (auto i = 0u; i < U_TYPESIZE; i++) {
 
         if (type == UrevType[i])
@@ -407,5 +407,5 @@ bool LoadMesh(const wchar_t* file, RModel* ptr)
 {
     MeshLoader ml = {};
 
-    return (ml.Load(file, ptr->Mesh_,ptr->Mtr_));
+    return (ml.Load(file, ptr->Mesh_, ptr->Mtr_));
 }

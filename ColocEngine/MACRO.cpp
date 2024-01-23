@@ -33,7 +33,7 @@ char* wtoc(const wchar_t* str)
 
 wchar_t* ctow(const char* str)
 {
-	auto len = MultiByteToWideChar(CP_ACP, 0, str, -1, (wchar_t*)NULL , 0);
+	auto len = MultiByteToWideChar(CP_ACP, 0, str, -1, (wchar_t*)NULL, 0);
 	auto buf = new wchar_t[len];
 
 	MultiByteToWideChar(CP_ACP, 0, str, -1, buf, len);

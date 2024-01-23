@@ -122,7 +122,7 @@ bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
     );
     if (FAILED(res)) return FAIL;
 
-    D3D12_DESCRIPTOR_HEAP_DESC hpdesc = {};
+    D3D12_DESCRIPTOR_HEAP_DESC hpdesc;
     {
         hpdesc.NumDescriptors = FrameAmount;
         hpdesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
@@ -297,7 +297,7 @@ bool D3d::InitGBO()
         }
     }
 
- //------------------------
+    //------------------------
     {
         D3D12_HEAP_PROPERTIES hp_proc_c = {};
         {
@@ -406,7 +406,7 @@ bool D3d::InitGBO()
             if (FAILED(res)) return 0;
         }
     }
-    
+
     //-----------------******
 
      //StructuredBuffer
@@ -591,8 +591,6 @@ bool D3d::InitGBO()
                 SB_MTL[i].HCPU
             );
         }
-
-
     }
     //--------------*****
 
@@ -606,7 +604,7 @@ bool D3d::InitGBO()
             SB_OI,
             SB_MB,
             TEX,
-            
+
             Amount
         };
 
@@ -734,7 +732,7 @@ bool D3d::InitGBO()
             D3D_ROOT_SIGNATURE_VERSION_1_0,
             &S_blob,
             &E_blob
-        ); 
+        );
         if (FAILED(res))     return 0;
 
         res = device_->CreateRootSignature
@@ -885,7 +883,7 @@ bool D3d::InitPost()
         );
         if (FAILED(res)) return false;
     }
-//-----------------------------------------
+    //-----------------------------------------
 
     {
         desc_hp.NumDescriptors = 1;
@@ -909,7 +907,7 @@ bool D3d::InitPost()
             &desc_prtv,
             postRTV_->GetCPUDescriptorHandleForHeapStart()
         );
-//-------------------------------------------------------------
+        //-------------------------------------------------------------
 
         {
             desc_hp.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -935,10 +933,10 @@ bool D3d::InitPost()
                 post_,
                 &desc_psrv,
                 postSRV_->GetCPUDescriptorHandleForHeapStart()
-            ); 
+            );
         }
     }
-//----------------------------------------------
+    //----------------------------------------------
     const UINT QUAD = 4;
     SIMPLEVERTEX vxs[QUAD] = {};
     {
@@ -947,7 +945,7 @@ bool D3d::InitPost()
         vxs[0].uv = { 0,1 };
 
         vxs[1].pos = { -1,1,z };
-        vxs[1].uv = { 0,0};
+        vxs[1].uv = { 0,0 };
 
         vxs[2].pos = { 1,-1,z };
         vxs[2].uv = { 1,1 };
@@ -1002,7 +1000,7 @@ bool D3d::InitPost()
     postVBV_.SizeInBytes = sizeof(vxs);
     postVBV_.StrideInBytes = sizeof(vxs[0]);//datnum type of SIMPLEVERTEX;
 
-//-------------------------------------------------------------
+    //-------------------------------------------------------------
 
     D3D12_RASTERIZER_DESC rs_desc = {};
     {
@@ -1049,7 +1047,7 @@ bool D3d::InitPost()
     res = D3DReadFileToBlob(file_str.c_str(), &PSblob);
     if (FAILED(res))     return 0;
 
-//-------------------------
+    //-------------------------
     D3D12_ROOT_SIGNATURE_DESC rootsig = {};
     {
         auto flag = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
@@ -1074,7 +1072,7 @@ bool D3d::InitPost()
     );
     if (FAILED(res)) return false;
 
-    res  = device_->CreateRootSignature
+    res = device_->CreateRootSignature
     (
         0,
         Sblob->GetBufferPointer(),
@@ -1109,7 +1107,7 @@ bool D3d::InitPost()
     );
     if (FAILED(res)) return false;
 
-//-----------------------------------
+    //-----------------------------------
 
     D3D12_DESCRIPTOR_HEAP_DESC hpd_desc = {};
     {
@@ -1308,7 +1306,7 @@ void D3d::write()
             auto v = 0u;
             memcpy(SB_OI[IND_frame].view, itr.info.data(), sizeof(ObjInfo) * itr.info.size());
 
-            for (auto& cnt : itr.Mesh_) {
+            for (auto cnt : itr.Mesh_) {
 
                 {
                     SB_MTL[IND_frame].view[v].alp = itr.Mtr_[v].alpha_;
@@ -1412,7 +1410,7 @@ void D3d::postEffect()
 
     cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], FALSE, nullptr);
     cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
-    
+
     cmdlist_->SetGraphicsRootSignature(postRTSG_);
 
     //cmdlist_->SetDescriptorHeaps(1, DHPost_CbSrUaV->ppHeap_);
@@ -1428,7 +1426,7 @@ void D3d::postEffect()
     cmdlist_->IASetVertexBuffers(0, 1, &postVBV_);
     cmdlist_->IASetIndexBuffer(&postIBV_);
 
-    cmdlist_->DrawInstanced(4, 1, 0 ,0);
+    cmdlist_->DrawInstanced(4, 1, 0, 0);
 }
 
 void D3d::render()

@@ -9,16 +9,12 @@ using std::string;
 using std::vector;
 using namespace DirectX;
 
-class P_Light;
-class D_Light;
-class A_Light;
-
 class RModel;
 
 struct SIMPLEVERTEX
 {
 	XMFLOAT3 pos;
-	XMFLOAT2 uv ;
+	XMFLOAT2 uv;
 
 	static const D3D12_INPUT_LAYOUT_DESC inp_Layout;
 
@@ -47,7 +43,7 @@ struct VERTEX
 	static const D3D12_INPUT_LAYOUT_DESC inp_Layout;
 
 	VERTEX() = default;
-	VERTEX(XMFLOAT3 const& pos, XMFLOAT3 const& norm, XMFLOAT2 const& uv, XMFLOAT3 const& tan ,XMFLOAT3 const& bitan , UINT const& MID);
+	VERTEX(XMFLOAT3 const& pos, XMFLOAT3 const& norm, XMFLOAT2 const& uv, XMFLOAT3 const& tan, XMFLOAT3 const& bitan, UINT const& MID);
 
 
 	enum ELEMENT

@@ -286,7 +286,7 @@ UINT ResourceManager::TexLoad(std::wstring str)
     ID3D12Device* device_ = PTR_D3D::ptr->GetDevice();
 
     for (auto v = 0u; v < textures_.size();v++) {
-        if (textures_[v].Name_ == str)	return v;
+        if (textures_[v].Name_ == path)	return v;
     }
 
     auto index = NULL;

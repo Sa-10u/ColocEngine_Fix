@@ -28,7 +28,7 @@ public:
 	D3d();
 	~D3d();
 
-	bool Initialize(HWND hwnd , uint32_t h , uint32_t w);
+	bool Initialize(HWND hwnd, uint32_t h, uint32_t w);
 	bool InitGBO();
 	bool InitPSO();
 	bool InitPost();
@@ -42,7 +42,7 @@ public:
 	float GetHeight();
 	float GetWidth();
 
-	void SetColorBG(float R, float G, float B ,float A);
+	void SetColorBG(float R, float G, float B, float A);
 
 	ID3D12Device* GetDevice();
 	ID3D12GraphicsCommandList* GetCMDList();
@@ -65,7 +65,7 @@ private:
 	ID3D12CommandAllocator* cmdalloc_[FrameAmount];
 	ID3D12GraphicsCommandList* cmdlist_;
 	ID3D12DescriptorHeap* heapRTV_;
-	
+
 	ID3D12Resource* post_;
 	ID3D12DescriptorHeap* postRTV_;
 	ID3D12DescriptorHeap* postSRV_;
@@ -87,9 +87,10 @@ private:
 	ID3D12PipelineState* PSO;
 	ID3D12PipelineState* postPSO;
 
-	ID3D12Resource*				CB_Util[FrameAmount];
-	ID3D12Resource*				CB_CAM[FrameAmount];
-	ID3D12Resource*				CB_LGT[FrameAmount];
+	ID3D12Resource* CB_Util[FrameAmount];
+	ID3D12Resource* CB_CAM[FrameAmount];
+	ID3D12Resource* CB_LGT[FrameAmount];
+	ID3D12Resource* CB_OTHERS[FrameAmount];
 
 	ID3D12Resource* ZB;
 	Texture			tex;
@@ -97,10 +98,9 @@ private:
 	StructuredBuffer<ObjInfo>	 SB_OI[FrameAmount];
 	StructuredBuffer<MapBOOL>	 SB_MB[FrameAmount];
 	StructuredBuffer<Material>	 SB_MTL[FrameAmount];
-;
+	;
 	CBUFFERVIEW<Util>			 CBV_Util[FrameAmount];
 	CBUFFERVIEW<Cam>			 CBV_Cam[FrameAmount];
-
 	struct CBUFFER_LIGHT
 	{
 		D3D12_CONSTANT_BUFFER_VIEW_DESC desc;
@@ -114,7 +114,7 @@ private:
 		uint16_t vol_cnt;
 		uint16_t spot_cnt;
 	}
-								 CBV_LGT[FrameAmount];
+	CBV_LGT[FrameAmount];
 
 	ID3D12DescriptorHeap* hp_ZBV;
 
@@ -126,7 +126,7 @@ private:
 
 	D3D12_VIEWPORT view_;
 	D3D12_RECT rect_;
-	
+
 	float angle_;
 
 	//-----
@@ -135,7 +135,7 @@ private:
 	float Width;
 
 	//-----
-	float backcolor_ [4];
+	float backcolor_[4];
 };
 
 namespace PTR_D3D

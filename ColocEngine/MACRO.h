@@ -6,7 +6,7 @@
 template<typename tgt>
 inline void SAFE_DELETE(tgt*& p)
 {
-	if (!(p == nullptr)) 
+	if (!(p == nullptr))
 	{
 		delete p;
 		p = nullptr;
@@ -38,7 +38,7 @@ typedef DirectX::XMVECTOR Vec;
 
 namespace SEMANTICS_STR
 {
-	extern LPCSTR POSITION ;
+	extern LPCSTR POSITION;
 	extern LPCSTR COLOR;
 	extern LPCSTR TEXCOORD;
 	extern LPCSTR TANGENT;
