@@ -379,6 +379,7 @@ UINT ResourceManager::TexLoad(std::wstring str)
         &rsc_v_desc,
         textures_.at(index).tex_.HCPU
     );
+    textures_.at(index).is_using = true;
 
     return index;
 }

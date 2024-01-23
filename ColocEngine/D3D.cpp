@@ -1278,35 +1278,33 @@ void D3d::write()
 
     auto MDIND = 0u;
     for (auto& itr : ResourceManager::models_) {
-
-        cmdlist_->OMSetRenderTargets(1, &handle, FALSE, &h_ZBV);
-
-        cmdlist_->SetGraphicsRootSignature(rootsig_);
-
-        cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
-
-        cmdlist_->SetGraphicsRootConstantBufferView(CBU, CBV_Util[IND_frame].desc.BufferLocation);
-        cmdlist_->SetGraphicsRootConstantBufferView(CBC, CBV_Cam[IND_frame].desc.BufferLocation);
-
-        cmdlist_->SetGraphicsRootDescriptorTable(TEX, ResourceManager::E_Tex.tex_.HGPU);
-
-        cmdlist_->SetGraphicsRootDescriptorTable(SBMTL, SB_MTL[IND_frame].HGPU);
-        cmdlist_->SetGraphicsRootDescriptorTable(SBOI, SB_OI[IND_frame].HGPU);
-        cmdlist_->SetGraphicsRootDescriptorTable(SBMB, SB_MB[IND_frame].HGPU);
-
-        cmdlist_->SetPipelineState(PSO);
-
-        cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        cmdlist_->RSSetViewports(1, &view_);
-        cmdlist_->RSSetScissorRects(1, &rect_);
-
-        cmdlist_->SetGraphicsRootConstantBufferView(0, CBV_Util[IND_frame].desc.BufferLocation);
-
-        {
+        
             auto v = 0u;
-            memcpy(SB_OI[IND_frame].view, itr.info.data(), sizeof(ObjInfo) * itr.info.size());
-
             for (auto cnt : itr.Mesh_) {
+
+                cmdlist_->OMSetRenderTargets(1, &handle, FALSE, &h_ZBV);
+
+                cmdlist_->SetGraphicsRootSignature(rootsig_);
+
+                cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
+
+                cmdlist_->SetGraphicsRootConstantBufferView(CBU, CBV_Util[IND_frame].desc.BufferLocation);
+                cmdlist_->SetGraphicsRootConstantBufferView(CBC, CBV_Cam[IND_frame].desc.BufferLocation);
+
+                cmdlist_->SetGraphicsRootDescriptorTable(TEX, ResourceManager::E_Tex.tex_.HGPU);
+
+                cmdlist_->SetGraphicsRootDescriptorTable(SBMTL, SB_MTL[IND_frame].HGPU);
+                cmdlist_->SetGraphicsRootDescriptorTable(SBOI, SB_OI[IND_frame].HGPU);
+                cmdlist_->SetGraphicsRootDescriptorTable(SBMB, SB_MB[IND_frame].HGPU);
+
+                cmdlist_->SetPipelineState(PSO);
+
+                cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+                cmdlist_->RSSetViewports(1, &view_);
+                cmdlist_->RSSetScissorRects(1, &rect_);
+
+                cmdlist_->SetGraphicsRootConstantBufferView(0, CBV_Util[IND_frame].desc.BufferLocation);
+
 
                 {
                     SB_MTL[IND_frame].view[v].alp = itr.Mtr_[v].alpha_;
@@ -1318,11 +1316,8 @@ void D3d::write()
                 }
 
                 {
-                    SB_MB[IND_frame].view[v].isD = itr.Mtr_[v].dmap_;
-                    SB_MB[IND_frame].view[v].isE = itr.Mtr_[v].emap_;
-                    SB_MB[IND_frame].view[v].isESB = itr.Mtr_[v].ESBAmap_;
-                    SB_MB[IND_frame].view[v].isN = itr.Mtr_[v].nmap_;
-                    SB_MB[IND_frame].view[v].isS = itr.Mtr_[v].smap_;
+                    memcpy(SB_OI[IND_frame].view, itr.info.data(), sizeof(ObjInfo)* itr.info.size());
+                    memcpy(SB_MB[IND_frame].view, itr.Mesh_[v].texIndex_.data(), sizeof(MapBOOL)* itr.Mesh_[v].texIndex_.size());
                 }
 
                 cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
@@ -1331,18 +1326,17 @@ void D3d::write()
                 cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_, 0, 0, 0);
 
                 v++;
+                cmdlist_->Close();
+                ID3D12CommandList* commands[] = { cmdlist_ };
+                cmdque_->ExecuteCommandLists(1, commands);
+
+                waitGPU();
+                cmdalloc_[IND_frame]->Reset();
+                cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
 
             }
             S_Draw::Flush(MDIND);
             MDIND++;
-            cmdlist_->Close();
-            ID3D12CommandList* commands[] = { cmdlist_ };
-            cmdque_->ExecuteCommandLists(1, commands);
-
-            waitGPU();
-            cmdalloc_[IND_frame]->Reset();
-            cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
-        }
     }
 
     brr = {};

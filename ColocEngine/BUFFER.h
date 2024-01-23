@@ -63,69 +63,6 @@ private:
 	static const D3D12_INPUT_ELEMENT_DESC element[AMMOUNT];
 };
 
-//-------------
-
-struct Texture
-{
-	ID3D12Resource* rsc_ptr = nullptr;
-	D3D12_GPU_DESCRIPTOR_HANDLE HGPU;
-	D3D12_CPU_DESCRIPTOR_HANDLE HCPU;
-};
-
-template<class t>
-struct StructuredBuffer
-{
-	ID3D12Resource* rsc_ptr = nullptr;
-	D3D12_GPU_DESCRIPTOR_HANDLE HGPU;
-	D3D12_CPU_DESCRIPTOR_HANDLE HCPU;
-	t* view;
-};
-
-struct MATERIAL
-{
-	XMFLOAT3 dif_;
-	float alpha_;
-
-	XMFLOAT3 spec_;
-	float shin_;
-
-	XMFLOAT3 emis_;
-	float val0;
-
-	uint16_t dmap_;	//for diffuse . A = Coefficient
-	uint16_t smap_;	//for specular .A = Coefficient
-	uint16_t emap_;	//for emission .A = Coefficient
-	uint16_t nmap_;	//for normal 
-	uint16_t ESBAmap_;//R = emissive intensity, G = shineness , B = bamp , A = alpha
-
-	MATERIAL();
-};
-
-struct BONE_INFO
-{
-public:
-	vector<UINT> IDs;
-	vector<float> Weights;
-};
-
-struct MESH
-{
-public:
-	vector<VERTEX> vtcs_;
-	vector<uint32_t> indexes_;
-	vector<BONE_INFO> bnsinfo_;
-
-	MapBOOL defTex_;
-	vector<MapBOOL> texIndex_;
-	uint32_t ID_Material;
-
-	MESH();
-	//-----
-};
-
-bool LoadMesh(const wchar_t* file, vector<MESH>& mesh, vector<MATERIAL>& material);
-bool LoadMesh(const wchar_t* file, RModel* ptr);
-
 //-----------------------------for S buffer
 
 struct alignas(16) ObjInfo
@@ -142,11 +79,11 @@ struct alignas(16) ObjInfo
 
 struct alignas(16) MapBOOL
 {
-	int isD;
-	int isS;
-	int isE;
-	int isN;
-	int isESB;
+	int isD;		//for diffuse . A = Coefficient
+	int isS;		//for specular .A = Coefficient
+	int isE;		//for emission .A = Coefficient
+	int isN;		//for normal 
+	int isESB;		//R = emissive intensity, G = shineness , B = bamp , A = alpha
 
 	float val0;
 	float val1;
@@ -190,3 +127,59 @@ struct CBUFFERVIEW
 	T* ptr = nullptr;
 };
 
+//-------------
+
+struct Texture
+{
+	ID3D12Resource* rsc_ptr = nullptr;
+	D3D12_GPU_DESCRIPTOR_HANDLE HGPU;
+	D3D12_CPU_DESCRIPTOR_HANDLE HCPU;
+};
+
+template<class t>
+struct StructuredBuffer
+{
+	ID3D12Resource* rsc_ptr = nullptr;
+	D3D12_GPU_DESCRIPTOR_HANDLE HGPU;
+	D3D12_CPU_DESCRIPTOR_HANDLE HCPU;
+	t* view;
+};
+
+struct MATERIAL
+{
+	XMFLOAT3 dif_;
+	float alpha_;
+
+	XMFLOAT3 spec_;
+	float shin_;
+
+	XMFLOAT3 emis_;
+	float val0;
+
+	MATERIAL();
+};
+
+struct BONE_INFO
+{
+public:
+	vector<UINT> IDs;
+	vector<float> Weights;
+};
+
+struct MESH
+{
+public:
+	vector<VERTEX> vtcs_;
+	vector<uint32_t> indexes_;
+	vector<BONE_INFO> bnsinfo_;
+
+	MapBOOL defTex_;
+	vector<MapBOOL> texIndex_;
+	uint32_t ID_Material;
+
+	MESH();
+	//-----
+};
+
+bool LoadMesh(const wchar_t* file, vector<MESH>& mesh, vector<MATERIAL>& material);
+bool LoadMesh(const wchar_t* file, RModel* ptr);

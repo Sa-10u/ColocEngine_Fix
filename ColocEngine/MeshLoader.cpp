@@ -60,7 +60,7 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<MATERIAL>&
     for (size_t i = 0; i < mtr.size(); i++) {
 
         const auto pm = scene->mMaterials[i];
-        ParseMaterial(mtr[i], pm);
+        ParseMaterial(mtr[i],mesh[i].defTex_ ,pm);
     }
     scene = nullptr;
     imp.FreeScene();
@@ -103,7 +103,7 @@ bool MeshLoader::Load(const wchar_t* file, RModel* ptr)
 
 
         const auto pm = scene->mMaterials[i];
-        ParseMaterial(ptr->Mtr_[i], pm);
+        ParseMaterial(ptr->Mtr_[i],ptr->Mesh_[i].defTex_, pm);
     }
     //--------------------------------------------
     ptr->TexName_.clear();
@@ -169,7 +169,7 @@ void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src)
     }
 }
 
-void MeshLoader::ParseMaterial(MATERIAL& mtl, const aiMaterial* src)
+void MeshLoader::ParseMaterial(MATERIAL& mtl, MapBOOL& mpb, const aiMaterial* src)
 {
     {
         aiColor3D coltemp(0.5f, 0.5f, 0.5f);
@@ -252,11 +252,11 @@ void MeshLoader::ParseMaterial(MATERIAL& mtl, const aiMaterial* src)
             str = FileNormalization(&str);
 
             auto wstr = ctow(str.c_str());
-            mtl.dmap_ = ResourceManager::TexLoad(wstr);
+            mpb.isD = ResourceManager::TexLoad(wstr);
         }
         else
         {
-            mtl.dmap_ = NULL;
+            mpb.isD = NULL;
         }
 
         __CREATE("EMISSION_MAP")
@@ -266,11 +266,11 @@ void MeshLoader::ParseMaterial(MATERIAL& mtl, const aiMaterial* src)
                 str = FileNormalization(&str);
 
                 auto wstr = ctow(str.c_str());
-                mtl.emap_ = ResourceManager::TexLoad(wstr);
+                mpb.isE = ResourceManager::TexLoad(wstr);
             }
             else
             {
-                mtl.emap_ = NULL;
+                mpb.isE = NULL;
             }
 
         __CREATE("NORMAL_MAP")
@@ -280,11 +280,11 @@ void MeshLoader::ParseMaterial(MATERIAL& mtl, const aiMaterial* src)
                 str = FileNormalization(&str);
 
                 auto wstr = ctow(str.c_str());
-                mtl.nmap_ = ResourceManager::TexLoad(wstr);
+                mpb.isN = ResourceManager::TexLoad(wstr);
             }
             else
             {
-                mtl.nmap_ = NULL;
+                mpb.isN = NULL;
             }
 
         __CREATE("SPECULAR_MAP")
@@ -294,11 +294,11 @@ void MeshLoader::ParseMaterial(MATERIAL& mtl, const aiMaterial* src)
                 str = FileNormalization(&str);
 
                 auto wstr = ctow(str.c_str());
-                mtl.smap_ = ResourceManager::TexLoad(wstr);
+                mpb.isS = ResourceManager::TexLoad(wstr);
             }
             else
             {
-                mtl.smap_ = NULL;
+                mpb.isS = NULL;
             }
 
         __CREATE("ALPHA_MAP")
@@ -308,29 +308,35 @@ void MeshLoader::ParseMaterial(MATERIAL& mtl, const aiMaterial* src)
                 str = FileNormalization(&str);
 
                 auto wstr = ctow(str.c_str());
-                mtl.ESBAmap_ = ResourceManager::TexLoad(wstr);
+                mpb.isESB = ResourceManager::TexLoad(wstr);
             }
             else
             {
-                mtl.ESBAmap_ = NULL;
+                mpb.isESB = NULL;
             }
 
         __CREATE("SHININESS_MAP")
         {
-            auto str = string(path.C_Str());
-            str = FileNormalization(&str);
+            if (mpb.isESB == NULL)
+            {
+                auto str = string(path.C_Str());
+                str = FileNormalization(&str);
 
-            auto wstr = ctow(str.c_str());
-            mtl.ESBAmap_ = ResourceManager::TexLoad(wstr);
+                auto wstr = ctow(str.c_str());
+                mpb.isESB = ResourceManager::TexLoad(wstr);
+            }
         }
 
         __CREATE("EMISSIVE_INTENCITY_MAP")
         {
-            auto str = string(path.C_Str());
-            str = FileNormalization(&str);
+            if (mpb.isESB == NULL)
+            {
+                auto str = string(path.C_Str());
+                str = FileNormalization(&str);
 
-            auto wstr = ctow(str.c_str());
-            mtl.ESBAmap_ = ResourceManager::TexLoad(wstr);
+                auto wstr = ctow(str.c_str());
+                mpb.isESB = ResourceManager::TexLoad(wstr);
+            }
         }
     }
 }

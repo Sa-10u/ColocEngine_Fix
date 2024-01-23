@@ -9,6 +9,7 @@ void S_Draw::Draw(XMMATRIX* wld, uint16_t md, MapBOOL** mb, uint16_t size)
 	i.wld = *wld;
 
 	ResourceManager::models_[md].info.push_back(i);
+	setTex(md, mb, size);
 }
 
 void S_Draw::Draw(C_Trans* trans, uint16_t md, MapBOOL** mb, uint16_t size)
@@ -19,6 +20,7 @@ void S_Draw::Draw(C_Trans* trans, uint16_t md, MapBOOL** mb, uint16_t size)
 	i.wld = trans->WLDGetMTX();
 
 	ResourceManager::models_[md].info.push_back(i);
+	setTex(md, mb, size);
 }
 
 void S_Draw::Draw(XMMATRIX mat, uint16_t md, MapBOOL** mb, uint16_t size)
@@ -29,12 +31,14 @@ void S_Draw::Draw(XMMATRIX mat, uint16_t md, MapBOOL** mb, uint16_t size)
 	i.wld = mat;
 
 	ResourceManager::models_[md].info.push_back(i);
+	setTex(md, mb, size);
 }
 
 void S_Draw::Draw(ObjInfo* info, uint16_t md, MapBOOL** mb, uint16_t size)
 {
 	ResourceManager::models_[md].DrawCount_++;
 	ResourceManager::models_[md].info.push_back(*info);
+	setTex(md, mb, size);
 }
 
 void S_Draw::setTex(uint16_t md ,MapBOOL** arr, uint16_t size)
@@ -61,4 +65,7 @@ void S_Draw::Flush(uint16_t md)
 {
 	ResourceManager::models_[md].DrawCount_ = NULL;
 	ResourceManager::models_[md].info.clear();
+	for (auto i = 0u; i < ResourceManager::models_[md].Mesh_.size(); i++) {
+		ResourceManager::models_[md].Mesh_[i].texIndex_.clear();
+	}
 }
