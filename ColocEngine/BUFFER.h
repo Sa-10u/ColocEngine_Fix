@@ -115,6 +115,8 @@ public:
 	vector<uint32_t> indexes_;
 	vector<BONE_INFO> bnsinfo_;
 
+	MapBOOL defTex_;
+	vector<MapBOOL> texIndex_;
 	uint32_t ID_Material;
 
 	MESH();
@@ -145,6 +147,10 @@ struct alignas(16) MapBOOL
 	int isE;
 	int isN;
 	int isESB;
+
+	float val0;
+	float val1;
+	float val2;
 
 	MapBOOL();
 };

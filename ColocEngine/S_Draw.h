@@ -7,11 +7,13 @@ class C_Trans;
 
 namespace S_Draw
 {
-	void Draw(XMMATRIX* wld, UINT md);
-	void Draw(C_Trans* trans, UINT md);
-	void Draw(XMMATRIX mat, UINT md);
+	void Draw(XMMATRIX* wld, uint16_t md, MapBOOL** arr, uint16_t size);
+	void Draw(C_Trans* trans, uint16_t md, MapBOOL** arr, uint16_t size);
+	void Draw(XMMATRIX mat, uint16_t md, MapBOOL** arr, uint16_t size);
 
-	void Draw(ObjInfo *info, UINT md);
+	void Draw(ObjInfo *info, uint16_t md, MapBOOL** arr, uint16_t size);
 
-	void Flush(UINT md);
+	inline void setTex(uint16_t md, MapBOOL** arr, uint16_t size);
+
+	void Flush(uint16_t md);
 }

@@ -14,11 +14,11 @@ void WW_Play::Initialize()
 
 void WW_Play::Run(float tick)
 {
-	S_Draw::Draw(&info, md);
+	S_Draw::Draw(&info, md , nullptr ,0);
 
 	C_Trans t0("a");
 	t0.pos = Position(-1.0, 0, 0);
-	S_Draw::Draw(&t0, md);
+	S_Draw::Draw(&t0, md , nullptr ,0);
 
 
 	ObjInfo i;
@@ -29,7 +29,7 @@ void WW_Play::Run(float tick)
 		0,0,1,0,
 		1.5,0,0,1
 	};
-	S_Draw::Draw(&i, md0);
+	S_Draw::Draw(&i, md0 , nullptr , 0);
 
 	i.wld =
 	{
@@ -38,7 +38,7 @@ void WW_Play::Run(float tick)
 		0,0,1,0,
 		1.5,-1,0,1
 	};
-	S_Draw::Draw(&i, md0);
+	S_Draw::Draw(&i, md0 , nullptr , 0);
 }
 
 void WW_Play::release()
