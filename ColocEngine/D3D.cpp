@@ -8,6 +8,7 @@
 #include"FileLoader.h"
 #include"CAM.h"
 #include"S_Draw.h"
+#include"LightManager.h"
 
 constexpr UINT CBCOUNT = 256;
 constexpr UINT HPSIZE = 10;
@@ -406,6 +407,27 @@ bool D3d::InitGBO()
             if (FAILED(res)) return 0;
         }
     }
+    //----------------------------
+    {
+        D3D12_HEAP_PROPERTIES hp_prop = {};
+        {
+            hp_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+            hp_prop.CreationNodeMask = 1;
+            hp_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+            hp_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
+            hp_prop.VisibleNodeMask = 1;
+        }
+
+        D3D12_RESOURCE_DESC rsc_desc = {};
+        {
+            rsc_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;doing here
+        }
+
+            device_->CreateCommittedResource
+            (
+
+            );
+    }
 
     //-----------------******
 
@@ -767,7 +789,7 @@ bool D3d::InitPSO()
     D3D12_RASTERIZER_DESC rs_desc = {};
     {
         rs_desc.FillMode = D3D12_FILL_MODE_SOLID;
-        rs_desc.CullMode = D3D12_CULL_MODE_NONE;
+        rs_desc.CullMode = D3D12_CULL_MODE_FRONT;
         rs_desc.FrontCounterClockwise = false;
         rs_desc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
         rs_desc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;

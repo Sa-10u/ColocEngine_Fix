@@ -7,7 +7,7 @@
 void WW_Play::Initialize()
 {
 	md = ResourceManager::ModelLoad(L"TEST_MK.fbx");
-	md0 = ResourceManager::ModelLoad(L"Sphere.fbx");
+	md0 = ResourceManager::ModelLoad(L"AlphaBox.fbx");
 
 	ResourceManager::TexLoad(L"default.dds");
 	ResourceManager::TexLoad(L"VAVA.dds");
@@ -18,9 +18,9 @@ void WW_Play::Run(float tick)
 	MapBOOL m{};
 	MapBOOL m1{};
 	m.isD = ResourceManager::TexLoad(L"default.dds");
-	m1.isD = ResourceManager::TexLoad(L"default.dds");
+	m1.isD = ResourceManager::TexLoad(L"MK_tex1.png");
 
-	MapBOOL* arr1[] = {&m ,nullptr ,&m1};
+	MapBOOL* arr1[] = {&m1 ,&m ,&m , &m ,&m, &m };
 
 	S_Draw::Draw(&info, md ,arr1 ,_countof(arr1));
 
@@ -34,14 +34,15 @@ void WW_Play::Run(float tick)
 
 	S_Draw::Draw(&t0, md , &arr0, 1);
 
-
+	static float x = .0f;
+	x += .001f;
 	ObjInfo i;
 	i.wld =
 	{
 		1,0,0,0,
 		0,1,0,0,
 		0,0,1,0,
-		1.5,0,0,1
+		x - 1.5f,0,1,1
 	};
 	S_Draw::Draw(&i, md0 , nullptr , 0);
 
@@ -50,7 +51,7 @@ void WW_Play::Run(float tick)
 		1,0,0,0,
 		0,1,0,0,
 		0,0,1,0,
-		1.5,-1,0,1
+		1.5,-0.5,0,1
 	};
 	S_Draw::Draw(&i, md0 , nullptr , 0);
 }
