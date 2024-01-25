@@ -1249,15 +1249,16 @@ void D3d::Update()
         XMStoreFloat3(&CBV_Cam[IND_frame].ptr->pos, CAM::Pos);
         XMStoreFloat3(&CBV_Cam[IND_frame].ptr->tgt, CAM::Tgt);
 
-        memcpy(&CBV_LGT[IND_frame].ptr->amb, &LightManager::lights.amb, sizeof(A_Light) * LightManager::Lights_MAX);
-        memcpy(&CBV_LGT[IND_frame].ptr->dir, &LightManager::lights.dir, sizeof(D_Light) * LightManager::Lights_MAX);
-        memcpy(&CBV_LGT[IND_frame].ptr->point, &LightManager::lights.point, sizeof(P_Light) * LightManager::Lights_MAX);
+        memcpy(CBV_LGT[IND_frame].ptr, &LightManager::lights, sizeof(LightManager::Lights));
     }
 
     CAM::Run();
 
     auto y = sizeof(ObjInfo);
-
+    auto s = sizeof(P_Light);
+    auto s1 = sizeof(A_Light);
+    auto s2 = sizeof(D_Light);
+    auto s3 = sizeof(LightManager::Lights);
 }
 
 void D3d::SetHeight(float h)

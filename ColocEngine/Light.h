@@ -4,7 +4,7 @@
 
 typedef DirectX::XMFLOAT3 Color;
 
-struct Light
+struct Light 
 {
 	Light();
 	virtual ~Light() = 0;
@@ -16,8 +16,8 @@ struct Light
 	void ToDisposal();
 
 	Color col;
-	int flag;
 	float intensity;
+	int flag;
 };
 
 struct P_Light : Light
@@ -42,4 +42,8 @@ struct A_Light : Light
 {
 	A_Light();
 	~A_Light() override;
+
+	float val0;
+	float val1;
+	float val2;
 };

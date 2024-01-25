@@ -20,7 +20,7 @@ namespace LightManager
 {
 	constexpr uint16_t Lights_MAX = 256;
 
-	struct Lights
+	struct alignas(256) Lights
 	{
 		std::array<P_Light, Lights_MAX> point;
 		std::array<D_Light, Lights_MAX> dir;

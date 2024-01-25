@@ -73,23 +73,32 @@ struct P_LIGHT
 {
 	float3 col;
 	float inten;
-	float3 pos;
+
 	int flag;
+	float3 pos;
 };
 
 struct D_LIGHT
 {
 	float3 col;
 	float inten;
-	float3 pos;
+
 	int flag;
+	float3 pos;
+	
+	float3 rot;
+	float thr;
 };
 
 struct A_LIGHT
 {
 	float3 col;
 	float inten;
+	
 	int flag;
+	float val0;
+	float val1;
+	float val2;
 };
 
 //------------------------
@@ -107,7 +116,7 @@ cbuffer CAM	:register(b256)
 	float3 tgt;
 };
 
-cbuffer Lights : register (b512)
+cbuffer Lights : register (b512) // Alignment Error
 {
 	P_LIGHT pl[MAX_LIGHT];
 	D_LIGHT dl[MAX_LIGHT];
