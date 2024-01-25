@@ -1,5 +1,10 @@
 #include "LightManager.h"
 
+namespace LightManager
+{
+	Lights lights;
+}
+
 void LightManager::Init()
 {
 	auto func = [&](Light* arr, uint16_t size)
@@ -12,9 +17,9 @@ void LightManager::Init()
 		}
 	};
 
-	func(lights.ptr->amb.data(), lights.ptr->amb.size());
-	func(lights.ptr->dir.data(), lights.ptr->dir.size());
-	func(lights.ptr->point.data(), lights.ptr->point.size());
+	func(lights.amb.data(), lights.amb.size());
+	func(lights.dir.data(), lights.dir.size());
+	func(lights.point.data(), lights.point.size());
 }
 
 void LightManager::Term()

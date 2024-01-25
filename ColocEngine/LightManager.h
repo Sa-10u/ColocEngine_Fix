@@ -2,9 +2,7 @@
 #include<array>
 #include<typeinfo>
 #include<cstdint>
-#include<d3d12.h>
 #include"Light.h"
-#include"BUFFER.h"
 
 static enum FLAG
 {
@@ -28,7 +26,7 @@ namespace LightManager
 		std::array<D_Light, Lights_MAX> dir;
 		std::array<A_Light, Lights_MAX> amb;
 	};
-	CBUFFERVIEW<Lights> lights;
+	extern Lights lights;
 
 	enum KIND
 	{
@@ -48,9 +46,6 @@ namespace LightManager
 	void DisposalLight(uint32_t ind);
 
 	//-------------
-	D3D12_CONSTANT_BUFFER_VIEW_DESC desc;
-	D3D12_CPU_DESCRIPTOR_HANDLE HCPU;
-	D3D12_GPU_DESCRIPTOR_HANDLE HGPU;
 };
 
 namespace LightManager
@@ -73,9 +68,9 @@ template<class lgt>
 			return false;
 		};
 
-		if(func(lights.ptr->point.data(), lights.ptr->point.size())) return itr;
-		if(func(lights.ptr->dir.data(), lights.ptr->point.size())) return itr;
-		if (func(lights.ptr->amb.data(), lights.ptr->point.size())) return itr;
+		if(func(lights.point.data(), lights.point.size())) return itr;
+		if(func(lights.dir.data(), lights.point.size())) return itr;
+		if (func(lights.amb.data(), lights.point.size())) return itr;
 
 		return -1;
 	}
@@ -95,9 +90,9 @@ template<class lgt>
 			return false;
 		};
 
-		if (func(lights.ptr->point.data()))	return ;
-		if (func(lights.ptr->dir.data()))	return;
-		if (func(lights.ptr->amb.data()))	return;
+		if (func(lights.point.data()))	return ;
+		if (func(lights.dir.data()))	return;
+		if (func(lights.amb.data()))	return;
 	};
 	;
 }

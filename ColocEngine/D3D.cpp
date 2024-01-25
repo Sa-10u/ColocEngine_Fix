@@ -8,7 +8,6 @@
 #include"FileLoader.h"
 #include"CAM.h"
 #include"S_Draw.h"
-#include"LightManager.h"
 
 constexpr UINT CBCOUNT = 256;
 constexpr UINT HPSIZE = 10;
@@ -420,13 +419,49 @@ bool D3d::InitGBO()
 
         D3D12_RESOURCE_DESC rsc_desc = {};
         {
-            rsc_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;doing here
+            rsc_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+            rsc_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+            rsc_desc.Format = DXGI_FORMAT_UNKNOWN;
+            rsc_desc.MipLevels = 1;
+            rsc_desc.Alignment = 0;
+            rsc_desc.DepthOrArraySize = 1;
+            rsc_desc.Height = 1;
+            rsc_desc.Width = sizeof(LightManager::Lights);
+            rsc_desc.SampleDesc.Count = 1;
+            rsc_desc.SampleDesc.Quality = 0;
+            rsc_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
         }
+        
+        for (auto i = 0u; i < FrameAmount; i++) {
 
-            device_->CreateCommittedResource
+            res = device_->CreateCommittedResource
             (
-
+                &hp_prop,
+                D3D12_HEAP_FLAG_NONE,
+                &rsc_desc,
+                D3D12_RESOURCE_STATE_GENERIC_READ,
+                nullptr,
+                IID_PPV_ARGS(&CB_LGT[i])
             );
+            if (FAILED(res)) return 0;
+
+            CBV_LGT[i].ptr;
+
+            CBV_LGT[i].desc.BufferLocation = CB_LGT[i]->GetGPUVirtualAddress();
+            CBV_LGT[i].desc.SizeInBytes = rsc_desc.Width;
+            CBV_LGT[i].HCPU = ResourceManager::DHH_CbSrUaV->GetAndIncreCPU();
+            CBV_LGT[i].HGPU = ResourceManager::DHH_CbSrUaV->GetAndIncreGPU();
+
+            device_->CreateConstantBufferView
+            (
+                &CBV_LGT[i].desc,
+                CBV_LGT[i].HCPU
+            );
+
+            void* ptr = nullptr;
+            res = CB_LGT[i]->Map(0, NULL, reinterpret_cast<void**>(&CBV_LGT[i].ptr));
+            if (FAILED(res)) return 0;
+        }
     }
 
     //-----------------******
@@ -622,6 +657,7 @@ bool D3d::InitGBO()
         {
             CB_U = 0,
             CB_C,
+            CB_L,
             SB_MTL,
             SB_OI,
             SB_MB,
@@ -643,6 +679,13 @@ bool D3d::InitGBO()
             r_param[CB_C].Descriptor.RegisterSpace = 0;
             r_param[CB_C].Descriptor.ShaderRegister = 256;
             r_param[CB_C].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        }
+
+        {
+            r_param[CB_L].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+            r_param[CB_L].Descriptor.RegisterSpace = 0;
+            r_param[CB_L].Descriptor.ShaderRegister = 512;
+            r_param[CB_L].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
         }
 
         D3D12_DESCRIPTOR_RANGE range_SBOI = {};
@@ -1205,6 +1248,10 @@ void D3d::Update()
 
         XMStoreFloat3(&CBV_Cam[IND_frame].ptr->pos, CAM::Pos);
         XMStoreFloat3(&CBV_Cam[IND_frame].ptr->tgt, CAM::Tgt);
+
+        memcpy(&CBV_LGT[IND_frame].ptr->amb, &LightManager::lights.amb, sizeof(A_Light) * LightManager::Lights_MAX);
+        memcpy(&CBV_LGT[IND_frame].ptr->dir, &LightManager::lights.dir, sizeof(D_Light) * LightManager::Lights_MAX);
+        memcpy(&CBV_LGT[IND_frame].ptr->point, &LightManager::lights.point, sizeof(P_Light) * LightManager::Lights_MAX);
     }
 
     CAM::Run();
@@ -1270,6 +1317,7 @@ void D3d::write()
     {
         CBU = 0,
         CBC,
+        CBL,
         SBMTL,
         SBOI,
         SBMB,
@@ -1312,6 +1360,7 @@ void D3d::write()
 
                 cmdlist_->SetGraphicsRootConstantBufferView(CBU, CBV_Util[IND_frame].desc.BufferLocation);
                 cmdlist_->SetGraphicsRootConstantBufferView(CBC, CBV_Cam[IND_frame].desc.BufferLocation);
+                cmdlist_->SetGraphicsRootConstantBufferView(CBL, CBV_LGT[IND_frame].desc.BufferLocation);
 
                 cmdlist_->SetGraphicsRootDescriptorTable(TEX, ResourceManager::E_Tex.tex_.HGPU);
 

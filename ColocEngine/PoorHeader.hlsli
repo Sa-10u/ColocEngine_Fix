@@ -107,17 +107,7 @@ cbuffer CAM	:register(b256)
 	float3 tgt;
 };
 
-cbuffer Light_cnt : register(b512)
-{
-	uint point_cnt;
-	uint dir_cnt;
-	uint amb_cnt;
-	uint area_cnt;
-	uint vol_cnt;
-	uint spot_cnt;
-}
-
-cbuffer Lights : register (b768)
+cbuffer Lights : register (b512)
 {
 	P_LIGHT pl[MAX_LIGHT];
 	D_LIGHT dl[MAX_LIGHT];

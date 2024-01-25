@@ -5,11 +5,11 @@
 #include<DirectXMath.h>
 #include<dxgi1_4.h>
 #include"MACRO.h"
-#include"BUFFER.h"
 #include<d3dcompiler.h>
 #include "MeshLoader.h"
 #include<DirectXTex.h>
-#include"Light.h"
+
+#include"LightManager.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -98,23 +98,10 @@ private:
 	StructuredBuffer<ObjInfo>	 SB_OI[FrameAmount];
 	StructuredBuffer<MapBOOL>	 SB_MB[FrameAmount];
 	StructuredBuffer<Material>	 SB_MTL[FrameAmount];
-	;
+	
 	CBUFFERVIEW<Util>			 CBV_Util[FrameAmount];
 	CBUFFERVIEW<Cam>			 CBV_Cam[FrameAmount];
-	struct CBUFFER_LIGHT
-	{
-		D3D12_CONSTANT_BUFFER_VIEW_DESC desc;
-		D3D12_CPU_DESCRIPTOR_HANDLE HCPU;
-		D3D12_GPU_DESCRIPTOR_HANDLE HGPU;
-
-		uint16_t point_cnt;
-		uint16_t dir_cnt;
-		uint16_t amb_cnt;
-		uint16_t area_cnt;
-		uint16_t vol_cnt;
-		uint16_t spot_cnt;
-	}
-	CBV_LGT[FrameAmount];
+	CBUFFERVIEW<LightManager::Lights>			 CBV_LGT[FrameAmount];
 
 	ID3D12DescriptorHeap* hp_ZBV;
 
