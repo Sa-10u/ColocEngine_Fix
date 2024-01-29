@@ -426,7 +426,12 @@ bool D3d::InitGBO()
             rsc_desc.Alignment = 0;
             rsc_desc.DepthOrArraySize = 1;
             rsc_desc.Height = 1;
-            rsc_desc.Width = sizeof(LightManager::Lights);
+            rsc_desc.Width = LightManager::Lights_MAX * 
+                (
+                    sizeof(LightManager::lights.amb[0].comp)+
+                    sizeof(LightManager::lights.dir[0].comp)+
+                    sizeof(LightManager::lights.point[0].comp)
+                );
             rsc_desc.SampleDesc.Count = 1;
             rsc_desc.SampleDesc.Quality = 0;
             rsc_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
@@ -1249,7 +1254,7 @@ void D3d::Update()
         XMStoreFloat3(&CBV_Cam[IND_frame].ptr->pos, CAM::Pos);
         XMStoreFloat3(&CBV_Cam[IND_frame].ptr->tgt, CAM::Tgt);
 
-        memcpy(CBV_LGT[IND_frame].ptr, &LightManager::lights, sizeof(LightManager::Lights));
+        memcpy(&CBV_LGT[IND_frame].ptr->amb, &LightManager::lights.amb[0].comp, sizeof(A_Light::comp) * LightManager::Lights_MAX);
     }
 
     CAM::Run();

@@ -26,6 +26,15 @@ struct P_Light : Light
 	~P_Light() override;
 
 	Position pos;
+
+	struct lgt
+	{
+		Color col;
+		float inten;
+
+		int flag;
+		Position pos;
+	}comp;
 };
 
 struct D_Light : Light
@@ -36,6 +45,18 @@ struct D_Light : Light
 	Position pos;
 	Rotation rot;
 	float threshold;
+
+	struct lgt
+	{
+		Color col;
+		float inten;
+
+		int flag;
+		Position pos;
+
+		Rotation rot;
+		float thr;
+	}comp;
 };
 
 struct A_Light : Light
@@ -46,4 +67,15 @@ struct A_Light : Light
 	float val0;
 	float val1;
 	float val2;
+
+	struct lgt
+	{
+		Color col;
+		float inten;
+
+		int flag;
+		float val0;
+		float val1;
+		float val2;
+	}comp;
 };

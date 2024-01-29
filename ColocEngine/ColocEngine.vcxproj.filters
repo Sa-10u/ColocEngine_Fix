@@ -241,11 +241,11 @@
     <None Include="Keyword.hlsli">
       <Filter>shader</Filter>
     </None>
-    <None Include="PoorHeader.hlsli">
-      <Filter>shader\ModelRendaring</Filter>
-    </None>
     <None Include="BasePost.hlsli">
       <Filter>shader\PostEffect</Filter>
+    </None>
+    <None Include="3DBaseHeader.hlsli">
+      <Filter>shader\ModelRendaring</Filter>
     </None>
   </ItemGroup>
 </Project>

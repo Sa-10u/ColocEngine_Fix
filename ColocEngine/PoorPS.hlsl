@@ -1,4 +1,4 @@
-#include "PoorHeader.hlsli"
+#include "3DBaseHeader.hlsli"
 #include "Functions.hlsli"
 #include "Keyword.hlsli"
 //-----------
@@ -13,20 +13,19 @@ PSoutput main(VSoutput inp)
 
    for (int i = 0u; i < sz; i++) {
 
-        res.color.r += pl[i].inten;
+        res.color += pl[i].inten;
     }
 
     for (int i = 0u; i < sz; i++) {
 
-        res.color.g += al[i].inten;
+        res.color += al[i].inten;
     }
 
     for (int i = 0u; i < sz; i++) {
 
-        res.color.b += dl[i].inten;
+        res.color += dl[i].inten;
     }
 
-    res.color.rgb = pl[0].inten;
 
     return res;
 }

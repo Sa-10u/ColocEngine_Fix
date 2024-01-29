@@ -134,15 +134,11 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="3DBaseHeader.hlsli" />
     <None Include="BasePost.hlsli" />
     <None Include="Functions.hlsli" />
     <None Include="Keyword.hlsli" />
     <None Include="packages.config" />
-    <None Include="PoorHeader.hlsli">
-      <FileType>Document</FileType>
-      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </EntryPointName>
-    </None>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
