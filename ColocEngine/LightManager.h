@@ -18,13 +18,11 @@ static enum FLAG
 
 namespace LightManager
 {
-	constexpr uint16_t Lights_MAX = 256;
-
 	struct alignas(256) Lights
 	{
-		std::array<P_Light, Lights_MAX> point;
-		std::array<D_Light, Lights_MAX> dir;
-		std::array<A_Light, Lights_MAX> amb;
+		P_Light point;
+		D_Light dir;
+		A_Light amb;
 	};
 	extern Lights lights;
 
@@ -40,7 +38,7 @@ namespace LightManager
 	void Term();
 
 		template<class lgt>
-	uint32_t CreateLight(lgt l);
+	uint32_t CreateLight();
 
 		template<class lgt>
 	void DisposalLight(uint32_t ind);
@@ -51,26 +49,30 @@ namespace LightManager
 namespace LightManager
 {
 template<class lgt>
-	uint32_t CreateLight(lgt l)
+	uint32_t CreateLight()
 	{
 		auto itr = 0u;
 
-		auto func = [&](Light* type , uint32_t size) 
+		auto func = [&](Light* type ) 
 		{
-			if (typeid(type[0]) == typeid(l))
+			if (typeid(*type) == typeid(lgt))
 			{
-				for (itr = 0u; itr < size; itr++) {
+				for (itr = 0u; itr < Lights_MAX; itr++) {
 
-					if (type[itr].isDisposal()) { type[itr] = l; return true; }
+					if (type->isDisposal(itr))
+					{
+						type->Reset(itr);
+						return true;
+					}
 				}
 			}
 
 			return false;
 		};
 
-		if(func(lights.point.data(), lights.point.size())) return itr;
-		if(func(lights.dir.data(), lights.point.size())) return itr;
-		if (func(lights.amb.data(), lights.point.size())) return itr;
+		if(func(&lights.point)) return itr;
+		if(func(&lights.dir)) return itr;
+		if(func(&lights.amb)) return itr;
 
 		return -1;
 	}

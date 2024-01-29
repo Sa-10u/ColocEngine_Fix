@@ -74,8 +74,8 @@ struct P_LIGHT
 	float3 col;
 	float inten;
 
-	int flag;
 	float3 pos;
+	int flag;
 };
 
 struct D_LIGHT
@@ -83,8 +83,8 @@ struct D_LIGHT
 	float3 col;
 	float inten;
 
-	int flag;
 	float3 pos;
+	int flag;
 	
 	float3 rot;
 	float thr;

@@ -25,5 +25,6 @@ namespace PSOManager
 	extern std::array<ID3D12PipelineState*, static_cast<uint32_t>(Shader3D::AMMOUNT)> PSO3D;
 	extern std::array<ID3D12PipelineState*, static_cast<uint32_t>(ShaderPost::AMMOUNT)> PSOPost;
 
-	ID3D12PipelineState* 
+	ID3D12PipelineState* GetPSO(Shader3D ind);
+	ID3D12PipelineState* GetPSO(ShaderPost ind);
 };
