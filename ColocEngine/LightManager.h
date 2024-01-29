@@ -80,21 +80,19 @@ template<class lgt>
 template<class lgt>
 	void DisposalLight(uint32_t ind)
 	{
-		auto func = [&](Light* arr)
+		auto func = [&](Light* type)
 		{
-			if (typeid(lgt) == typeid(arr[0]))
+			if (typeid(lgt) == typeid(*type))
 			{
-				arr[ind].flag &= ~DISPOSAL;
-				arr[ind].intensity = .0f;
-				arr[ind].col = Color(.0f, .0f, .0f);
+				type->ToON(ind);
+				type->ToStore(ind);
 				return true;
 			}
 			return false;
 		};
 
-		if (func(lights.point.data()))	return ;
-		if (func(lights.dir.data()))	return;
-		if (func(lights.amb.data()))	return;
+		if (func(&lights.point))	return ;
+		if (func(&lights.dir))	return;
+		if (func(&lights.amb))	return;
 	};
-	;
 }
