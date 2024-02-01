@@ -217,13 +217,13 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Lambert.hlsl">
+    <FxCompile Include="Toon.hlsl">
       <Filter>shader\ModelRendaring</Filter>
     </FxCompile>
-    <FxCompile Include="PoorPS.hlsl">
+    <FxCompile Include="DefPS.hlsl">
       <Filter>shader\ModelRendaring</Filter>
     </FxCompile>
-    <FxCompile Include="poorVS.hlsl">
+    <FxCompile Include="DefVS.hlsl">
       <Filter>shader\ModelRendaring</Filter>
     </FxCompile>
     <FxCompile Include="PostEffect_Default_VS.hlsl">

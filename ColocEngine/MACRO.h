@@ -48,10 +48,10 @@ namespace SEMANTICS_STR
 }
 namespace SHADER_FILENAME
 {
-	extern LPCWSTR PoorVS;
-	extern LPCWSTR PoorPS;
+	extern LPCWSTR DefVS;
+	extern LPCWSTR DefPS;
 
-	extern LPCWSTR LambertPS;
+	extern LPCWSTR ToonPS;
 }
 
 char* wtoc(const wchar_t* str);

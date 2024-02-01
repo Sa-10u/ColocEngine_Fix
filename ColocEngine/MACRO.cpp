@@ -15,10 +15,10 @@ namespace SEMANTICS_STR
 
 namespace SHADER_FILENAME
 {
-	LPCWSTR PoorVS = s_path "PoorVS.cso";
-	LPCWSTR PoorPS = s_path "PoorPS.cso";
+	LPCWSTR DefVS = s_path "DefVS.cso";
+	LPCWSTR DefPS = s_path "DefPS.cso";
 
-	LPCWSTR LambertPS = s_path "Lambert.cso";
+	LPCWSTR ToonPS = s_path "Toon.cso";
 }
 
 char* wtoc(const wchar_t* str)

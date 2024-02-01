@@ -878,11 +878,11 @@ bool D3d::InitPSO()
     //----------------------
 
     ID3DBlob* VSblob = nullptr;
-    auto res = D3DReadFileToBlob(SHADER_FILENAME::PoorVS, &VSblob);
+    auto res = D3DReadFileToBlob(SHADER_FILENAME::DefVS, &VSblob);
     if (FAILED(res))     return 0;
 
     ID3DBlob* PSblob = nullptr;
-    res = D3DReadFileToBlob(SHADER_FILENAME::PoorPS, &PSblob);
+    res = D3DReadFileToBlob(SHADER_FILENAME::DefPS, &PSblob);
     if (FAILED(res))     return 0;
     //--------------------------
 

@@ -9,21 +9,21 @@ PSoutput main(VSoutput inp)
 
     res.color = colmap[Map[inp.ID].isD].Sample(colsmp, inp.uv);
 
-    int sz = MAX_LIGHT;
+    float len;
 
-   for (int i = 0u; i < sz; i++) {
+   for (int i = 0u; i < MAX_LIGHT; i++) {
 
-        res.color += pl[i].inten;
+       len = length(pl[i].pos - inp.Wpos);
+       
+       res.color.rgb += saturate((10 - len) * (pl[i].col));
     }
 
-    for (int i = 0u; i < sz; i++) {
+    for (int i = 0u; i < MAX_LIGHT; i++) {
 
-        res.color += al[i].inten;
     }
 
-    for (int i = 0u; i < sz; i++) {
+    for (int i = 0u; i < MAX_LIGHT; i++) {
 
-        res.color += dl[i].inten;
     }
 
 
