@@ -9,7 +9,6 @@ constexpr uint16_t Lights_MAX = 256;
 struct Light 
 {
 	Light() = default;
-	virtual ~Light() = 0;
 
 	virtual bool isON(int index) = 0;
 	virtual bool isDisposal(int index) = 0;
@@ -33,7 +32,7 @@ struct Light
 struct P_Light : Light
 {
 	P_Light();
-	~P_Light() override;
+	~P_Light() = default;
 
 	bool isON(int index) override;
 	bool isDisposal(int index) override;
@@ -75,7 +74,7 @@ public:
 struct D_Light : Light
 {
 	D_Light();
-	~D_Light() override;
+	~D_Light() = default;
 
 	bool isON(int index) override;
 	bool isDisposal(int index) override;
@@ -122,7 +121,7 @@ public:
 struct A_Light : Light
 {
 	A_Light();
-	~A_Light() override;
+	~A_Light() = default;
 
 	bool isON(int index) override;
 	bool isDisposal(int index) override;

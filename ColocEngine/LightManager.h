@@ -62,6 +62,8 @@ template<class lgt>
 					if (type->isDisposal(itr))
 					{
 						type->Reset(itr);
+						type->ToON(itr);
+						type->ToStore(itr);
 						return true;
 					}
 				}
@@ -84,8 +86,8 @@ template<class lgt>
 		{
 			if (typeid(lgt) == typeid(*type))
 			{
-				type->ToON(ind);
-				type->ToStore(ind);
+				type->ToOFF(ind);
+				type->ToDisposal(ind);
 				return true;
 			}
 			return false;

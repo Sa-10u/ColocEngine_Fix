@@ -9,7 +9,7 @@ PSoutput main(VSoutput inp)
 
     res.color = colmap[Map[inp.ID].isD].Sample(colsmp, inp.uv);
 
-    int sz = 5;
+    int sz = MAX_LIGHT;
 
    for (int i = 0u; i < sz; i++) {
 
