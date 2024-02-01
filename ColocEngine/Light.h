@@ -27,7 +27,7 @@ struct Light
 	virtual void SetIntensity(int index , float inten) = 0;
 
 	virtual void* pLight() = 0;
-	virtual void* GetSize() = 0;
+	virtual size_t GetSize() = 0;
 };
 
 struct P_Light : Light
@@ -52,21 +52,23 @@ struct P_Light : Light
 	void SetPosition(int index, Position pos);
 
 	void* pLight() override;
-	void* GetSize() override;
+	size_t GetSize() override;
 
 private:
 	struct lgt
 	{
+		lgt();
+
 		Color col;
 		float inten;
 
 		Position pos;
-		uint8_t flag;
+		int flag;
 	}comp[Lights_MAX];
 
 public:
 	
-	lgt GetComponent();
+	lgt GetComponent(int index);
 
 };
 
@@ -94,20 +96,27 @@ struct D_Light : Light
 	void SetThreshold(int index, float thr);
 
 	void* pLight() override;
-	void* GetSize() override;
+	size_t GetSize() override;
 
 private:
 	struct lgt
 	{
+		lgt();
+
 		Color col;
 		float inten;
 
 		Position pos;
-		uint8_t flag;
+		int flag;
 
 		Rotation rot;
 		float thr;
 	}comp[Lights_MAX];
+
+public:
+
+	lgt GetComponent(int index);
+
 };
 
 struct A_Light : Light
@@ -131,17 +140,24 @@ struct A_Light : Light
 	void SetIntensity(int index, float inten) override;
 
 	void* pLight() override;
-	void* GetSize() override;
+	size_t GetSize() override;
 
 private:
 	struct lgt
 	{
+		lgt();
+
 		Color col;
 		float inten;
 
-		uint8_t flag;
+		int flag;
 		float val0;
 		float val1;
 		float val2;
 	}comp[Lights_MAX];
+
+public:
+
+	lgt GetComponent(int index);
+
 };
