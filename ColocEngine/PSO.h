@@ -1,5 +1,6 @@
 #pragma once
 #include<d3d12.h>
+#include<cstdint>
 
 class PSO
 {
@@ -14,7 +15,7 @@ public:
 		D3D12_ROOT_SIGNATURE_FLAGS flag,
 		uint16_t paramcnt ,
 		uint16_t sampcnt
-	) = 0;
+	) = 0 ;
 
 	virtual void Term();
 
@@ -40,17 +41,17 @@ public:
 		uint16_t paramcnt,
 		uint16_t sampcnt
 	) override;
-}Def3D;
+};
 
 class DefToon : public PSO
 {
 	bool Init
 	(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sampler, D3D12_ROOT_SIGNATURE_FLAGS flag, uint16_t paramcnt, uint16_t sampcnt)override;
-}DefToon;
+};
 
 class DefPost : public PSO
 {
 	bool Init
 	(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sampler, D3D12_ROOT_SIGNATURE_FLAGS flag, uint16_t paramcnt, uint16_t sampcnt)override;
-}DefPost;
+};
 

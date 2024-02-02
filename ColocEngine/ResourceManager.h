@@ -34,5 +34,8 @@ namespace ResourceManager
 	//-----------
 	extern const uint16_t MAX_Textures;
 	extern const uint16_t MAT_Models;
+
+	constexpr UINT CBCOUNT = 256;
+
 };
 

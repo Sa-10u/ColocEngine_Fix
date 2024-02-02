@@ -4,6 +4,7 @@
 #include"FileLoader.h"
 #include<thread>
 #include"ResourceManager.h"
+#include"PSOManager.h"
 
 using namespace std::chrono;
 
@@ -50,6 +51,7 @@ bool WinView::setup()
             DataManager::Init();
             WorldManager::Init();
             ResourceManager::Init();
+            PSOManager::Init();
             Input_KB::Init();
 
             return true;
@@ -146,6 +148,9 @@ void WinView::termination()
     Input_KB::Release();
     WorldManager::Release();
     DataManager::Release();
+    
+    ResourceManager::Term();
+    PSOManager::Term();
 }
 
 void WinView::loop()

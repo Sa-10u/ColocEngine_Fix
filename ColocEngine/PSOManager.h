@@ -8,6 +8,8 @@ namespace PSOManager
 	bool Init();
 	void Term();
 
+	void InitParam();
+
 	enum class Shader3D
 	{
 		Default,
@@ -30,5 +32,18 @@ namespace PSOManager
 	PSO* GetPSO(ShaderPost ind);
 //-------------------------------------------------
 
-	
+	enum
+	{
+		CB_U = 0,
+		CB_C,
+		CB_L,
+		SB_MTL,
+		SB_OI,
+		SB_MB,
+		TEX,
+
+		Amount
+	};
+
+	extern D3D12_ROOT_PARAMETER r_param[Amount];
 };

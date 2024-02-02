@@ -206,6 +206,9 @@
     <ClInclude Include="PSOManager.h">
       <Filter>System\header</Filter>
     </ClInclude>
+    <ClInclude Include="PSOs.h">
+      <Filter>Head</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Toon.hlsl">

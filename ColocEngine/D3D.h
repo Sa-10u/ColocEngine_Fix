@@ -30,7 +30,6 @@ public:
 
 	bool Initialize(HWND hwnd, uint32_t h, uint32_t w);
 	bool InitGBO();
-	bool InitPSO();
 	bool InitPost();
 	void Termination();
 	void TermGBO();		//Graphic Buffer Object
@@ -80,12 +79,6 @@ private:
 	D3D12_RESOURCE_BARRIER brr;
 
 	//-----------------
-
-	ID3D12RootSignature* rootsig_;
-	ID3D12RootSignature* postRTSG_;
-
-	ID3D12PipelineState* PSO;
-	ID3D12PipelineState* postPSO;
 
 	ID3D12Resource* CB_Util[FrameAmount];
 	ID3D12Resource* CB_CAM[FrameAmount];
