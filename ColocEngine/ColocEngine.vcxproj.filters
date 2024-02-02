@@ -78,9 +78,6 @@
     <ClCompile Include="MeshLoader.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="DescriptorManager.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="CAM.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -153,12 +150,6 @@
       <Filter>Head</Filter>
     </ClInclude>
     <ClInclude Include="MeshLoader.h">
-      <Filter>Head</Filter>
-    </ClInclude>
-    <ClInclude Include="PoolManager.h">
-      <Filter>Head</Filter>
-    </ClInclude>
-    <ClInclude Include="DescriptorManager.h">
       <Filter>Head</Filter>
     </ClInclude>
     <ClInclude Include="Resource.h">

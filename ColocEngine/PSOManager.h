@@ -5,7 +5,8 @@
 
 namespace PSOManager
 {
-	void Init();
+	bool Init();
+	void Term();
 
 	enum class Shader3D
 	{
@@ -22,9 +23,12 @@ namespace PSOManager
 		AMMOUNT
 	};
 
-	extern std::array<ID3D12PipelineState*, static_cast<uint32_t>(Shader3D::AMMOUNT)> PSO3D;
-	extern std::array<ID3D12PipelineState*, static_cast<uint32_t>(ShaderPost::AMMOUNT)> PSOPost;
+	extern std::array<PSO*, static_cast<uint32_t>(Shader3D::AMMOUNT)> PSO3D;
+	extern std::array<PSO*, static_cast<uint32_t>(ShaderPost::AMMOUNT)> PSOPost;
 
-	ID3D12PipelineState* GetPSO(Shader3D ind);
-	ID3D12PipelineState* GetPSO(ShaderPost ind);
+	PSO* GetPSO(Shader3D ind);
+	PSO* GetPSO(ShaderPost ind);
+//-------------------------------------------------
+
+	
 };
