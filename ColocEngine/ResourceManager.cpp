@@ -401,7 +401,7 @@ void ResourceManager::TexFlush()
 {
     for (auto& itr : textures_) {
 
-        if (&itr != nullptr)
+        if (itr.tex_.rsc_ptr != NULL)
         {
             itr.tex_.rsc_ptr->Release();
             itr.Name_.clear();

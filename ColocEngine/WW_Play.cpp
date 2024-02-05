@@ -8,7 +8,7 @@
 void WW_Play::Initialize()
 {
 	md = ResourceManager::ModelLoad(L"TEST_MK.fbx");
-	md0 = ResourceManager::ModelLoad(L"Plane.fbx");
+	md0 = ResourceManager::ModelLoad(L"AlphaBox.fbx");
 
 	ResourceManager::TexLoad(L"default.dds");
 	ResourceManager::TexLoad(L"VAVA.dds");
@@ -33,14 +33,14 @@ void WW_Play::Run(float tick)
 
 	MapBOOL* arr0 = { &mb };
 
-	S_Draw::Draw(&t0, md , &arr0, 1);
+	//S_Draw::Draw(&t0, md , &arr0, 1);
 
 	C_Trans tr("a");
 
 
 	tr.rot = Rotation(85, 0, 0);
-	tr.scale = Scale(.1, .1, .1);
-	tr.pos = Position(1, 0, 0);
+	//tr.scale = Scale(.1, .1, .1);
+	tr.pos = Position(.5, 0, .5);
 
 	static ObjInfo oi = {};
 	oi.val0 += 0.01f;
@@ -50,9 +50,9 @@ void WW_Play::Run(float tick)
 	mp.isD = ResourceManager::TexLoad(L"Water.jpg");
 	mp.isN = ResourceManager::TexLoad(L"NormalMap.png");
 
-	MapBOOL* mc[] = {&mp};
+	//MapBOOL* mc[] = {&mp};
 
-	S_Draw::Draw(&oi, md0, mc, 1);
+	S_Draw::Draw(&oi, md0, nullptr, 0);
 	
 }
 
