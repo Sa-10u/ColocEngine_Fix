@@ -400,8 +400,12 @@ void ResourceManager::ModelFlush()
 void ResourceManager::TexFlush()
 {
     for (auto& itr : textures_) {
-        itr.tex_.rsc_ptr->Release();
-        itr.Name_.clear();
+
+        if (&itr != nullptr)
+        {
+            itr.tex_.rsc_ptr->Release();
+            itr.Name_.clear();
+        }
     }
     textures_.clear();
 

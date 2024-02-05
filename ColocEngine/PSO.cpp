@@ -89,7 +89,7 @@ bool Def3D::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sample
 	{
 		bs_desc.AlphaToCoverageEnable = false;
 		bs_desc.IndependentBlendEnable = false;
-		for (auto i = 0u; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i) {
+		for (auto i = 0u; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; i++) {
 
 			bs_desc.RenderTarget[i] = rtb_desc;
 		}

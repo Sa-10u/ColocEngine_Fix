@@ -258,6 +258,8 @@ bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
     cmdlist_->Close();
     InitGBO();
 
+    if(!PSOManager::Init())  return 0;
+
     __CREATE("Buffer for Post Effect")
     {
         if (!InitPost())      return 0;

@@ -6,89 +6,11 @@ namespace PSOManager
 {
     std::array<PSO*, static_cast<uint32_t>(Shader3D::AMMOUNT)> PSO3D = {&def3D , &defToon};
     std::array<PSO*, static_cast<uint32_t>(ShaderPost::AMMOUNT)> PSOPost = {&defPost};
-
-    D3D12_ROOT_PARAMETER r_param[Amount];
 }
 
 bool PSOManager::Init()
 {
-    InitParam();
 
-    auto res = 0u;
-    {
-
-        D3D12_STATIC_SAMPLER_DESC sampler = {};
-        {
-            sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
-            sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
-            sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
-            sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
-            sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-            sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-            sampler.MaxAnisotropy = 1;
-            sampler.MaxLOD = D3D12_FLOAT32_MAX;
-            sampler.MinLOD = D3D12_FLOAT32_MAX * -1;
-            sampler.MipLODBias = D3D12_DEFAULT_MIP_LOD_BIAS;
-            sampler.RegisterSpace = 0;
-            sampler.ShaderRegister = 0;
-            sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-        }
-
-        D3D12_ROOT_SIGNATURE_FLAGS flag = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-        flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS;
-        flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS;
-        flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
-
-        for (auto i = 0u; i < static_cast<size_t>(Shader3D::AMMOUNT); i++) {
-
-            if (!PSO3D[i]->Init(r_param, &sampler, flag, Amount, 1))   return false;
-        }
-    }
-
-    {
-
-        D3D12_STATIC_SAMPLER_DESC sampler = {};
-        {
-            sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
-            sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
-            sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
-            sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
-            sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-            sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-            sampler.MaxAnisotropy = 1;
-            sampler.MaxLOD = D3D12_FLOAT32_MAX;
-            sampler.MinLOD = D3D12_FLOAT32_MAX * -1;
-            sampler.MipLODBias = D3D12_DEFAULT_MIP_LOD_BIAS;
-            sampler.RegisterSpace = 0;
-            sampler.ShaderRegister = 0;
-            sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-        }
-
-        D3D12_ROOT_SIGNATURE_FLAGS flag = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-        flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS;
-        flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS;
-        flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
-
-        for (auto i = 0u; i < static_cast<size_t>(ShaderPost::AMMOUNT); i++) {
-
-            if (!PSO3D[i]->Init(r_param, &sampler, flag, Amount, 1))   return false;
-        }
-    }
-
-    return true;
-}
-
-void PSOManager::Term()
-{
-    for (auto i = 0u; i < static_cast<size_t>(Shader3D::AMMOUNT); i++) {
-
-        PSO3D[i]->Term();
-        PSOPost[i]->Term();
-    }
-}
-
-void PSOManager::InitParam()
-{
     D3D12_ROOT_PARAMETER r_param[Amount] = {};
     {
         r_param[CB_U].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
@@ -177,6 +99,99 @@ void PSOManager::InitParam()
         r_param[TEX].DescriptorTable.NumDescriptorRanges = 1;
         r_param[TEX].DescriptorTable.pDescriptorRanges = &range_Tex;
         r_param[TEX].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+    }
+
+    D3D12_STATIC_SAMPLER_DESC sampler = {};
+    {
+        sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+        sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+        sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+        sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+        sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+        sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+        sampler.MaxAnisotropy = 1;
+        sampler.MaxLOD = D3D12_FLOAT32_MAX;
+        sampler.MinLOD = D3D12_FLOAT32_MAX * -1;
+        sampler.MipLODBias = D3D12_DEFAULT_MIP_LOD_BIAS;
+        sampler.RegisterSpace = 0;
+        sampler.ShaderRegister = 0;
+        sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+    }
+
+    auto res = 0u;
+    {
+
+        D3D12_STATIC_SAMPLER_DESC sampler = {};
+        {
+            sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+            sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+            sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+            sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+            sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+            sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+            sampler.MaxAnisotropy = 1;
+            sampler.MaxLOD = D3D12_FLOAT32_MAX;
+            sampler.MinLOD = D3D12_FLOAT32_MAX * -1;
+            sampler.MipLODBias = D3D12_DEFAULT_MIP_LOD_BIAS;
+            sampler.RegisterSpace = 0;
+            sampler.ShaderRegister = 0;
+            sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+        }
+
+        D3D12_ROOT_SIGNATURE_FLAGS flag = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+        flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS;
+        flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS;
+        flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
+
+        for (auto i = 0u; i < static_cast<size_t>(Shader3D::AMMOUNT); i++) {
+
+            if (!PSO3D[i]->Init(r_param, &sampler, flag, Amount, 1))   return false;
+        }
+    }
+
+    {
+
+        D3D12_STATIC_SAMPLER_DESC sampler = {};
+        {
+            sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+            sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+            sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+            sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+            sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+            sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+            sampler.MaxAnisotropy = 1;
+            sampler.MaxLOD = D3D12_FLOAT32_MAX;
+            sampler.MinLOD = D3D12_FLOAT32_MAX * -1;
+            sampler.MipLODBias = D3D12_DEFAULT_MIP_LOD_BIAS;
+            sampler.RegisterSpace = 0;
+            sampler.ShaderRegister = 0;
+            sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+        }
+
+        D3D12_ROOT_SIGNATURE_FLAGS flag = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+        flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS;
+        flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS;
+        flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
+
+        for (auto i = 0u; i < static_cast<size_t>(ShaderPost::AMMOUNT); i++) {
+
+            if (!PSO3D[i]->Init(r_param, &sampler, flag, Amount, 1))   return false;
+        }
+    }
+
+    return true;
+}
+
+void PSOManager::Term()
+{
+    for (auto i = 0u; i < static_cast<size_t>(Shader3D::AMMOUNT); i++) {
+
+        PSO3D[i]->Term();
+    }
+
+    for (auto i = 0u; i < static_cast<size_t>(ShaderPost::AMMOUNT); i++) {
+
+        PSOPost[i]->Term();
     }
 }
 

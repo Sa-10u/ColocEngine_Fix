@@ -8,8 +8,6 @@ namespace PSOManager
 	bool Init();
 	void Term();
 
-	void InitParam();
-
 	enum class Shader3D
 	{
 		Default,
@@ -44,6 +42,4 @@ namespace PSOManager
 
 		Amount
 	};
-
-	extern D3D12_ROOT_PARAMETER r_param[Amount];
 };

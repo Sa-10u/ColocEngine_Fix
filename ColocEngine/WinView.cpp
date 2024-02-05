@@ -51,7 +51,6 @@ bool WinView::setup()
             DataManager::Init();
             WorldManager::Init();
             ResourceManager::Init();
-            PSOManager::Init();
             Input_KB::Init();
 
             return true;
