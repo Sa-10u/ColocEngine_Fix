@@ -7,7 +7,7 @@ PSoutput main(VSoutput inp)
 {
 	PSoutput resÅ@= (PSoutput)0;
 
-    res.color = colmap[Map[inp.ID].isN].Sample(colsmp, inp.uv);
+    res.color = colmap[Map[inp.ID].isD].Sample(colsmp, inp.uv + Map[inp.ID].val0);
 
     float len;
 
@@ -26,6 +26,6 @@ PSoutput main(VSoutput inp)
 
     }
 
-
+    res.color.rgb = Data[inp.ID].val0;
     return res;
 }

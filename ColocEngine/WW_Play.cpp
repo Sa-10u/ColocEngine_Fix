@@ -42,13 +42,18 @@ void WW_Play::Run(float tick)
 	tr.scale = Scale(.1, .1, .1);
 	tr.pos = Position(1, 0, 0);
 
+	static ObjInfo oi = {};
+	oi.val0 += 0.01f;
+	oi.wld = tr.WLDGetMTX();
+
 	MapBOOL mp = {};
 	mp.isD = ResourceManager::TexLoad(L"Water.jpg");
 	mp.isN = ResourceManager::TexLoad(L"NormalMap.png");
 
 	MapBOOL* mc[] = {&mp};
 
-	S_Draw::Draw(&tr, md0, mc, 1);
+	S_Draw::Draw(&oi, md0, mc, 1);
+	
 }
 
 void WW_Play::release()
