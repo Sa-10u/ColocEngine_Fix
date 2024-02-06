@@ -45,10 +45,10 @@ PSoutput main(VSoutput inp)
 
     float mu = 5;
 
-    float mirdif = floor((mirp + difp) * mu) / mu;
+    difp = floor((difp) * mu) / mu;
     ap = floor(ap * mu) / mu;
 
-    res.color.rgb = (base) * (mirdif * Pcol);
+    res.color.rgb = (base) * ((mirp + difp) * Pcol);
     res.color.rgb += (res.color.rgb) + (ap * Acol);
 
     return res;
