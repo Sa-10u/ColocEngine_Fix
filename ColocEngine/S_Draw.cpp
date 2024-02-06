@@ -1,5 +1,8 @@
 #include "S_Draw.h"
 #include"C_Trans.h"
+#include<cassert>
+
+//fix draw count , over instance's count then run GPU 
 
 void S_Draw::Draw(XMMATRIX* wld, uint16_t md, MapBOOL** mb, uint16_t size)
 {

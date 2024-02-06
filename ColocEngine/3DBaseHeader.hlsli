@@ -71,7 +71,7 @@ struct Material
 
 struct P_LIGHT
 {
-	float3 col;
+	float3 color;
 	float inten;
 
 	float3 pos;
@@ -80,7 +80,7 @@ struct P_LIGHT
 
 struct D_LIGHT
 {
-	float3 col;
+	float3 color;
 	float inten;
 
 	float3 pos;
@@ -92,7 +92,7 @@ struct D_LIGHT
 
 struct A_LIGHT
 {
-	float3 col;
+	float3 color;
 	float inten;
 	
 	int flag;
@@ -112,8 +112,8 @@ cbuffer Util : register(b0)
 
 cbuffer CAM	:register(b256)
 {
-	float3 pos;
-	float3 tgt;
+	float3 Cpos;
+	float3 Ctgt;
 };
 
 cbuffer Lights : register (b512) // Alignment Error

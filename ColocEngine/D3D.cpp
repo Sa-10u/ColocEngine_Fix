@@ -1033,7 +1033,6 @@ void D3d::write()
 
                 cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
                 cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
-                if (v == 4) continue;//test
                 cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_, 0, 0, 0);
 
                 v++;

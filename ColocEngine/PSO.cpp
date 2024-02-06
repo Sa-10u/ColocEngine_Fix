@@ -110,7 +110,7 @@ bool Def3D::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sample
 	if (FAILED(res))     return 0;
 
 	ID3DBlob* PSblob = nullptr;
-	res = D3DReadFileToBlob(SHADER_FILENAME::DefPS, &PSblob);
+	res = D3DReadFileToBlob(SHADER_FILENAME::ToonPS, &PSblob);
 	if (FAILED(res))     return 0;
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc = {};
