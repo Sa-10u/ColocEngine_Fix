@@ -17,8 +17,10 @@ namespace SHADER_FILENAME
 {
 	LPCWSTR DefVS = s_path "DefVS.cso";
 	LPCWSTR DefPS = s_path "DefPS.cso";
-
 	LPCWSTR ToonPS = s_path "Toon.cso";
+
+	LPCWSTR DefPostVS = s_path "PostEffect_Default_PS.cso";
+	LPCWSTR DefPostPS = s_path "PostEffect_Default_PS.cso";
 }
 
 char* wtoc(const wchar_t* str)

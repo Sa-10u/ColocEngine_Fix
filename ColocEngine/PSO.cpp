@@ -273,10 +273,10 @@ bool DefPost::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* samp
 		D3D12_ROOT_SIGNATURE_DESC rtdesc = {};
 		{
 			rtdesc.Flags = flag;
-			rtdesc.NumParameters = paramcnt;
-			rtdesc.NumStaticSamplers = sampcnt;
-			rtdesc.pParameters = params;
-			rtdesc.pStaticSamplers = sampler;
+			rtdesc.NumParameters = 0; //paramcnt;
+			rtdesc.NumStaticSamplers = 0;// sampcnt;
+			//rtdesc.pParameters = params;
+			//rtdesc.pStaticSamplers = sampler;
 		}
 
 		res = D3D12SerializeRootSignature
@@ -335,7 +335,7 @@ bool DefPost::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* samp
 
 	D3D12_DEPTH_STENCIL_DESC dss_desc = {};
 	{
-		dss_desc.DepthEnable = 1;
+		dss_desc.DepthEnable = 0;
 		dss_desc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 		dss_desc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 		dss_desc.StencilEnable = 0;
@@ -344,11 +344,11 @@ bool DefPost::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* samp
 	//----------------------
 
 	ID3DBlob* VSblob = nullptr;
-	res = D3DReadFileToBlob(L"PostEffect_Default_VS", &VSblob);
+	res = D3DReadFileToBlob(SHADER_FILENAME::DefPostVS , &VSblob);
 	if (FAILED(res))     return 0;
 
 	ID3DBlob* PSblob = nullptr;
-	res = D3DReadFileToBlob(L"PostEffect_Default_PS", &PSblob);
+	res = D3DReadFileToBlob(SHADER_FILENAME::DefPostPS, &PSblob);
 	if (FAILED(res))     return 0;
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc = {};
@@ -369,6 +369,7 @@ bool DefPost::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* samp
 		pso_desc.NumRenderTargets = 1;
 		pso_desc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 		pso_desc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+		pso_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	}
 
 	res = device_->CreateGraphicsPipelineState

@@ -49,7 +49,7 @@ PSoutput main(VSoutput inp)
     res.color.rgb = (base) * ((mirp + difp) * Pcol);
     res.color.rgb += (res.color.rgb) + (ap * Acol);
 
-    res.color.a = (mirp + difp + ap)/3;
+    //res.color.a = (mirp + difp + ap)/3;
 
     return res;
 }

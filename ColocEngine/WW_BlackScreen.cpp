@@ -9,15 +9,31 @@
 
 void WW_BlackScreen::Initialize()
 {
-	DataManager::CreateEntity(&BG, "BG");
-	DataManager::AddComponent<C_SetColorBG>(&BG->comps, "BGchanger", BG);
+	ptr = &P1_BlackToWhite;
+	val0 = .0f;
 }
 
 void WW_BlackScreen::Run(float tick)
 {
-		WorldManager::ChangeWorld(WLD_ID::PLAY);	
+	this->*ptr();
 }
 
 void WW_BlackScreen::release()
+{
+}
+
+void WW_BlackScreen::P1_BlackToWhite()
+{
+}
+
+void WW_BlackScreen::P2_Title()
+{
+}
+
+void WW_BlackScreen::P3_TitleToSelect()
+{
+}
+
+void WW_BlackScreen::P4_Select()
 {
 }

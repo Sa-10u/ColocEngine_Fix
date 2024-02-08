@@ -659,7 +659,7 @@ bool D3d::InitGBO()
     view_.MinDepth = 0.0f;
     view_.TopLeftX = 0.0f;
     view_.TopLeftY = 0.0f;
-
+    
 
     rect_.left = 0.0f;
     rect_.top = 0.0f;
@@ -970,10 +970,12 @@ void D3d::write()
 
         //brr.Transition.pResource = post_;
         brr.Transition.pResource = colbuf_[IND_frame];
+
         brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
         //brr.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
         brr.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+
         brr.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
     }
     cmdlist_->ResourceBarrier(1, &brr);
@@ -1056,7 +1058,7 @@ void D3d::write()
         brr.Transition.pResource = post_;
         brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
     }
-    //cmdlist_->ResourceBarrier(1, &brr);
+   // cmdlist_->ResourceBarrier(1, &brr);
 }
 
 void D3d::waitGPU()
@@ -1115,9 +1117,9 @@ void D3d::postEffect()
 
     cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::ShaderPost::Default)->GetRTSG());
 
-    //cmdlist_->SetDescriptorHeaps(1, DHPost_CbSrUaV->ppHeap_);
+    cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHPost_CbSrUaV->ppHeap_);
     {
-        //cmdlist_->SetGraphicsRootConstantBufferView(0, CBV_Util[IND_frame].desc.BufferLocation);
+        cmdlist_->SetGraphicsRootConstantBufferView(0, CBV_Util[IND_frame].desc.BufferLocation);
     }
 
     cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderPost::Default)->GetPSO());

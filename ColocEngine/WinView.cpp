@@ -171,7 +171,7 @@ void WinView::loop()
         else
         {
             st = system_clock::now();
-            std::this_thread::sleep_for(std::chrono::milliseconds(-10));
+            //std::this_thread::sleep_for(std::chrono::milliseconds(-10));
 
             Input_KB::Update();
             GameMain::Update(1.0f);

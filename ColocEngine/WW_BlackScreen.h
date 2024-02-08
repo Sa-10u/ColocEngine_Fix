@@ -1,8 +1,6 @@
 #pragma once
 #include "WorldManager.h"
 
-class C_SetBGColor;
-
 class WW_BlackScreen : public WorldWork
 {
 public:
@@ -13,6 +11,15 @@ public:
 
 private:
 
-	Entity* BG;
+	void P1_BlackToWhite();
+	void P2_Title();
+	void P3_TitleToSelect();
+	void P4_Select();
+
+	void (WW_BlackScreen::*ptr)();
+
+	WW_BlackScreen();
+
+	float val0;
 };
 

@@ -30,7 +30,7 @@ namespace PSOManager
 	PSO* GetPSO(ShaderPost ind);
 //-------------------------------------------------
 
-	enum
+	enum 
 	{
 		CB_U = 0,
 		CB_C,
@@ -41,5 +41,13 @@ namespace PSOManager
 		TEX,
 
 		Amount
+	};
+
+	enum
+	{
+		P_CB = 0,
+		P_TEX,
+
+		P_Amount
 	};
 };

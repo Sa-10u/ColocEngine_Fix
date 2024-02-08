@@ -2,8 +2,6 @@
 #include "WorldManager.h"
 #include"BUFFER.h"
 
-class RModel;
-
 class WW_Play : public WorldWork
 {
 public:
@@ -14,8 +12,5 @@ public:
 
 private:
 
-	int md;
-	ObjInfo info;
-	int md0;
 };
 
