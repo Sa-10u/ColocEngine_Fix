@@ -15,8 +15,8 @@ void WW_Play::Initialize()
 
 	auto ind = LightManager::CreateLight<P_Light>();
 	LightManager::lights.point.SetColor(ind, Color(1, 1, 1));
-	LightManager::lights.point.SetIntensity(ind, 1);
-	LightManager::lights.point.SetPosition(ind, Position(1, 1, 1));
+	LightManager::lights.point.SetIntensity(ind, 10);
+	LightManager::lights.point.SetPosition(ind, Position(1, 3, -.5));
 }
 
 void WW_Play::Run(float tick)
@@ -30,14 +30,13 @@ void WW_Play::Run(float tick)
 
 	static C_Trans t0("a");
 	t0.pos = Position(0.0, 0, 0);
-	t0.rot.y += 0.01;
+	//t0.rot.y += 0.01;
 
 	info.wld = t0.WLDGetMTX();
 
-	S_Draw::Draw(&info, md ,arr1 ,_countof(arr1));
+	//S_Draw::Draw(&info, md ,arr1 ,_countof(arr1));
 
 	
-
 	MapBOOL mb{};
 	mb.isD = ResourceManager::TexLoad(L"VAVA.dds");
 
@@ -48,9 +47,9 @@ void WW_Play::Run(float tick)
 	C_Trans tr("a");
 
 
-	tr.rot = Rotation(85, 0, 0);
+	tr.rot = Rotation(-0.4, 0, 0);
 	tr.scale = Scale(.2, .2, .2);
-	tr.pos = Position(.5, 0, .5);
+	tr.pos = Position(.5, 0, 0);
 
 	static ObjInfo oi = {};
 	oi.val0 += 0.001f;

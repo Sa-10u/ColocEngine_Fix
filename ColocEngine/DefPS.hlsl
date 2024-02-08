@@ -12,7 +12,10 @@ PSoutput main(VSoutput inp)
 
     float3 norm = Map[inp.ID].isN ? colmap[Map[inp.ID].isN].Sample(colsmp, inp.uv + Data[inp.ID].val0) :normalize(inp.norm);
 
-    norm = mul(norm, Data[inp.ID].World);
+    norm = colmap[Map[inp.ID].isN].Sample(colsmp, inp.uv + Data[inp.ID].val0) + colmap[Map[inp.ID].isN].Sample(colsmp, inp.uv - Data[inp.ID].val0);
+    norm = norm / 2;
+
+    norm = normalize(mul(norm, Data[inp.ID].World));
     float3 eyev = normalize(Cpos - inp.Wpos);
 
     float3 Pcol = 0;
@@ -25,7 +28,7 @@ PSoutput main(VSoutput inp)
        float3 ltov = normalize(pl[i].pos - inp.Wpos);
 
        difp += ((dot(normalize(pl[i].pos - inp.Wpos), norm)) *( pow(saturate(1 / len),2)))* pl[i].inten;
-       mirp += (saturate(pow(dot(normalize(ltov + eyev), norm) ,40))) * (pl[i].inten * clamp(10-len ,0,1));
+       mirp += (saturate(pow(dot(normalize(ltov + eyev), norm), 40))) * (pl[i].inten * clamp(len ,0,1));
 
        Pcol += pl[i].color;
     }
@@ -45,6 +48,8 @@ PSoutput main(VSoutput inp)
 
     res.color.rgb = (base) * ((mirp + difp) * Pcol);
     res.color.rgb += (res.color.rgb) + (ap * Acol);
+
+    res.color.a = (mirp + difp + ap)/3;
 
     return res;
 }

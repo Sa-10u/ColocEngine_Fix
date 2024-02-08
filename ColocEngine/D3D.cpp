@@ -992,8 +992,6 @@ void D3d::write()
             for (auto cnt : itr.Mesh_) {
 
                 cmdlist_->OMSetRenderTargets(1, &handle, FALSE, &h_ZBV);
-                auto p = PSOManager::GetPSO(PSOManager::Shader3D::Default)->GetRTSG();
-                auto l = PSOManager::GetPSO(PSOManager::Shader3D::Default)->GetPSO();
                 cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::Shader3D::Default)->GetRTSG());
 
                 cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
