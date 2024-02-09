@@ -1,5 +1,7 @@
 #pragma once
 #include "WorldManager.h"
+#include"C_Trans.h"
+#include"BUFFER.h"
 
 class WW_BlackScreen : public WorldWork
 {
@@ -21,5 +23,9 @@ private:
 
 	float val0;
 	float val1;
+
+	uint16_t title;
+
+	Entity e_title;
 };
 

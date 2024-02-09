@@ -1,11 +1,8 @@
 #include "WW_BlackScreen.h"
 
-#include"C_SetColorBG.h"
 #include"Input.h"
 #include"ResourceManager.h"
 #include"S_Draw.h"
-#include"C_Trans.h"
-#include"BUFFER.h"
 #include"D3D.h"
 #include<cmath>
 #include<numbers>
@@ -15,6 +12,10 @@ void WW_BlackScreen::Initialize()
 	ptr = &WW_BlackScreen::P1_BlackToWhite;
 	val0 = .0f;
 	val1 = .0f;
+
+	title = ResourceManager::TexLoad(L"Title.png");
+
+	DataManager::CreateEntity(&e_title , "Title");
 }
 
 void WW_BlackScreen::Run(float tick)
@@ -36,6 +37,10 @@ void WW_BlackScreen::P1_BlackToWhite()
 	{
 		PTR_D3D::ptr->SetColorBG(0, 0, 0, 0);
 		ptr = &WW_BlackScreen::P2_Title;
+		val0 = 0;
+		val1 = 0;
+
+		DataManager::AddComponent<C_Trans>(&e_title.comps, "TRANS", &e_title);
 	}
 
 	val1 = col;
@@ -43,9 +48,20 @@ void WW_BlackScreen::P1_BlackToWhite()
 }
 
 void WW_BlackScreen::P2_Title()
-{
-	//SetTitle Picture;
+{	
+	val1 += 1;
+	C_Trans* trans = nullptr;
+	DataManager::SearchComponent("TRANS", trans, &e_title.comps);
 
+
+
+	if (val1 > 30)
+	{
+		PTR_D3D::ptr->SetColorBG(0, 0, 0, 0);
+		ptr = &WW_BlackScreen::P3_TitleToSelect;
+		val0 = 0;
+		val1 = 0;
+	}
 
 }
 

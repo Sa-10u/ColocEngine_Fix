@@ -2,7 +2,7 @@
 
 void Entity::Update(float tick)
 {
-	for (auto c : comps) {
+	for (auto& c : comps) {
 
 		if(c->Runnable)	c->Run(tick);
 	}
@@ -10,7 +10,7 @@ void Entity::Update(float tick)
 
 void Entity::SubUpdate(float tick)
 {
-	for (auto s : sub_comps) {
+	for (auto& s : sub_comps) {
 		if(s->Runnable)	s->Run(tick);
 	}
 }
@@ -20,12 +20,12 @@ size_t Entity::Release()
 	this->Usable = true;
 	this->Runnable = false;
 
-	for (auto e : comps) {
+	for (auto& e : comps) {
 		e->Release();
 		delete e;
 	}
 
-	for (auto s : sub_comps) {
+	for (auto& s : sub_comps) {
 		s->Release();
 		delete s;
 	}
@@ -84,7 +84,7 @@ namespace DataManager
 	void (*Process_Jump[2])(float tick, size_t ID) = { &EmptyProcess,&proc };
 	void (*Sub_Process_Jump[2])(float tick, size_t ID) = { &EmptyProcess , &sub_proc };
 }
-size_t DataManager::CreateEntity(Entity** e , string tag)
+size_t DataManager::CreateEntity(Entity* e , string tag)
 {
 	for (auto i = 0; i < Size; i++) {
 
@@ -96,7 +96,7 @@ size_t DataManager::CreateEntity(Entity** e , string tag)
 
 			Entities[i].Tag = tag;
 
-			*e = &Entities[i];
+			if(e != nullptr)	e = &Entities[i];
 
 			return i;
 		}
@@ -259,7 +259,7 @@ void DataManager::ALL_RESET()
 
 void DataManager::DeleteComponent(string tag, std::vector<IComp*>* list)
 {
-	for (auto itr : *list) {
+	for (auto& itr : *list) {
 
 		if (itr->Tag == tag)
 		{
@@ -272,7 +272,7 @@ void DataManager::DeleteComponent(string tag, std::vector<IComp*>* list)
 
 void DataManager::DeleteComponent(IComp* ptr, std::vector<IComp*> *list)
 {
-	for (auto itr : *list) {
+	for (auto& itr : *list) {
 
 		if (itr == ptr)
 		{
@@ -284,7 +284,7 @@ void DataManager::DeleteComponent(IComp* ptr, std::vector<IComp*> *list)
 
 void DataManager::DeleteComponents(string tag, std::vector<IComp*> *list)
 {
-	for (auto itr : *list) {
+	for (auto& itr : *list) {
 
 		if (itr->Tag == tag)	itr->Release();
 		
@@ -293,7 +293,7 @@ void DataManager::DeleteComponents(string tag, std::vector<IComp*> *list)
 
 bool DataManager::SearchComponent(string tag, std::vector<IComp*> *list)
 {
-	for (auto itr : *list) {
+	for (auto& itr : *list) {
 
 		if (itr->Tag == tag)	return true;
 	}
@@ -303,7 +303,7 @@ bool DataManager::SearchComponent(string tag, std::vector<IComp*> *list)
 
 bool DataManager::SearchComponent(string tag, IComp* cmp, std::vector<IComp*> *list)
 {
-	for (auto itr : *list) {
+	for (auto& itr : *list) {
 
 		if (itr->Tag == tag)
 		{
@@ -319,7 +319,7 @@ uint32_t DataManager::SearchComponents(string tag, std::vector<IComp*> *list)
 {
 	int cnt = 0;
 
-	for (auto itr : *list) {
+	for (auto& itr : *list) {
 
 		if (itr->Tag == tag)	cnt++;
 	}
@@ -330,7 +330,7 @@ uint32_t DataManager::SearchComponents(string tag, std::vector<IComp*> *list)
 uint32_t DataManager::SearchComponents(string tag, std::vector<IComp*> *get, const std::vector<IComp*> *list)
 {
 	uint32_t cnt = 0;
-	for (auto itr : *list) {
+	for (auto& itr : *list) {
 
 		if (itr->Tag == tag)
 		{

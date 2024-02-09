@@ -58,6 +58,9 @@
     <Filter Include="shader\ModelRendaring">
       <UniqueIdentifier>{0bbd68d0-a726-4ba7-8aed-e41d3b92f9e5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shader\UI">
+      <UniqueIdentifier>{b6882901-b5e9-4d3e-8b1d-bc2b0e8fbd98}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MAIN.cpp">
@@ -88,9 +91,6 @@
       <Filter>Components\ColocEngine\source</Filter>
     </ClCompile>
     <ClCompile Include="IComp.cpp">
-      <Filter>Components\ColocEngine\source</Filter>
-    </ClCompile>
-    <ClCompile Include="C_SetColorBG.cpp">
       <Filter>Components\ColocEngine\source</Filter>
     </ClCompile>
     <ClCompile Include="FileLoader.cpp">
@@ -161,9 +161,6 @@
     <ClInclude Include="WW_BlackScreen.h">
       <Filter>Scene\header</Filter>
     </ClInclude>
-    <ClInclude Include="C_SetColorBG.h">
-      <Filter>Components\ColocEngine\header</Filter>
-    </ClInclude>
     <ClInclude Include="C_Trans.h">
       <Filter>Components\ColocEngine\header</Filter>
     </ClInclude>
@@ -226,6 +223,12 @@
     <FxCompile Include="PostEffect_Default_PS.hlsl">
       <Filter>shader\PostEffect</Filter>
     </FxCompile>
+    <FxCompile Include="UI_PS.hlsl">
+      <Filter>shader\UI</Filter>
+    </FxCompile>
+    <FxCompile Include="UI_VS.hlsl">
+      <Filter>shader\UI</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -238,8 +241,11 @@
     <None Include="BasePost.hlsli">
       <Filter>shader\PostEffect</Filter>
     </None>
-    <None Include="3DBaseHeader.hlsli">
+    <None Include="Base3D.hlsli">
       <Filter>shader\ModelRendaring</Filter>
+    </None>
+    <None Include="BaseUI.hlsli">
+      <Filter>shader\UI</Filter>
     </None>
   </ItemGroup>
 </Project>

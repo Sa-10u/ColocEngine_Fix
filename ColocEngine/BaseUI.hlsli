@@ -1,5 +1,5 @@
-Texture2D raw[]: register(t0);
-SamplerState smp : register(s0);
+SamplerState colsmp : register(s0);
+Texture2D	 colmap[] : register(t256);
 
 struct VSinput
 {
@@ -18,15 +18,21 @@ struct PSoutput
     float4 col : SV_TARGET0;
 };
 
-//-------------------------------
+//--------------------
 
 cbuffer Util : register(b0)
 {
-    float4x4 View		: packoffset(c0);
-    float4x4 Projection : packoffset(c4);
     float Time : packoffset(c8);
 };
 
-//---------------
+struct PerInstance
+{ 
+    float tick;
+    float val0;
+    float val1;
+    float val2;
 
-StructuredBuffer<PerInstance> Data	: register(t0);
+    float4 clip;
+};
+
+StructuredBuffer<PerInstance> Data : register(t0);
