@@ -6,16 +6,20 @@
 #include"S_Draw.h"
 #include"C_Trans.h"
 #include"BUFFER.h"
+#include"D3D.h"
+#include<cmath>
+#include<numbers>
 
 void WW_BlackScreen::Initialize()
 {
-	ptr = &P1_BlackToWhite;
+	ptr = &WW_BlackScreen::P1_BlackToWhite;
 	val0 = .0f;
+	val1 = .0f;
 }
 
 void WW_BlackScreen::Run(float tick)
 {
-	this->*ptr();
+	(this->*ptr)();
 }
 
 void WW_BlackScreen::release()
@@ -24,10 +28,19 @@ void WW_BlackScreen::release()
 
 void WW_BlackScreen::P1_BlackToWhite()
 {
+	val0 += 0.1f;
+	float col = sin(val0 /3.141592);
+	PTR_D3D::ptr->SetColorBG(col, col, col, 1);
+
+	if (col < val1)	ptr = &WW_BlackScreen::P2_Title;
+
+	val1 = col;
+
 }
 
 void WW_BlackScreen::P2_Title()
 {
+	val1;
 }
 
 void WW_BlackScreen::P3_TitleToSelect()

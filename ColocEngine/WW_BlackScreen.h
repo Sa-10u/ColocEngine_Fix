@@ -18,8 +18,8 @@ private:
 
 	void (WW_BlackScreen::*ptr)();
 
-	WW_BlackScreen();
 
 	float val0;
+	float val1;
 };
 

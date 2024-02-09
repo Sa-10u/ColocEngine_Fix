@@ -171,7 +171,6 @@ void WinView::loop()
         else
         {
             st = system_clock::now();
-            //std::this_thread::sleep_for(std::chrono::milliseconds(-10));
 
             Input_KB::Update();
             GameMain::Update(1.0f);
@@ -181,9 +180,9 @@ void WinView::loop()
             ed = system_clock::now();
             auto t = ed - st;
 
-            auto str = duration_cast<milliseconds>(ed - st).count();
-            str = 1000.0f / str;
+            std::this_thread::sleep_for(std::chrono::milliseconds(-10));
 
+            auto str = duration_cast<milliseconds>(ed - st).count();
             SetWindowText(h_wnd, std::to_wstring(str).c_str());
         }
     }

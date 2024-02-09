@@ -986,7 +986,7 @@ void D3d::write()
     cmdlist_->OMSetRenderTargets(1, &handle, FALSE, &h_ZBV);
     cmdlist_->ClearRenderTargetView(handle, backcolor_, 0, nullptr);
     cmdlist_->ClearDepthStencilView(h_ZBV, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-
+    
     auto MDIND = 0u;
     for (auto& itr : ResourceManager::models_) {
         
