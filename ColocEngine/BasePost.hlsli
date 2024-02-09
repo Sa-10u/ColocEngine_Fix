@@ -26,7 +26,3 @@ cbuffer Util : register(b0)
     float4x4 Projection : packoffset(c4);
     float Time : packoffset(c8);
 };
-
-//---------------
-
-StructuredBuffer<PerInstance> Data	: register(t0);

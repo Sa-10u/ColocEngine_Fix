@@ -29,7 +29,7 @@ void WW_BlackScreen::release()
 
 void WW_BlackScreen::P1_BlackToWhite()
 {
-	val0 += 0.2f;
+	val0 += 0.1f;
 	float col = sin(val0 /3.141592);
 	PTR_D3D::ptr->SetColorBG(col, col, col, 1);
 
@@ -67,6 +67,7 @@ void WW_BlackScreen::P2_Title()
 
 void WW_BlackScreen::P3_TitleToSelect()
 {
+	
 }
 
 void WW_BlackScreen::P4_Select()

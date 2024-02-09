@@ -158,7 +158,8 @@ void WinView::loop()
 
     auto st = system_clock::now();
     auto ed = system_clock::now();
-    
+    float tick = .0f;
+
 
     while (msg.message != WM_QUIT) {
 
@@ -173,17 +174,18 @@ void WinView::loop()
             st = system_clock::now();
 
             Input_KB::Update();
-            GameMain::Update(1.0f);
+            GameMain::Update(tick);
             D3D->Run(1);
             WorldManager::Changer();
 
             ed = system_clock::now();
             auto t = ed - st;
             auto str = duration_cast<milliseconds>(t).count();
+            str = FPS - str;
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(FPS - str));
+            std::this_thread::sleep_for(std::chrono::milliseconds(str));
 
-            str =FPS - str;
+            tick = str;
             SetWindowText(h_wnd, std::to_wstring(str).c_str());
         }
     }

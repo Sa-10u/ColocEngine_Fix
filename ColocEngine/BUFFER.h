@@ -11,6 +11,18 @@ using namespace DirectX;
 
 class RModel;
 
+struct Rect2D
+{
+	Rect2D(float lx, float ly, float rx, float ry);
+
+	float lx;
+	float ly;
+	float rx;
+	float ry;
+};
+
+//-----------------------
+
 struct SIMPLEVERTEX
 {
 	XMFLOAT3 pos;

@@ -135,6 +135,12 @@
     <ClCompile Include="Resource.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="C_Quad.cpp">
+      <Filter>Components\ColocEngine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="C_UI.cpp">
+      <Filter>Components\ColocEngine\source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinView.h">
@@ -205,6 +211,12 @@
     </ClInclude>
     <ClInclude Include="PSOs.h">
       <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="C_Quad.h">
+      <Filter>Components\ColocEngine\header</Filter>
+    </ClInclude>
+    <ClInclude Include="C_UI.h">
+      <Filter>Components\ColocEngine\header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

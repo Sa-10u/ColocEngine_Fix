@@ -65,3 +65,7 @@ const D3D12_INPUT_LAYOUT_DESC SIMPLEVERTEX::inp_Layout =
 	SIMPLEVERTEX::element,
 	SIMPLEVERTEX::AMMOUNT
 };
+
+Rect2D::Rect2D(float lx, float ly, float rx, float ry):lx(lx),ly(ly),rx(rx),ry(ry)
+{
+}
