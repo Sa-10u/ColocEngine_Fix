@@ -34,6 +34,8 @@ private:
 	D3d* D3D;
 	float fps;
 
+	const uint16_t FPS;
+
 private:
 
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);

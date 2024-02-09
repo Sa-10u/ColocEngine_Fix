@@ -28,11 +28,15 @@ void WW_BlackScreen::release()
 
 void WW_BlackScreen::P1_BlackToWhite()
 {
-	val0 += 0.1f;
+	val0 += 0.2f;
 	float col = sin(val0 /3.141592);
 	PTR_D3D::ptr->SetColorBG(col, col, col, 1);
 
-	if (col < val1)	ptr = &WW_BlackScreen::P2_Title;
+	if (col < val1)
+	{
+		PTR_D3D::ptr->SetColorBG(0, 0, 0, 0);
+		ptr = &WW_BlackScreen::P2_Title;
+	}
 
 	val1 = col;
 
@@ -40,7 +44,9 @@ void WW_BlackScreen::P1_BlackToWhite()
 
 void WW_BlackScreen::P2_Title()
 {
-	val1;
+	//SetTitle Picture;
+
+
 }
 
 void WW_BlackScreen::P3_TitleToSelect()

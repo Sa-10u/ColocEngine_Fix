@@ -13,7 +13,7 @@ using namespace std::chrono;
 
 //typedef floatMS = chrono::duration
 
-WinView::WinView(uint32_t h, uint32_t w) :h_ins(nullptr), h_wnd(nullptr), h_(h), w_(w),D3D(nullptr)
+WinView::WinView(uint32_t h, uint32_t w) :h_ins(nullptr), h_wnd(nullptr), h_(h), w_(w),D3D(nullptr),FPS(60)
 {
 }
 
@@ -179,10 +179,11 @@ void WinView::loop()
 
             ed = system_clock::now();
             auto t = ed - st;
+            auto str = duration_cast<milliseconds>(t).count();
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(-10));
+            std::this_thread::sleep_for(std::chrono::milliseconds(FPS - str));
 
-            auto str = duration_cast<milliseconds>(ed - st).count();
+            str =FPS - str;
             SetWindowText(h_wnd, std::to_wstring(str).c_str());
         }
     }
