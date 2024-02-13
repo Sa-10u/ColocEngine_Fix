@@ -12,8 +12,8 @@ struct VSoutput
     float4 pos  : SV_POSITION;
     float2 uv   : TEXCOORD;
 
-    uint ID	    : SV_InstanceID;
-    uint VID    : SV_VertexID
+    uint ID	    : InstanceID;
+    uint VID    : VertexID
 };
 
 struct PSoutput

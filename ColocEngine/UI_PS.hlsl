@@ -2,7 +2,7 @@
 
 PSoutput main(VSoutput inp)
 {
-	PSoutput res = (PSoutput)0;
+	PSoutput res = (PSoutput)(0);
 
 	res.col = float4(1, 1, 1, 1);
 	
