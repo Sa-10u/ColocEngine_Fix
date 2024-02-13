@@ -18,6 +18,19 @@ struct PSoutput
     float4 col : SV_TARGET0;
 };
 
+struct MapBOOL
+{
+	int isD;
+	int isS;
+	int isE;
+	int isN;
+	int isESB;
+
+	float val0;
+	float val1;
+	float val2;
+};
+
 //-------------------------------
 
 cbuffer Util : register(b0)
@@ -26,3 +39,5 @@ cbuffer Util : register(b0)
     float4x4 Projection : packoffset(c4);
     float Time : packoffset(c8);
 };
+
+StructuredBuffer<MapBOOL>	Map	: register(t0);

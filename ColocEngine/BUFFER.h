@@ -13,12 +13,13 @@ class RModel;
 
 struct Rect2D
 {
-	Rect2D(float lx, float ly, float rx, float ry);
+	Rect2D(float lx, float ty, float rx, float by);
+	Rect2D();
 
 	float lx;
-	float ly;
+	float ty;
 	float rx;
-	float ry;
+	float by;
 };
 
 //-----------------------
@@ -86,7 +87,16 @@ struct alignas(16) ObjInfo
 	float val1;
 	float val2;
 
-	ObjInfo();
+	ObjInfo() :tick(0), val0(0), val1(0), val2(0)
+	{
+		wld =
+		{
+			1,0,0,0,
+			0,1,0,0,
+			0,0,1,0,
+			0,0,0,1
+		};
+	}
 };
 
 struct alignas(16) MapBOOL

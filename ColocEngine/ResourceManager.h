@@ -22,11 +22,11 @@ namespace ResourceManager
 	void ALL_RELEASE_MODEL();
 	void ALL_RELEASE_TEX();
 
-	extern RModel E_Model;
 	extern RTexture E_Tex;
 
 	extern ID3D12DescriptorHeap* heapCBV_SRV_UAV_;
 	extern ID3D12DescriptorHeap* postCBV_SRV_UAV_;
+	extern ID3D12DescriptorHeap* uiCBV_SRv_UAV_;
 
 	extern DH* DHH_CbSrUaV;
 	extern DH* DHPost_CbSrUaV;

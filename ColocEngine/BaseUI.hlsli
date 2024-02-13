@@ -18,6 +18,14 @@ struct PSoutput
     float4 col : SV_TARGET0;
 };
 
+struct Quad
+{
+    float lx;
+    float rx;
+    float ty;
+    float dy;
+};
+
 //--------------------
 
 cbuffer Util : register(b0)
@@ -27,12 +35,25 @@ cbuffer Util : register(b0)
 
 struct PerInstance
 { 
+    Quad pos;
     float tick;
     float val0;
     float val1;
     float val2;
+};
 
-    float4 clip;
+struct MapBOOL
+{
+    int isD;
+    int isS;
+    int isE;
+    int isN;
+    int isESB;
+
+    float val0;
+    float val1;
+    float val2;
 };
 
 StructuredBuffer<PerInstance> Data : register(t0);
+StructuredBuffer<MapBOOL>	Map	: register(t512);

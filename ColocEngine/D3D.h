@@ -10,6 +10,7 @@
 #include<DirectXTex.h>
 
 #include"LightManager.h"
+#include"C_UI.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -91,6 +92,8 @@ private:
 	StructuredBuffer<ObjInfo>	 SB_OI[FrameAmount];
 	StructuredBuffer<MapBOOL>	 SB_MB[FrameAmount];
 	StructuredBuffer<Material>	 SB_MTL[FrameAmount];
+
+	StructuredBuffer<C_UI>		SB_UI[FrameAmount];
 	
 	CBUFFERVIEW<Util>			 CBV_Util[FrameAmount];
 	CBUFFERVIEW<Cam>			 CBV_Cam[FrameAmount];

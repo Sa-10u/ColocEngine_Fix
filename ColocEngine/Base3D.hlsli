@@ -129,6 +129,3 @@ StructuredBuffer<Material>  Mtl : register(t1024);
 
 SamplerState colsmp : register(s0);
 Texture2D	 colmap[] : register(t1792);
-
-
-

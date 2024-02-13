@@ -12,17 +12,6 @@ MESH::MESH():ID_Material(-1),indexes_(),vtcs_()
 }
 //--------
 
-ObjInfo::ObjInfo():tick(0),val0(0),val1(0),val2(0)
-{
-	wld = 
-	{
-		1,0,0,0,
-		0,1,0,0,
-		0,0,1,0,
-		0,0,0,1
-	};
-}
-
 MATERIAL::MATERIAL():alpha_(0),shin_(0)
 {
 	dif_ = {};
@@ -66,6 +55,10 @@ const D3D12_INPUT_LAYOUT_DESC SIMPLEVERTEX::inp_Layout =
 	SIMPLEVERTEX::AMMOUNT
 };
 
-Rect2D::Rect2D(float lx, float ly, float rx, float ry):lx(lx),ly(ly),rx(rx),ry(ry)
+Rect2D::Rect2D(float lx, float ty, float rx, float by):lx(lx),ty(ty),rx(rx),by(by)
+{
+}
+
+Rect2D::Rect2D():lx(0),ty(0),rx(0),by(0)
 {
 }
