@@ -59,6 +59,6 @@ Rect2D::Rect2D(float lx, float ty, float rx, float by):lx(lx),ty(ty),rx(rx),by(b
 {
 }
 
-Rect2D::Rect2D():lx(0),ty(0),rx(0),by(0)
+Rect2D::Rect2D():lx(0),ty(0),rx(1),by(1)
 {
 }

@@ -1,4 +1,13 @@
-float4 main( float4 pos : POSITION ) : SV_POSITION
+#include"BaseUI.h"
+
+VSoutput main(VSinput inp)
 {
-	return pos;
+	VSoutput res = (VSoutput)0;
+	res.pos = Data[inp.ID].pos[inp.VID];
+
+	res.uv = inp.uv;
+	res.ID = inp.ID;
+	res.VID = inp.VID;
+
+	return res;
 }

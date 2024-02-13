@@ -20,8 +20,8 @@ public:
 
 protected:
 
-	Position vxs[4];
-	uint32_t ids[6];
+	static Position vxs[4];
+	static uint32_t ids[6];
 
 };
 

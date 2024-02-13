@@ -1,4 +1,10 @@
-float4 main() : SV_TARGET
+#include"BaseUI.h"
+
+PSoutput main(VSoutput inp)
 {
-	return float4(1.0f, 1.0f, 1.0f, 1.0f);
+	PSoutput res = (PSoutput)0;
+
+	res.col = float4(1, 1, 1, 1);
+	
+	return res;
 }

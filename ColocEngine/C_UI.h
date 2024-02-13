@@ -3,9 +3,10 @@
 #include "ResourceManager.h"
 #include<array>
 
-struct SimpleInfo_UI
+struct alignas(16) SimpleInfo_UI
 {
 	Rect2D rect;
+	Rect2D cutUV;
 
 	float tick;
 
@@ -27,20 +28,24 @@ public:
 	bool IsInside(float x, float y);
 	SimpleInfo_UI GetInfo();
 	void SetInfo(SimpleInfo_UI rec);
+	void SetTexture(MapBOOL mb);
 
 	void Flush();
 
 	uint16_t GetDrawCount();
+	static SIMPLEVERTEX vxcs[4];
+
 
 public:
 	static std::array<SimpleInfo_UI, ResourceManager::CBCOUNT> data;
+	static std::array<MapBOOL, ResourceManager::CBCOUNT> mb;
 
 private:
-	void DrawCall();
+	inline void DrawCall();
 
 private:
-	static SIMPLEVERTEX vxcs[4];
 
+	MapBOOL pic;
 	SimpleInfo_UI info;
 	static uint16_t index;
 };

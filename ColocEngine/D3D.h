@@ -81,23 +81,23 @@ private:
 
 	//-----------------
 
-	ID3D12Resource* CB_Util[FrameAmount];
-	ID3D12Resource* CB_CAM[FrameAmount];
-	ID3D12Resource* CB_LGT[FrameAmount];
-	ID3D12Resource* CB_OTHERS[FrameAmount];
+	ID3D12Resource*						CB_Util[FrameAmount];
+	ID3D12Resource*						CB_CAM[FrameAmount];
+	ID3D12Resource*						CB_LGT[FrameAmount];
+	ID3D12Resource*						CB_OTHERS[FrameAmount];
 
 	ID3D12Resource* ZB;
 	Texture			tex;
 
-	StructuredBuffer<ObjInfo>	 SB_OI[FrameAmount];
-	StructuredBuffer<MapBOOL>	 SB_MB[FrameAmount];
-	StructuredBuffer<Material>	 SB_MTL[FrameAmount];
+	StructuredBuffer<ObjInfo>			SB_OI[FrameAmount];
+	StructuredBuffer<MapBOOL>			SB_MB[FrameAmount];
+	StructuredBuffer<Material>			SB_MTL[FrameAmount];
 
-	StructuredBuffer<C_UI>		SB_UI[FrameAmount];
+	StructuredBuffer<SimpleInfo_UI>		SB_UI[FrameAmount];
 	
-	CBUFFERVIEW<Util>			 CBV_Util[FrameAmount];
-	CBUFFERVIEW<Cam>			 CBV_Cam[FrameAmount];
-	CBUFFERVIEW<LightManager::Lights>			 CBV_LGT[FrameAmount];
+	CBUFFERVIEW<Util>					CBV_Util[FrameAmount];
+	CBUFFERVIEW<Cam>					CBV_Cam[FrameAmount];
+	CBUFFERVIEW<LightManager::Lights>	CBV_LGT[FrameAmount];
 
 	ID3D12DescriptorHeap* hp_ZBV;
 
