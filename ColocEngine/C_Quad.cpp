@@ -1,12 +1,12 @@
 #include "C_Quad.h"
 
-Position vxs[4]=
+Position C_Quad::vxs[4]=
 { 
     { -1, 1, 0 },{ 1, 1, 0 },
     { 1, -1, 0 },{ -1, -1, 0 }
 };
 
-uint32_t ids[6] = { 0,1,3,1,2,3 };
+uint32_t C_Quad::ids[6] = { 0,1,3,1,2,3 };
 
 void C_Quad::initialize()
 {

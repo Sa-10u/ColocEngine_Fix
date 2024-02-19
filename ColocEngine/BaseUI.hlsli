@@ -4,7 +4,7 @@ struct VSinput
     float2 uv	: TEXCOORD;
 
     uint ID		: SV_InstanceID;
-    uint VID    : SV_VertexID
+    uint VID    : SV_VertexID;
 };
 
 struct VSoutput
@@ -13,7 +13,7 @@ struct VSoutput
     float2 uv   : TEXCOORD;
 
     uint ID	    : InstanceID;
-    uint VID    : VertexID
+    uint VID    : VertexID;
 };
 
 struct PSoutput
@@ -23,10 +23,8 @@ struct PSoutput
 
 struct Quad
 {
-    float lx;
-    float rx;
-    float ty;
-    float by;
+    float x;
+    float y;
 };
 
 //--------------------
@@ -38,8 +36,8 @@ cbuffer Util : register(b0)
 
 struct PerInstance
 { 
-    Quad pos;
-    Quad uv;
+    Quad pos[4];
+    Quad uv[4];
     float tick;
     float val0;
     float val1;

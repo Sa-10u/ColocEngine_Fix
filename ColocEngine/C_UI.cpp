@@ -9,6 +9,9 @@
 	};
 	uint16_t C_UI::index = 0;
 
+	std::array<SimpleInfo_UI, ResourceManager::CBCOUNT> C_UI::data = {};
+	std::array<MapBOOL, ResourceManager::CBCOUNT> C_UI::mb = {};
+
 SimpleInfo_UI::SimpleInfo_UI():tick(0),val0(0),val1(0),val2(0)
 {}
 
@@ -36,7 +39,7 @@ C_UI::C_UI(string tag, SimpleInfo_UI rect):C_Quad(tag)
 
 bool C_UI::IsInside(float x, float y)
 {
-	return false;
+	return  info.rect.? true : false;
 }
 
 SimpleInfo_UI C_UI::GetInfo()
@@ -69,9 +72,7 @@ void C_UI::DrawCall()
 	if (index >= ResourceManager::CBCOUNT)	return;
 
 	data[index] = this->info;
-	index++;
-}
+	mb[index] = this->pic;
 
-SimpleInfo_UI::SimpleInfo_UI():tick(0),val0(0),val1(0),val2(0)
-{
+	index++;
 }

@@ -1,6 +1,7 @@
 #include "ResourceManager.h"
 #include"FileLoader.h"
 #include"D3D.h"
+#include<algorithm>
 
 namespace ResourceManager
 {
@@ -292,7 +293,9 @@ UINT ResourceManager::TexLoad(std::wstring str)
     auto index = NULL;
     HRESULT res = E_FAIL;
 
-    for (auto i = 0u; i < MAX_Textures; i++) {
+    uint16_t arrSize = MAX_Textures;
+
+    for (auto i = 0u; i <arrSize; i++) {
 
         if (textures_.at(i).is_using == false)
         {

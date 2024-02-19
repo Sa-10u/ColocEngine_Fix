@@ -46,11 +46,11 @@ bool WinView::setup()
     {
         if (D3D->Initialize(h_wnd,h_,w_))
         {
+            ResourceManager::Init();
             CAM::Init();
             GameMain::Init();
             DataManager::Init();
             WorldManager::Init();
-            ResourceManager::Init();
             Input_KB::Init();
 
             return true;
