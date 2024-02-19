@@ -39,7 +39,7 @@ C_UI::C_UI(string tag, SimpleInfo_UI rect):C_Quad(tag)
 
 bool C_UI::IsInside(float x, float y)
 {
-	return  info.rect.? true : false;
+	return  (info.rect.lx < x && x < info.rect.rx) && (info.rect.by < y && y < info.rect.ty) ? true : false;
 }
 
 SimpleInfo_UI C_UI::GetInfo()

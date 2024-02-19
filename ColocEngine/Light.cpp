@@ -2,49 +2,19 @@
 
 enum FLAG
 {
-	ON = 1,
-	DISPOSAL = 2,
-	USER_0 = 4,
-	USER_1 = 8,
-	USER_2 = 16,
-	USER_3 = 32,
-	USER_4 = 64, 
-	USER_5 = 128,
+	USER_0 = 1,
+	USER_1 = 2,
+	USER_2 = 4,
+	USER_3 = 8,
+	USER_4 = 16,
+	USER_5 = 32,
+	USER_6 = 64, 
+	USER_7 = 128,
 };
 
 
 P_Light::P_Light()
 {
-}
-
-bool P_Light::isON(int index)
-{
-	return comp[index].flag & FLAG::ON;
-}
-
-bool P_Light::isDisposal(int index)
-{
-	return comp[index].flag & FLAG::DISPOSAL;
-}
-
-void P_Light::ToOFF(int index)
-{
-	comp[index].flag &= ~FLAG::ON;
-}
-
-void P_Light::ToON(int index)
-{
-	comp[index].flag |= FLAG::ON;
-}
-
-void P_Light::ToDisposal(int index)
-{
-	comp[index].flag |= FLAG::DISPOSAL;
-}
-
-void P_Light::ToStore(int index)
-{
-	comp[index].flag &= ~FLAG::DISPOSAL;
 }
 
 void P_Light::Reset(int index)
@@ -93,37 +63,6 @@ P_Light::lgt P_Light::GetComponent(int index)
 
 D_Light::D_Light()
 {
-}
-
-
-bool D_Light::isON(int index)
-{
-	return comp[index].flag & FLAG::ON;
-}
-
-bool D_Light::isDisposal(int index)
-{
-	return comp[index].flag & FLAG::DISPOSAL;
-}
-
-void D_Light::ToOFF(int index)
-{
-	comp[index].flag &= ~FLAG::ON;
-}
-
-void D_Light::ToON(int index)
-{
-	comp[index].flag |= FLAG::ON;
-}
-
-void D_Light::ToDisposal(int index)
-{
-	comp[index].flag |= FLAG::DISPOSAL;
-}
-
-void D_Light::ToStore(int index)
-{
-	comp[index].flag &= ~FLAG::DISPOSAL;
 }
 
 void D_Light::SetFlag(int index, uint8_t flag)
@@ -184,36 +123,6 @@ A_Light::A_Light()
 {
 }
 
-bool A_Light::isON(int index)
-{
-	return comp[index].flag & FLAG::ON;
-}
-
-bool A_Light::isDisposal(int index)
-{
-	return comp[index].flag & FLAG::DISPOSAL;
-}
-
-void A_Light::ToOFF(int index)
-{
-	comp[index].flag &= ~FLAG::ON;
-}
-
-void A_Light::ToON(int index)
-{
-	comp[index].flag |= FLAG::ON;
-}
-
-void A_Light::ToDisposal(int index)
-{
-	comp[index].flag |= FLAG::DISPOSAL;
-}
-
-void A_Light::ToStore(int index)
-{
-	comp[index].flag &= ~FLAG::DISPOSAL;
-}
-
 void A_Light::Reset(int index)
 {
 	comp[index].col = { 0,0,0 };
@@ -253,16 +162,16 @@ A_Light::lgt A_Light::GetComponent(int index)
 	return comp[index];
 }
 
-P_Light::lgt::lgt():col(0,0,0),inten(.0f),pos(0,0,0),flag(FLAG::DISPOSAL)
+P_Light::lgt::lgt():col(0,0,0),inten(.0f),pos(0,0,0),flag(0)
 {
 }
 
-D_Light::lgt::lgt() :col(0, 0, 0), inten(.0f), pos(0, 0, 0), flag(FLAG::DISPOSAL),rot(0,0,0),thr(.0f)
+D_Light::lgt::lgt() :col(0, 0, 0), inten(.0f), pos(0, 0, 0), flag(0),rot(0,0,0),thr(.0f)
 {
 
 }
 
-A_Light::lgt::lgt() :col(0, 0, 0), inten(.0f), flag(FLAG::DISPOSAL), val0(.0f), val1(.0f), val2(.0f)
+A_Light::lgt::lgt() :col(0, 0, 0), inten(.0f), flag(0), val0(.0f), val1(.0f), val2(.0f)
 {
 
 }

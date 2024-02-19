@@ -4,8 +4,8 @@ VSoutput main(VSinput inp)
 {
     VSoutput res = (VSoutput)(0);
     
-    result.pos = float4(inp.pos,0);
-    result.uv = inp.uv;
+    res.pos = float4(inp.pos,0);
+    res.uv = inp.uv;
     
     return res;
 }

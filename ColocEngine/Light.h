@@ -10,14 +10,6 @@ struct Light
 {
 	Light() = default;
 
-	virtual bool isON(int index) = 0;
-	virtual bool isDisposal(int index) = 0;
-
-	virtual void ToOFF(int index) = 0;
-	virtual void ToON(int index) = 0;
-	virtual void ToDisposal(int index) = 0;
-	virtual void ToStore(int index) = 0;
-
 	virtual void Reset(int index) = 0;
 
 	virtual void SetFlag(int index, uint8_t flag) = 0;
@@ -33,14 +25,6 @@ struct P_Light : Light
 {
 	P_Light();
 	~P_Light() = default;
-
-	bool isON(int index) override;
-	bool isDisposal(int index) override;
-
-	void ToOFF(int index) override;
-	void ToON(int index) override;
-	void ToDisposal(int index) override;
-	void ToStore(int index) override;
 
 	void Reset(int index) override;
 
@@ -75,14 +59,6 @@ struct D_Light : Light
 {
 	D_Light();
 	~D_Light() = default;
-
-	bool isON(int index) override;
-	bool isDisposal(int index) override;
-
-	void ToOFF(int index) override;
-	void ToON(int index) override;
-	void ToDisposal(int index) override;
-	void ToStore(int index) override;
 
 	void SetFlag(int index, uint8_t flag) override;
 
@@ -122,14 +98,6 @@ struct A_Light : Light
 {
 	A_Light();
 	~A_Light() = default;
-
-	bool isON(int index) override;
-	bool isDisposal(int index) override;
-
-	void ToOFF(int index) override;
-	void ToON(int index) override;
-	void ToDisposal(int index) override;
-	void ToStore(int index) override;
 
 	void Reset(int index) override;
 
