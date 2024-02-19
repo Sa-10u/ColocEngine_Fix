@@ -3,7 +3,6 @@
 #include"BUFFER.h"
 #include"ResourceManager.h"
 #include"C_Trans.h"
-#include"LightManager.h"
 
 void WW_Play::Initialize()
 {

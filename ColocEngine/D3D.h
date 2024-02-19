@@ -9,8 +9,8 @@
 #include "MeshLoader.h"
 #include<DirectXTex.h>
 
-#include"LightManager.h"
 #include"C_UI.h"
+#include"S_Light.h"
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -97,7 +97,7 @@ private:
 	
 	CBUFFERVIEW<Util>					CBV_Util[FrameAmount];
 	CBUFFERVIEW<Cam>					CBV_Cam[FrameAmount];
-	CBUFFERVIEW<LightManager::Lights>	CBV_LGT[FrameAmount];
+	CBUFFERVIEW<Lights>					CBV_LGT[FrameAmount];
 
 	ID3D12DescriptorHeap* hp_ZBV;
 

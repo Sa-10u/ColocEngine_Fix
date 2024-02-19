@@ -425,9 +425,9 @@ bool D3d::InitGBO()
             rsc_desc.Height = 1;
             rsc_desc.Width =
                 (
-                    LightManager::lights.amb.GetSize() +
-                    LightManager::lights.dir.GetSize() +
-                    LightManager::lights.point.GetSize()
+                    P_Light::GetSize()+
+                    D_Light::GetSize()+
+                    A_Light::GetSize()
                 );
             rsc_desc.SampleDesc.Count = 1;
             rsc_desc.SampleDesc.Quality = 0;
@@ -898,15 +898,12 @@ void D3d::Update()
         XMStoreFloat3(&CBV_Cam[IND_frame].ptr->pos, CAM::Pos);
         XMStoreFloat3(&CBV_Cam[IND_frame].ptr->tgt, CAM::Tgt);
         
-        memcpy(&CBV_LGT[IND_frame].ptr->amb, LightManager::lights.amb.pLight(), LightManager::lights.amb.GetSize());
-        memcpy(&CBV_LGT[IND_frame].ptr->dir, LightManager::lights.dir.pLight(), LightManager::lights.dir.GetSize());
-        memcpy(&CBV_LGT[IND_frame].ptr->point, LightManager::lights.point.pLight() , LightManager::lights.point.GetSize());
+        memcpy(&CBV_LGT[IND_frame].ptr->pl, P_Light::pLight(), P_Light::GetSize());
+        memcpy(&CBV_LGT[IND_frame].ptr->dl, D_Light::pLight(), D_Light::GetSize());
+        memcpy(&CBV_LGT[IND_frame].ptr->al, A_Light::pLight(), A_Light::GetSize());
     }
 
     CAM::Run();
-
-    auto y = sizeof(ObjInfo);
-    auto s3 = sizeof(LightManager::Lights);
 }
 
 void D3d::SetHeight(float h)

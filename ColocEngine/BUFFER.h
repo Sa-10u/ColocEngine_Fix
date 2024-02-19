@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include<cstdint>
+#include"S_Light.h"
 
 using std::string;
 using std::vector;
@@ -138,6 +139,13 @@ struct alignas(256) Cam
 {
 	XMFLOAT3 pos;
 	XMFLOAT3 tgt;
+};
+
+struct alignas(256) Lights
+{
+	P_Light* pl;
+	D_Light* dl;
+	A_Light* al;
 };
 
 template <typename T>
