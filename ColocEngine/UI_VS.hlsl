@@ -1,4 +1,4 @@
-#include"BaseUI.h"
+#include"BaseUI.hlsli"
 
 VSoutput main(VSinput inp)
 {
@@ -8,6 +8,6 @@ VSoutput main(VSinput inp)
 	res.uv = inp.uv;
 	res.ID = inp.ID;
 	res.VID = inp.VID;
-
+	
 	return res;
 }

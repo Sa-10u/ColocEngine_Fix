@@ -1,6 +1,5 @@
 #include"BasePost.hlsli"
 
-
 PSoutput main(VSoutput inp)
 {
     PSoutput res = (PSoutput)(0);

@@ -26,7 +26,7 @@ struct Quad
     float lx;
     float rx;
     float ty;
-    float dy;
+    float by;
 };
 
 //--------------------

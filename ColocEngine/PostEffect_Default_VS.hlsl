@@ -2,10 +2,10 @@
 
 VSoutput main(VSinput inp)
 {
-    VSoutput result = (VSoutput)(0);
+    VSoutput res = (VSoutput)(0);
     
     result.pos = float4(inp.pos,0);
     result.uv = inp.uv;
     
-    return result;
+    return res;
 }
