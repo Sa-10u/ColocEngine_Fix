@@ -133,6 +133,9 @@ struct alignas(256) Util
 	XMMATRIX view;
 	XMMATRIX proj;
 	float time;
+	uint16_t PL_CNT;
+	uint16_t DL_CNT;
+	uint16_t AL_CNT;
 };
 
 struct alignas(256) Cam

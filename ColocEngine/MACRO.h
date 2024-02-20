@@ -54,6 +54,9 @@ namespace SHADER_FILENAME
 
 	extern LPCWSTR DefPostVS;
 	extern LPCWSTR DefPostPS;
+
+	extern LPCWSTR UI_VS;
+	extern LPCWSTR UI_PS;
 }
 
 char* wtoc(const wchar_t* str);

@@ -19,7 +19,7 @@ PSoutput main(VSoutput inp)
     float4 base = colmap[Map[inp.ID].isD].Sample(colsmp, inp.uv + Data[inp.ID].val0);
     res.color.a = base.a;
 
-    for (int i = 0u; i < MAX_LIGHT; i++) {
+    for (int i = 0u; i < PL_CNT; i++) {
 
         float len = length(pl[i].pos - inp.Wpos);
         float3 ltov = normalize(pl[i].pos - inp.Wpos);
@@ -30,14 +30,14 @@ PSoutput main(VSoutput inp)
         Pcol += pl[i].color;
     }
 
-    for (int i = 0u; i < MAX_LIGHT; i++) {
+    for (int i = 0u; i < DL_CNT; i++) {
         dl[i];
     }
 
     float ap = .0f;
     float3 Acol = 0;
 
-    for (int i = 0u; i < MAX_LIGHT; i++) {
+    for (int i = 0u; i < AL_CNT; i++) {
 
         ap += al[i].inten;
         Acol += al[i].color;

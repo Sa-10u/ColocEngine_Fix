@@ -21,6 +21,9 @@ namespace SHADER_FILENAME
 
 	LPCWSTR DefPostVS = s_path "PostEffect_Default_PS.cso";
 	LPCWSTR DefPostPS = s_path "PostEffect_Default_PS.cso";
+
+	LPCWSTR UI_VS = s_path"UI_VS.cso";
+	LPCWSTR UI_PS = s_path"UI_PS.cso";
 }
 
 char* wtoc(const wchar_t* str)

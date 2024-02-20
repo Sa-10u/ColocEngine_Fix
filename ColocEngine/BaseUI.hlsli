@@ -28,12 +28,6 @@ struct Quad
 };
 
 //--------------------
-
-cbuffer Util : register(b0)
-{
-    float Time : packoffset(c8);
-};
-
 struct PerInstance
 { 
     Quad pos[4];
@@ -55,6 +49,11 @@ struct MapBOOL
     float val0;
     float val1;
     float val2;
+};
+
+cbuffer Util : register(b0)
+{
+    float Time : packoffset(c8);
 };
 
 StructuredBuffer<PerInstance> Data : register(t0);

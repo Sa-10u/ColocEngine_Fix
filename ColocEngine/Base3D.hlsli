@@ -108,6 +108,9 @@ cbuffer Util : register(b0)
 	float4x4 View		: packoffset(c0);
 	float4x4 Projection : packoffset(c4);
 	float Time : packoffset(c8);
+	uint PL_CNT;
+	uint DL_CNT;
+	uint AL_CNT;
 };
 
 cbuffer CAM	:register(b256)

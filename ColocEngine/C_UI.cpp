@@ -57,6 +57,28 @@ void C_UI::SetTexture(MapBOOL mb)
 	this->pic = mb;
 }
 
+void C_UI::SetPos(Rect2D rect)
+{
+	this->info.rect = rect;
+}
+
+void C_UI::SetUV(Rect2D rect)
+{
+	this->info.cutUV = rect;
+}
+
+void C_UI::SetTick(float tick)
+{
+	this->info.tick = tick;
+}
+
+void C_UI::SetValue(float v0, float v1, float v2)
+{
+	this->info.val0 = v0;
+	this->info.val1 = v1;
+	this->info.val2 = v2;
+}
+
 void C_UI::Flush()
 {
 	index = 0;

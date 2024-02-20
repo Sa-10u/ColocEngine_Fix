@@ -895,6 +895,10 @@ void D3d::Update()
         CBV_Util[IND_frame].ptr->view = XMMatrixLookAtRH(CAM::Pos, CAM::Tgt, CAM::Head);
         CBV_Util[IND_frame].ptr->proj = XMMatrixPerspectiveFovRH(CAM::Fov, CAM::Aspect, 1.0f, 1000.0f);
 
+        CBV_Util[IND_frame].ptr->PL_CNT = P_Light::GetCount();
+        CBV_Util[IND_frame].ptr->DL_CNT = D_Light::GetCount();
+        CBV_Util[IND_frame].ptr->AL_CNT = A_Light::GetCount();
+
         XMStoreFloat3(&CBV_Cam[IND_frame].ptr->pos, CAM::Pos);
         XMStoreFloat3(&CBV_Cam[IND_frame].ptr->tgt, CAM::Tgt);
         

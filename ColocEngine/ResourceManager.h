@@ -26,10 +26,11 @@ namespace ResourceManager
 
 	extern ID3D12DescriptorHeap* heapCBV_SRV_UAV_;
 	extern ID3D12DescriptorHeap* postCBV_SRV_UAV_;
-	extern ID3D12DescriptorHeap* uiCBV_SRv_UAV_;
+	extern ID3D12DescriptorHeap* uiCBV_SRV_UAV_;
 
 	extern DH* DHH_CbSrUaV;
 	extern DH* DHPost_CbSrUaV;
+	extern DH* DHUI_CbSrUaV;
 
 	//-----------
 	extern const uint16_t MAX_Textures;

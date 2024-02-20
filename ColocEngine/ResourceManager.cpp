@@ -14,9 +14,11 @@ namespace ResourceManager
 
     ID3D12DescriptorHeap* heapCBV_SRV_UAV_;
     ID3D12DescriptorHeap* postCBV_SRV_UAV_;
+    ID3D12DescriptorHeap* uiCBV_SRV_UAV_;
 
     DH* DHH_CbSrUaV;
     DH* DHPost_CbSrUaV;
+    DH* DHUI_CbSrUaV;
 }
 
 void ResourceManager::Init()

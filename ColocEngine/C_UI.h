@@ -30,6 +30,11 @@ public:
 	void SetInfo(SimpleInfo_UI rec);
 	void SetTexture(MapBOOL mb);
 
+	void SetPos(Rect2D rect);
+	void SetUV(Rect2D rect);
+	void SetTick(float tick);
+	void SetValue(float v0, float v1, float v2);
+
 	static void Flush();
 
 	uint16_t GetDrawCount();
