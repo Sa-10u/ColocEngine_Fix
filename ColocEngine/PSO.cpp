@@ -316,28 +316,22 @@ bool DefPost::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* samp
 	}
 
 	D3D12_RENDER_TARGET_BLEND_DESC rtb_desc =
-		{
-		    false,false,
-		    D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
-		    D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
-		    D3D12_LOGIC_OP_NOOP,D3D12_COLOR_WRITE_ENABLE_ALL
-		};
+	{
+		false,false,
+		D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
+		D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
+		D3D12_LOGIC_OP_NOOP,D3D12_COLOR_WRITE_ENABLE_ALL
+	};
 
 	D3D12_BLEND_DESC bs_desc = {};
 	{
 		bs_desc.AlphaToCoverageEnable = false;
 		bs_desc.IndependentBlendEnable = false;
-		for (auto i = 0u; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i) {
+		for (auto i = 0u; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; i++) {
 
 			bs_desc.RenderTarget[i] = rtb_desc;
 		}
 	};
-
-	D3D12_DEPTH_STENCIL_DESC dss_desc = {};
-	{
-		dss_desc.DepthEnable = 0;
-		dss_desc.StencilEnable = 0;
-	}
 
 	//----------------------
 

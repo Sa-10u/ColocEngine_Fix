@@ -54,6 +54,8 @@ private:
 	void present(int itv);
 	void postEffect();
 	void render();
+	void preeffectUI();
+	void constantUI();
 
 private:
 	static const uint32_t FrameAmount = 2;

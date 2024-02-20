@@ -650,6 +650,67 @@ bool D3d::InitGBO()
                 SB_MTL[i].HCPU
             );
         }
+
+        {
+            D3D12_HEAP_PROPERTIES hp_prop = {};
+            {
+                hp_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+                hp_prop.CreationNodeMask = 1;
+                hp_prop.VisibleNodeMask = 1;
+                hp_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+                hp_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
+            }
+
+            D3D12_RESOURCE_DESC rc_desc = {};
+            {
+                rc_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+                rc_desc.Format = DXGI_FORMAT_UNKNOWN;
+                rc_desc.MipLevels = 1;
+                rc_desc.DepthOrArraySize = 1;
+                rc_desc.Height = 1;
+                rc_desc.Width = sizeof(SimpleInfo_UI) * ResourceManager::CBCOUNT;
+                rc_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+                rc_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+                rc_desc.SampleDesc.Count = 1;
+            }
+
+            for (auto i = 0u; i < FrameAmount; i++) {
+                res = device_->CreateCommittedResource
+                (
+                    &hp_prop,
+                    D3D12_HEAP_FLAG_NONE,
+                    &rc_desc,
+                    D3D12_RESOURCE_STATE_GENERIC_READ,
+                    nullptr,
+                    IID_PPV_ARGS(&SB_UI[i].rsc_ptr)
+                );
+                if (FAILED(res)) return 0;
+
+                res = SB_UI[i].rsc_ptr->Map(0, nullptr, reinterpret_cast<void**>(&SB_UI[i].view));
+                memset(SB_UI[i].view, 0, ResourceManager::CBCOUNT * sizeof(SimpleInfo_UI));
+
+                D3D12_SHADER_RESOURCE_VIEW_DESC srv = {};
+                {
+                    srv.Format = DXGI_FORMAT_UNKNOWN;
+                    srv.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+                    srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+                    srv.Buffer.FirstElement = 0;
+                    srv.Buffer.NumElements = ResourceManager::CBCOUNT;
+                    srv.Buffer.StructureByteStride = sizeof(MapBOOL);
+                    srv.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+                }
+
+                SB_UI[i].HCPU = ResourceManager::DHH_CbSrUaV->GetAndIncreCPU();
+                SB_UI[i].HGPU = ResourceManager::DHH_CbSrUaV->GetAndIncreGPU();
+
+                device_->CreateShaderResourceView
+                (
+                    SB_UI[i].rsc_ptr,
+                    &srv,
+                    SB_UI[i].HCPU
+                );
+            }
+        }
     }
 
     //----------------------*****
@@ -878,7 +939,9 @@ void D3d::Run(int interval)
 {
     Update();
     write();
+    preeffectUI();
     //postEffect();
+    constantUI();
     render();
     present(0);
 
@@ -992,7 +1055,7 @@ void D3d::write()
     for (auto& itr : ResourceManager::models_) {
         
             auto v = 0u;
-            for (auto cnt : itr.Mesh_) {
+            for (auto& cnt : itr.Mesh_) {
 
                 cmdlist_->OMSetRenderTargets(1, &handle, FALSE, &h_ZBV);
                 cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::Shader3D::Default)->GetRTSG());
@@ -1114,7 +1177,7 @@ void D3d::postEffect()
     cmdlist_->ResourceBarrier(1, &brr);
 
     cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], FALSE, nullptr);
-    cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
+    //cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
 
     cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::ShaderPost::Default)->GetRTSG());
 
@@ -1152,6 +1215,16 @@ void D3d::render()
 
     ID3D12CommandList* commands[] = { cmdlist_ };
     cmdque_->ExecuteCommandLists(1, commands);
+}
+
+void D3d::preeffectUI()
+{
+    cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], false, nullptr);
+    cmdlist_->SetDescriptorHeaps()
+}
+
+void D3d::constantUI()
+{
 }
 
 namespace PTR_D3D
