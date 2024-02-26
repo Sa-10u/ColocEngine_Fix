@@ -24,8 +24,6 @@ private:
 	float val0;
 	float val1;
 
-	uint16_t title;
-
 	Entity e_title;
 };
 

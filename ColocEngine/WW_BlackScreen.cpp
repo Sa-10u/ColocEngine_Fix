@@ -7,13 +7,12 @@
 #include<cmath>
 #include<numbers>
 
+
 void WW_BlackScreen::Initialize()
 {
 	ptr = &WW_BlackScreen::P1_BlackToWhite;
 	val0 = .0f;
 	val1 = .0f;
-
-	title = ResourceManager::TexLoad(L"Title.png");
 
 	DataManager::CreateEntity(&e_title , "Title");
 }
@@ -40,7 +39,10 @@ void WW_BlackScreen::P1_BlackToWhite()
 		val0 = 0;
 		val1 = 0;
 
-		DataManager::AddComponent<C_Trans>(&e_title.comps, "TRANS", &e_title);
+		auto ui = DataManager::AddComponent<C_UI>(&e_title.comps, "title", &e_title);
+
+		Rect2D rect(0, 0, 10, 10);
+		ui->SetPos(rect);
 	}
 
 	val1 = col;
@@ -51,23 +53,20 @@ void WW_BlackScreen::P2_Title()
 {	
 	val1 += 1;
 	C_Trans* trans = nullptr;
-	DataManager::SearchComponent("TRANS", trans, &e_title.comps);
-
-
 
 	if (val1 > 30)
 	{
-		PTR_D3D::ptr->SetColorBG(0, 0, 0, 0);
 		ptr = &WW_BlackScreen::P3_TitleToSelect;
 		val0 = 0;
 		val1 = 0;
+	
 	}
 
 }
 
 void WW_BlackScreen::P3_TitleToSelect()
 {
-	
+
 }
 
 void WW_BlackScreen::P4_Select()

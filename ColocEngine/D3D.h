@@ -32,6 +32,7 @@ public:
 	bool Initialize(HWND hwnd, uint32_t h, uint32_t w);
 	bool InitGBO();
 	bool InitPost();
+	bool InitUI();
 	void Termination();
 	void TermGBO();		//Graphic Buffer Object
 	void Run(int interval);
@@ -104,10 +105,10 @@ private:
 	ID3D12DescriptorHeap* hp_ZBV;
 
 	//---------------
-	ID3D12Resource* postVB_;
-	D3D12_VERTEX_BUFFER_VIEW postVBV_;
-	ID3D12Resource* postIB_;
-	D3D12_INDEX_BUFFER_VIEW postIBV_;
+	ID3D12Resource* quadVB_;
+	D3D12_VERTEX_BUFFER_VIEW quadVBV_;
+	ID3D12Resource* quadIB_;
+	D3D12_INDEX_BUFFER_VIEW quadIBV_;
 
 	D3D12_VIEWPORT view_;
 	D3D12_RECT rect_;

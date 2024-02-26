@@ -262,7 +262,12 @@ bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
 
     __CREATE("Buffer for Post Effect")
     {
-        if (!InitPost())      return 0;
+        if (!InitPost())      return false;
+    }
+
+    __CREATE("Heap for UI")
+    {
+        if (!InitUI())       return false;
     }
     return true;
 }
@@ -737,6 +742,24 @@ bool D3d::InitPost()
     auto desc_rsc = colbuf_[0]->GetDesc();
 
     {
+
+        D3D12_DESCRIPTOR_HEAP_DESC hpd_desc = {};
+        {
+            hpd_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+            hpd_desc.NodeMask = 0;
+            hpd_desc.NumDescriptors = FrameAmount * POST_HPSIZE;
+            hpd_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+        }
+
+        res = device_->CreateDescriptorHeap
+        (
+            &hpd_desc,
+            IID_PPV_ARGS(&ResourceManager::postCBV_SRV_UAV_)
+        );
+        ResourceManager::DHPost_CbSrUaV = new DH(device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV), &ResourceManager::postCBV_SRV_UAV_);
+
+        if (FAILED(res)) return false;
+
         D3D12_HEAP_PROPERTIES prop_hp = {};
         {
             prop_hp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
@@ -821,8 +844,7 @@ bool D3d::InitPost()
         }
     }
     //----------------------------------------------
-    const UINT QUAD = 4;
-    SIMPLEVERTEX vxs[QUAD] = {};
+    SIMPLEVERTEX vxs[C_Quad::QUAD_VERTEX] = {};
     {
         float z = 0.1;
         vxs[0].pos = { -1,-1,z };
@@ -869,38 +891,45 @@ bool D3d::InitPost()
         &rc_desc_v,
         D3D12_RESOURCE_STATE_GENERIC_READ,
         nullptr,
-        IID_PPV_ARGS(&postVB_)
+        IID_PPV_ARGS(&quadVB_)
     );
     if (FAILED(res)) return false;
 
     void* ptr = nullptr;
-    res = postVB_->Map(0, nullptr, &ptr);
+    res = quadVB_->Map(0, nullptr, &ptr);
     if (FAILED(res)) return false;
 
     memcpy(ptr, vxs, sizeof(vxs));
-    postVB_->Unmap(0, nullptr);
+    quadVB_->Unmap(0, nullptr);
 
-    postVBV_.BufferLocation = postVB_->GetGPUVirtualAddress();
-    postVBV_.SizeInBytes = sizeof(vxs);
-    postVBV_.StrideInBytes = sizeof(vxs[0]);//datnum type of SIMPLEVERTEX;
-    
-    D3D12_DESCRIPTOR_HEAP_DESC hpd_desc = {};
+    quadVBV_.BufferLocation = quadVB_->GetGPUVirtualAddress();
+    quadVBV_.SizeInBytes = sizeof(vxs);
+    quadVBV_.StrideInBytes = sizeof(vxs[0]);//datnum type of SIMPLEVERTEX;
+
+    return true;
+}
+
+bool D3d::InitUI()
+{
+    HRESULT res = {};
     {
-        hpd_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-        hpd_desc.NodeMask = 0;
-        hpd_desc.NumDescriptors = FrameAmount * POST_HPSIZE;
-        hpd_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+        D3D12_DESCRIPTOR_HEAP_DESC hp_desc = {};
+        {
+            hp_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+            hp_desc.NodeMask = 1;
+            hp_desc.NumDescriptors = ResourceManager::CBCOUNT;
+            hp_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+        }
+
+        res = device_->CreateDescriptorHeap
+        (
+            &hp_desc,
+            IID_PPV_ARGS(&ResourceManager::uiCBV_SRV_UAV_)
+        );
+        if (FAILED(res)) return false;
+
+        ResourceManager::DHUI_CbSrUaV = new DH(device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV), &ResourceManager::uiCBV_SRV_UAV_);
     }
-
-    res = device_->CreateDescriptorHeap
-    (
-        &hpd_desc,
-        IID_PPV_ARGS(&ResourceManager::postCBV_SRV_UAV_)
-    );
-    ResourceManager::DHPost_CbSrUaV = new DH(device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV), &ResourceManager::postCBV_SRV_UAV_);
-
-    if (FAILED(res)) return false;
-
 
     return true;
 }
@@ -1066,9 +1095,9 @@ void D3d::write()
                 cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_C, CBV_Cam[IND_frame].desc.BufferLocation);
                 cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_L, CBV_LGT[IND_frame].desc.BufferLocation);
 
-                cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::TEX, ResourceManager::E_Tex.tex_.HGPU);
+                cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::TEX, ResourceManager::textures_[0].tex_.HGPU);
 
-                cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_MTL, SB_MTL[IND_frame].HGPU);
+                cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_MTL,SB_MTL[IND_frame].HGPU);
                 cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_OI, SB_OI[IND_frame].HGPU);
                 cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_MB, SB_MB[IND_frame].HGPU);
 
@@ -1077,9 +1106,6 @@ void D3d::write()
                 cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
                 cmdlist_->RSSetViewports(1, &view_);
                 cmdlist_->RSSetScissorRects(1, &rect_);
-
-                cmdlist_->SetGraphicsRootConstantBufferView(0, CBV_Util[IND_frame].desc.BufferLocation);
-
 
                 {
                     SB_MTL[IND_frame].view[v].alp = itr.Mtr_[v].alpha_;
@@ -1183,7 +1209,7 @@ void D3d::postEffect()
 
     cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHPost_CbSrUaV->ppHeap_);
     {
-        cmdlist_->SetGraphicsRootConstantBufferView(0, CBV_Util[IND_frame].desc.BufferLocation);
+        cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::P_CB, CBV_Util[IND_frame].desc.BufferLocation);
     }
 
     cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderPost::Default)->GetPSO());
@@ -1191,10 +1217,12 @@ void D3d::postEffect()
     cmdlist_->RSSetViewports(1, &view_);
     cmdlist_->RSSetScissorRects(1, &rect_);
 
-    cmdlist_->IASetVertexBuffers(0, 1, &postVBV_);
-    cmdlist_->IASetIndexBuffer(&postIBV_);
+    cmdlist_->IASetVertexBuffers(0, 1, &quadVBV_);
+    cmdlist_->IASetIndexBuffer(&quadIBV_);
 
-    cmdlist_->DrawInstanced(4, 1, 0, 0);
+    cmdlist_->DrawInstanced(C_UI::QUAD_VERTEX, 1, 0, 0);
+
+
 }
 
 void D3d::render()
@@ -1219,8 +1247,45 @@ void D3d::render()
 
 void D3d::preeffectUI()
 {
-    cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], false, nullptr);
-    cmdlist_->SetDescriptorHeaps()
+
+    if (C_UI::GetDrawCount())
+    {
+        {
+            memcpy(&SB_MB[IND_frame].view, C_UI::mb.data(), C_UI::mb.size() * sizeof(MapBOOL));
+            memcpy(&SB_UI[IND_frame].view, C_UI::data.data(), sizeof(SimpleInfo_UI) * C_UI::data.size());
+        }
+//---------------------------------
+
+        cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetRTSG());
+        cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetPSO());
+
+        cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], false, nullptr);
+        cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHUI_CbSrUaV->ppHeap_);
+
+        cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], false, nullptr);
+        cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::U_CB, CBV_Util[IND_frame].desc.BufferLocation);
+
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_SB_OI, SB_UI[IND_frame].HGPU);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_SB_MB, SB_MB[IND_frame].HGPU);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_TEX, ResourceManager::textures_[0].tex_.HGPU);
+
+        cmdlist_->RSSetViewports(1, &view_);
+        cmdlist_->RSSetScissorRects(1, &rect_);
+
+        cmdlist_->IASetVertexBuffers(0, 1, &quadVBV_);
+        cmdlist_->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+        cmdlist_->DrawInstanced(C_UI::QUAD_VERTEX, C_UI::GetDrawCount(), 0, 0);
+
+        cmdlist_->Close();
+        ID3D12CommandList* commands[] = { cmdlist_ };
+        cmdque_->ExecuteCommandLists(1, commands);
+
+        waitGPU();
+        cmdalloc_[IND_frame]->Reset();
+        cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
+    }
+   
 }
 
 void D3d::constantUI()

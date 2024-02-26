@@ -215,7 +215,7 @@ bool PSOManager::Init()
         D3D12_DESCRIPTOR_RANGE range_oi = {};
         {
             range_oi.BaseShaderRegister = 0;
-            range_oi.NumDescriptors = 1;
+            range_oi.NumDescriptors = ResourceManager::CBCOUNT;
             range_oi.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
             range_oi.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
             range_oi.RegisterSpace = 0;
@@ -230,7 +230,7 @@ bool PSOManager::Init()
         D3D12_DESCRIPTOR_RANGE range_mb = {};
         {
             range_mb.BaseShaderRegister = 256;
-            range_mb.NumDescriptors = 1;
+            range_mb.NumDescriptors = ResourceManager::CBCOUNT;
             range_mb.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
             range_mb.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
             range_mb.RegisterSpace = 0;
@@ -245,7 +245,7 @@ bool PSOManager::Init()
         D3D12_DESCRIPTOR_RANGE range_tex = {};
         {
             range_tex.BaseShaderRegister = 512;
-            range_tex.NumDescriptors = 1;
+            range_tex.NumDescriptors = -1;
             range_tex.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
             range_tex.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
             range_tex.RegisterSpace = 0;
@@ -283,7 +283,7 @@ bool PSOManager::Init()
 
         for (auto i = 0u; i < static_cast<size_t>(ShaderUI::AMOUNT); i++) {
 
-            if (!PSOUI[i]->Init(r_param,&sampler,flag,U_Amount,1));
+            if (!PSOUI[i]->Init(r_param, &sampler, flag, U_Amount, 1))  return false;
         }
     }
 
@@ -315,6 +315,6 @@ PSO* PSOManager::GetPSO(ShaderPost ind)
 
 PSO* PSOManager::GetPSO(ShaderUI ind)
 {
-    return nullptr;
+    return PSOUI[static_cast<size_t>(ind)];
 }
 

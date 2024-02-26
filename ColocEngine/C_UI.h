@@ -37,8 +37,8 @@ public:
 
 	static void Flush();
 
-	uint16_t GetDrawCount();
-	static SIMPLEVERTEX vxcs[4];
+	static uint16_t GetDrawCount();
+	static SIMPLEVERTEX vxcs[C_Quad::QUAD_VERTEX];
 
 
 public:

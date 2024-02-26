@@ -13,6 +13,9 @@ public:
 
 	C_Quad(string tag);
 
+	static constexpr uint8_t QUAD_VERTEX = 4;
+	static constexpr uint8_t QUAD_INDEX = 6;
+
 public:
 
 	uint32_t* GetIndcsData();
@@ -20,8 +23,8 @@ public:
 
 protected:
 
-	static Position vxs[4];
-	static uint32_t ids[6];
+	static Position vxs[C_Quad::QUAD_VERTEX];
+	static uint32_t ids[C_Quad::QUAD_INDEX];
 
 };
 
