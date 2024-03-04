@@ -701,7 +701,7 @@ bool D3d::InitGBO()
                     srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
                     srv.Buffer.FirstElement = 0;
                     srv.Buffer.NumElements = ResourceManager::CBCOUNT;
-                    srv.Buffer.StructureByteStride = sizeof(MapBOOL);
+                    srv.Buffer.StructureByteStride = sizeof(SimpleInfo_UI);
                     srv.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
                 }
 
@@ -1139,7 +1139,7 @@ void D3d::write()
             MDIND++;
     }
 
-    brr = {};
+   /* brr = {};
     {
         brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
         brr.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
@@ -1147,7 +1147,7 @@ void D3d::write()
         brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
         brr.Transition.pResource = post_;
         brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-    }
+    }*/
    // cmdlist_->ResourceBarrier(1, &brr);
 }
 
@@ -1247,12 +1247,14 @@ void D3d::render()
 
 void D3d::preeffectUI()
 {
+    auto cnt = C_UI::GetDrawCount();
 
-    if (C_UI::GetDrawCount())
+    if (cnt)
     {
         {
-            memcpy(&SB_MB[IND_frame].view, C_UI::mb.data(), C_UI::mb.size() * sizeof(MapBOOL));
-            memcpy(&SB_UI[IND_frame].view, C_UI::data.data(), sizeof(SimpleInfo_UI) * C_UI::data.size());
+            memcpy(SB_MB[IND_frame].view, C_UI::mb.data(), C_UI::mb.size() * sizeof(MapBOOL));
+            memcpy(SB_UI[IND_frame].view, C_UI::data.data(), sizeof(SimpleInfo_UI) * C_UI::data.size());
+            SB_UI[IND_frame];
         }
 //---------------------------------
 
@@ -1260,14 +1262,14 @@ void D3d::preeffectUI()
         cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetPSO());
 
         cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], false, nullptr);
-        cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHUI_CbSrUaV->ppHeap_);
+        cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
 
         cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], false, nullptr);
         cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::U_CB, CBV_Util[IND_frame].desc.BufferLocation);
 
         cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_SB_OI, SB_UI[IND_frame].HGPU);
         cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_SB_MB, SB_MB[IND_frame].HGPU);
-        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_TEX, ResourceManager::textures_[0].tex_.HGPU);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_TEX, ResourceManager::textures_.data()->tex_.HGPU);
 
         cmdlist_->RSSetViewports(1, &view_);
         cmdlist_->RSSetScissorRects(1, &rect_);
@@ -1275,15 +1277,9 @@ void D3d::preeffectUI()
         cmdlist_->IASetVertexBuffers(0, 1, &quadVBV_);
         cmdlist_->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
-        cmdlist_->DrawInstanced(C_UI::QUAD_VERTEX, C_UI::GetDrawCount(), 0, 0);
+        cmdlist_->DrawInstanced(C_UI::QUAD_VERTEX, cnt, 0, 0);
 
-        cmdlist_->Close();
-        ID3D12CommandList* commands[] = { cmdlist_ };
-        cmdque_->ExecuteCommandLists(1, commands);
-
-        waitGPU();
-        cmdalloc_[IND_frame]->Reset();
-        cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
+      
     }
    
 }

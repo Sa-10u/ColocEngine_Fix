@@ -24,6 +24,6 @@ private:
 	float val0;
 	float val1;
 
-	Entity e_title;
+	Entity* e_title;
 };
 

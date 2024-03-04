@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include<array> 
 
 using std::string;
 class IComp;
@@ -47,9 +48,9 @@ namespace DataManager
 {
 	constexpr uint32_t Size = 200;
 
-	extern Entity* Entities;
+	extern std::array<Entity, Size>Entities;
 
-	size_t CreateEntity(Entity* e , string tag);
+	size_t CreateEntity(Entity** e , string tag);
 	Entity* CreateEntity(size_t ID, string tag);
 
 	void DeleteEntity(size_t ID);
@@ -73,7 +74,7 @@ namespace DataManager
 	extern void (*Sub_Process_Jump[2])(float tick, size_t ID);
 
 	bool HasEntity(string tag , Entity* ptr);
-	bool HasEntities(string tag, std::vector<Entity*> ptrs);
+	bool HasEntities(string tag, std::vector<Entity*>* ptrs);
 
 	bool HasEntity(string tag);
 	uint32_t HasEntities(string tag);
@@ -114,7 +115,7 @@ inline t* DataManager::AddComponent(t* cmp, std::vector<IComp*>* list ,Entity* e
 {
 	if (cmp == nullptr)	return nullptr;
 
-	for (auto itr : *list) {
+	for (auto& itr : *list) {
 
 		if (itr->Usable)
 		{
@@ -139,7 +140,7 @@ inline t* DataManager::AddComponent(std::vector<IComp*>* list, string tag , Enti
 {
 	t* cmp = new t(tag);
 
-	for (auto itr : *list) {
+	for (auto& itr : *list) {
 
 		if (itr->Usable)
 		{
@@ -165,7 +166,7 @@ inline t* DataManager::AddComponent(std::vector<IComp*>* list, string tag , Enti
 template<class t>
 inline void DataManager::DeleteComponents(std::vector<IComp*>* list)
 {
-	for (auto itr : *list) {
+	for (auto& itr : *list) {
 
 		if(typeid(*itr) == typeid(t))	itr->Release();
 	}
@@ -176,7 +177,7 @@ uint32_t DataManager::SearchComponents(std::vector<IComp*>* list)
 {
 	uint32_t cnt = 0;
 	
-	for (auto itr : *list) {
+	for (auto& itr : *list) {
 
 		if (typeid(itr) == typeid(t))	cnt++;
 	}
@@ -189,7 +190,7 @@ uint32_t DataManager::SearchComponents(std::vector<IComp*>* get, const std::vect
 {
 	uint32_t cnt = 0;
 
-	for (auto itr : *list) {
+	for (auto& itr : *list) {
 
 		if (typeid(itr) == typeid(t))
 		{

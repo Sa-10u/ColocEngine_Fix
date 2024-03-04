@@ -39,7 +39,7 @@ void WW_BlackScreen::P1_BlackToWhite()
 		val0 = 0;
 		val1 = 0;
 
-		auto ui = DataManager::AddComponent<C_UI>(&e_title.comps, "title", &e_title);
+		auto ui = DataManager::AddComponent<C_UI>(&e_title->comps, "title", e_title);
 
 		Rect2D rect(0, 0, 10, 10);
 		ui->SetPos(rect);

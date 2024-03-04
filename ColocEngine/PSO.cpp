@@ -444,7 +444,7 @@ bool DefUI::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sample
 		D3D12_RASTERIZER_DESC rs_desc = {};
 		{
 			rs_desc.FillMode = D3D12_FILL_MODE_SOLID;
-			rs_desc.CullMode = D3D12_CULL_MODE_FRONT;
+			rs_desc.CullMode = D3D12_CULL_MODE_NONE;
 			rs_desc.FrontCounterClockwise = false;
 			rs_desc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
 			rs_desc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;

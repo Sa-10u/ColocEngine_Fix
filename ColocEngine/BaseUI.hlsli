@@ -30,8 +30,12 @@ struct Quad
 //--------------------
 struct PerInstance
 { 
-    Quad pos[4];
-    Quad uv[4];
+    Quad pos_st;
+    Quad pos_end;
+
+    Quad uv_st;
+    Quad uv_end;
+
     float tick;
     float val0;
     float val1;
