@@ -846,18 +846,18 @@ bool D3d::InitPost()
     //----------------------------------------------
     SIMPLEVERTEX vxs[C_Quad::QUAD_VERTEX] = {};
     {
-        float z = 0.1;
-        vxs[0].pos = { -1,-1,z };
-        vxs[0].uv = { 0,1 };
+        float z = 0.5;
+        vxs[3].pos = { -1,-1,z };
+        vxs[3].uv = { 0,1 };
 
-        vxs[1].pos = { -1,1,z };
-        vxs[1].uv = { 0,0 };
+        vxs[0].pos = { -1,1,z };
+        vxs[0].uv = { 0,0 };
 
         vxs[2].pos = { 1,-1,z };
         vxs[2].uv = { 1,1 };
 
-        vxs[3].pos = { 1,1,z };
-        vxs[3].uv = { 1,0 };
+        vxs[1].pos = { 1,1,z };
+        vxs[1].uv = { 1,0 };
     }
 
     D3D12_HEAP_PROPERTIES hp_prop_v = {};
@@ -1218,7 +1218,6 @@ void D3d::postEffect()
     cmdlist_->RSSetScissorRects(1, &rect_);
 
     cmdlist_->IASetVertexBuffers(0, 1, &quadVBV_);
-    cmdlist_->IASetIndexBuffer(&quadIBV_);
 
     cmdlist_->DrawInstanced(C_UI::QUAD_VERTEX, 1, 0, 0);
 
@@ -1257,14 +1256,13 @@ void D3d::preeffectUI()
             SB_UI[IND_frame];
         }
 //---------------------------------
+        cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], false, nullptr);
 
         cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetRTSG());
         cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetPSO());
 
-        cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], false, nullptr);
         cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
 
-        cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], false, nullptr);
         cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::U_CB, CBV_Util[IND_frame].desc.BufferLocation);
 
         cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_SB_OI, SB_UI[IND_frame].HGPU);

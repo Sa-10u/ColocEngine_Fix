@@ -107,8 +107,6 @@ private:
 	//---------------
 	ID3D12Resource* quadVB_;
 	D3D12_VERTEX_BUFFER_VIEW quadVBV_;
-	ID3D12Resource* quadIB_;
-	D3D12_INDEX_BUFFER_VIEW quadIBV_;
 
 	D3D12_VIEWPORT view_;
 	D3D12_RECT rect_;
