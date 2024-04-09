@@ -969,7 +969,7 @@ void D3d::Run(int interval)
     Update();
     write();
     preeffectUI();
-    //postEffect();
+    postEffect();
     constantUI();
     render();
     present(0);
@@ -1200,7 +1200,7 @@ void D3d::postEffect()
         brr.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
         brr.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
     }
-    cmdlist_->ResourceBarrier(1, &brr);
+    //cmdlist_->ResourceBarrier(1, &brr);
 
     cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], FALSE, nullptr);
     //cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
@@ -1213,10 +1213,10 @@ void D3d::postEffect()
     }
 
     cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderPost::Default)->GetPSO());
-    cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
     cmdlist_->RSSetViewports(1, &view_);
     cmdlist_->RSSetScissorRects(1, &rect_);
 
+    cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
     cmdlist_->IASetVertexBuffers(0, 1, &quadVBV_);
 
     cmdlist_->DrawInstanced(C_UI::QUAD_VERTEX, 1, 0, 0);
