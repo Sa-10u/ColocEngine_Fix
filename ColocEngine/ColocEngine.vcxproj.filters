@@ -75,9 +75,6 @@
     <ClCompile Include="MACRO.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="BUFFER.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="MeshLoader.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -136,6 +133,9 @@
       <Filter>Components\ColocEngine\source</Filter>
     </ClCompile>
     <ClCompile Include="S_Light.cpp">
+      <Filter>System\source</Filter>
+    </ClCompile>
+    <ClCompile Include="BUFFER.cpp">
       <Filter>System\source</Filter>
     </ClCompile>
   </ItemGroup>

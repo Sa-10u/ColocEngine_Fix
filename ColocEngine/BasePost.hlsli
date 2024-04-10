@@ -1,6 +1,3 @@
-Texture2D raw[]: register(t512);
-SamplerState smp : register(s0);
-
 struct VSinput
 {
     float3 pos	: POSITION;
@@ -41,3 +38,7 @@ cbuffer Util : register(b0)
 };
 
 StructuredBuffer<MapBOOL>	Map	: register(t0);
+
+Texture2D raw[] : register(t512);
+SamplerState smp : register(s0);
+

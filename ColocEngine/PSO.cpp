@@ -288,7 +288,7 @@ bool DefPost::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* samp
 		);
 		if (FAILED(res))	return false;
 	}
-
+	
 	res = device_->CreateRootSignature
 	(
 		NULL,
@@ -327,11 +327,17 @@ bool DefPost::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* samp
 	{
 		bs_desc.AlphaToCoverageEnable = false;
 		bs_desc.IndependentBlendEnable = false;
-		for (auto i = 0u; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; i++) {
+		for (auto i = 0u; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i) {
 
 			bs_desc.RenderTarget[i] = rtb_desc;
 		}
 	};
+
+	D3D12_DEPTH_STENCIL_DESC dss_desc = {};
+	{
+		dss_desc.DepthEnable = 0;
+		dss_desc.StencilEnable = 0;
+	}
 
 	//----------------------
 
@@ -360,6 +366,7 @@ bool DefPost::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* samp
 		pso_desc.NumRenderTargets = 1;
 		pso_desc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 		pso_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+		pso_desc.DepthStencilState = dss_desc;
 	}
 
 	res = device_->CreateGraphicsPipelineState
@@ -473,6 +480,7 @@ bool DefUI::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sample
 			gps_desc.SampleDesc.Count = 1;
 			gps_desc.SampleDesc.Quality = 0;
 			gps_desc.pRootSignature = rtsg;
+			gps_desc.DepthStencilState = dss_desc;
 		}
 
 		res = device_->CreateGraphicsPipelineState

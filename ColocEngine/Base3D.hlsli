@@ -130,5 +130,6 @@ StructuredBuffer<PerInstance> Data	: register(t0);
 StructuredBuffer<MapBOOL>	Map	: register(t512);
 StructuredBuffer<Material>  Mtl : register(t1024);
 
+Texture2D colmap[] : register(t1792);
+
 SamplerState colsmp : register(s0);
-Texture2D	 colmap[] : register(t1792);
