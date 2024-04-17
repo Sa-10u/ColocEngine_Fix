@@ -46,7 +46,7 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<MATERIAL>&
     //----------------
     auto scene = imp.ReadFile(path, flag);
     if (scene == nullptr)    return false;
-
+    
     mesh.clear();
     mesh.resize(scene->mNumMeshes);
     for (size_t i = 0; i < mesh.size(); i++) {

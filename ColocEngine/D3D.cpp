@@ -969,7 +969,7 @@ void D3d::Run(int interval)
     Update();
     write();
     preeffectUI();
-    postEffect();
+   // postEffect();
     constantUI();
     render();
     present(0);
@@ -1253,7 +1253,7 @@ void D3d::preeffectUI()
         {
             memcpy(SB_MB[IND_frame].view, C_UI::mb.data(), C_UI::mb.size() * sizeof(MapBOOL));
             memcpy(SB_UI[IND_frame].view, C_UI::data.data(), sizeof(SimpleInfo_UI) * C_UI::data.size());
-            SB_UI[IND_frame];
+            //SB_UI[IND_frame];
         }
 //---------------------------------
         cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], false, nullptr);

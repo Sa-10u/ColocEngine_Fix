@@ -7,7 +7,6 @@
 #include<cmath>
 #include<numbers>
 
-
 void WW_BlackScreen::Initialize()
 {
 	ptr = &WW_BlackScreen::P1_BlackToWhite;
@@ -41,7 +40,7 @@ void WW_BlackScreen::P1_BlackToWhite()
 
 		auto ui = DataManager::AddComponent<C_UI>(&e_title->comps, "title", e_title);
 
-		Rect2D rect(0, 0, 10, 10);
+		Rect2D rect(-1, -1, 1, 1);
 		ui->SetPos(rect);
 	}
 

@@ -198,8 +198,8 @@ bool PSOManager::Init()
         flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 
         for (auto i = 0u; i < static_cast<size_t>(ShaderPost::AMOUNT); i++) {
-
-            if (!PSOPost[i]->Init(r_param, &sampler, flag, P_Amount, 1))   return false;
+            //causes error .
+          //  if (!PSOPost[i]->Init(r_param, &sampler, flag, P_Amount, 1))   return false;
         }
     }
 
