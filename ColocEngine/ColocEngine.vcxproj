@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="BUFFER.cpp" />
     <ClCompile Include="CAM.cpp" />
+    <ClCompile Include="C_Player.cpp" />
     <ClCompile Include="C_Quad.cpp" />
     <ClCompile Include="C_UI.cpp" />
     <ClCompile Include="PSO.cpp" />
@@ -48,6 +49,7 @@
   <ItemGroup>
     <ClInclude Include="BUFFER.h" />
     <ClInclude Include="CAM.h" />
+    <ClInclude Include="C_Player.h" />
     <ClInclude Include="C_Quad.h" />
     <ClInclude Include="C_UI.h" />
     <ClInclude Include="PSO.h" />

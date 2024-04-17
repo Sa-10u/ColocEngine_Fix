@@ -185,8 +185,6 @@ void DataManager::Release()
 
 		itr.Release();
 	}
-
-	Entities = {};
 }
 
 void DataManager::Process(float tick)
