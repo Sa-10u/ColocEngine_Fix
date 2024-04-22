@@ -15,6 +15,17 @@ constexpr UINT POST_HPSIZE = 1;
 
 bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
 {
+#if 1
+    {
+        ID3D12Debug* dbg = {};
+
+        if (!FAILED(D3D12GetDebugInterface(IID_PPV_ARGS(&dbg))))
+        {
+            dbg->EnableDebugLayer();
+        }
+    }
+#endif
+
     PTR_D3D::ptr = this;
     PTR_WND::ptr = &hwnd;
 
