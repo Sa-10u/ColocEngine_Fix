@@ -65,7 +65,7 @@ void WW_BlackScreen::P2_Title()
 
 void WW_BlackScreen::P3_TitleToSelect()
 {
-
+	WorldManager::ChangeWorld(WLD_ID::PLAY);
 }
 
 void WW_BlackScreen::P4_Select()

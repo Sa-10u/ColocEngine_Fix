@@ -138,6 +138,9 @@
     <ClCompile Include="BUFFER.cpp">
       <Filter>System\source</Filter>
     </ClCompile>
+    <ClCompile Include="C_Player.cpp">
+      <Filter>Components\YourComponents\source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinView.h">
@@ -211,6 +214,9 @@
     </ClInclude>
     <ClInclude Include="S_Light.h">
       <Filter>System\header</Filter>
+    </ClInclude>
+    <ClInclude Include="C_Player.h">
+      <Filter>Components\YourComponents\header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
