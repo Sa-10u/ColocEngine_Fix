@@ -179,14 +179,16 @@ void WinView::loop()
             WorldManager::Changer();
 
             ed = system_clock::now();
-            auto t = ed - st;
-            auto str = duration_cast<milliseconds>(t).count();
-            str = FPS - str;
+            auto&& t = ed - st;
+            auto mili = duration_cast<milliseconds>(t).count();
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(str));
+            auto lim = static_cast<int64_t>(fps - mili);
+    
+            std::this_thread::sleep_for(std::chrono::milliseconds(lim));
+            
+            tick = lim;
 
-            tick = str;
-            SetWindowText(h_wnd, std::to_wstring(str).c_str());
+            SetWindowText(h_wnd, std::to_wstring().c_str());
         }
     }
 }

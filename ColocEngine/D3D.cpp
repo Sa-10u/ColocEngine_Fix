@@ -874,7 +874,7 @@ bool D3d::InitPost()
     //----------------------------------------------
     SIMPLEVERTEX vxs[C_Quad::QUAD_VERTEX] = {};
     {
-        float z = 0.5;
+        float z = -1;
        
         vxs[0].pos = { -1,1,z };
         vxs[0].uv = { 0,0 };  
