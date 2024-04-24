@@ -12,6 +12,7 @@
 
 constexpr UINT HPSIZE = 10;
 constexpr UINT POST_HPSIZE = 1;
+constexpr UINT UI_HPSIZE = 1;
 
 bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
 {
@@ -716,8 +717,24 @@ bool D3d::InitGBO()
                     srv.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
                 }
 
-                SB_UI[i].HCPU = ResourceManager::DHH_CbSrUaV->GetAndIncreCPU();
-                SB_UI[i].HGPU = ResourceManager::DHH_CbSrUaV->GetAndIncreGPU();
+                D3D12_DESCRIPTOR_HEAP_DESC hpd_desc = {};
+                {
+                    hpd_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+                    hpd_desc.NodeMask = 0;
+                    hpd_desc.NumDescriptors = FrameAmount * UI_HPSIZE;
+                    hpd_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+                }
+
+                device_->CreateDescriptorHeap
+                (
+                    &hpd_desc,
+                    IID_PPV_ARGS(&ResourceManager::uiCBV_SRV_UAV_)
+                );
+
+                ResourceManager::DHUI_CbSrUaV = new DH(device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV), &ResourceManager::uiCBV_SRV_UAV_);
+
+                SB_UI[i].HCPU = ResourceManager::DHUI_CbSrUaV->GetAndIncreCPU();
+                SB_UI[i].HGPU = ResourceManager::DHUI_CbSrUaV->GetAndIncreGPU();
 
                 device_->CreateShaderResourceView
                 (
@@ -969,7 +986,7 @@ void D3d::Termination()
     SAFE_RELEASE(device_);
     delete ResourceManager::DHH_CbSrUaV;
     delete ResourceManager::DHPost_CbSrUaV;
-
+    delete ResourceManager::DHUI_CbSrUaV;
 }
 
 void D3d::TermGBO()
@@ -1248,7 +1265,7 @@ void D3d::render()
 void D3d::preeffectUI()
 {
     auto cnt = C_UI::GetDrawCount();
-    static auto handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
+    //static auto handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
 
     if (cnt)
     {
@@ -1263,7 +1280,7 @@ void D3d::preeffectUI()
         cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetRTSG());
         cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetPSO());
 
-        cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
+        cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHUI_CbSrUaV->ppHeap_);
 
         cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::U_CB, CBV_Util[IND_frame].desc.BufferLocation);
 
