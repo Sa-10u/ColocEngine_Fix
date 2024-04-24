@@ -980,7 +980,7 @@ void D3d::Run(int interval)
     Update();
     write();
     preeffectUI();
-   // postEffect();
+    postEffect();
     constantUI();
     render();
     present(0);
@@ -1063,8 +1063,8 @@ D3d::D3d()
 
 void D3d::write()
 {
-    //auto handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
-    auto handle = h_RTV[IND_frame];
+    static auto handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
+    //auto handle = h_RTV[IND_frame];
 
     
     brr = {};
@@ -1072,8 +1072,8 @@ void D3d::write()
         brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
         brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 
-        //brr.Transition.pResource = post_;
-        brr.Transition.pResource = colbuf_[IND_frame];
+        brr.Transition.pResource = post_;
+        //brr.Transition.pResource = colbuf_[IND_frame];
 
         brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
@@ -1150,7 +1150,7 @@ void D3d::write()
             MDIND++;
     }
 
-   /* brr = {};
+    brr = {};
     {
         brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
         brr.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
@@ -1158,8 +1158,8 @@ void D3d::write()
         brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
         brr.Transition.pResource = post_;
         brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-    }*/
-   // cmdlist_->ResourceBarrier(1, &brr);
+    }
+    cmdlist_->ResourceBarrier(1, &brr);
 }
 
 void D3d::waitGPU()
@@ -1211,9 +1211,9 @@ void D3d::postEffect()
         brr.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
         brr.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
     }
-    //cmdlist_->ResourceBarrier(1, &brr);
+    cmdlist_->ResourceBarrier(1, &brr);
 
-    cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], FALSE, nullptr);
+    cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], 0, nullptr);
     //cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
 
     cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::ShaderPost::Default)->GetRTSG());
@@ -1258,6 +1258,7 @@ void D3d::render()
 void D3d::preeffectUI()
 {
     auto cnt = C_UI::GetDrawCount();
+    static auto handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
 
     if (cnt)
     {
@@ -1267,7 +1268,7 @@ void D3d::preeffectUI()
             //SB_UI[IND_frame];
         }
 //---------------------------------
-        cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], false, nullptr);
+        cmdlist_->OMSetRenderTargets(1,&handle , false, nullptr);
 
         cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetRTSG());
         cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetPSO());

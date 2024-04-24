@@ -17,4 +17,6 @@ private:
 	C_Trans* trans;
 	ObjInfo oi;
 	uint16_t md;
+
+	Entity* e_title;
 };
