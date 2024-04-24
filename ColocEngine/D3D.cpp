@@ -858,17 +858,18 @@ bool D3d::InitPost()
     SIMPLEVERTEX vxs[C_Quad::QUAD_VERTEX] = {};
     {
         float z = 0.5;
-        vxs[3].pos = { -1,-1,z };
-        vxs[3].uv = { 0,1 };
-
+       
         vxs[0].pos = { -1,1,z };
-        vxs[0].uv = { 0,0 };
+        vxs[0].uv = { 0,0 };  
+        
+        vxs[1].pos = { 1,1,z };
+        vxs[1].uv = { 1,0 };
 
         vxs[2].pos = { 1,-1,z };
         vxs[2].uv = { 1,1 };
 
-        vxs[1].pos = { 1,1,z };
-        vxs[1].uv = { 1,0 };
+        vxs[3].pos = { -1,-1,z };
+        vxs[3].uv = { 0,1 };
     }
 
     D3D12_HEAP_PROPERTIES hp_prop_v = {};
@@ -980,7 +981,7 @@ void D3d::Run(int interval)
     Update();
     write();
     preeffectUI();
-    postEffect();
+    //postEffect();
     constantUI();
     render();
     present(0);
@@ -1063,8 +1064,8 @@ D3d::D3d()
 
 void D3d::write()
 {
-    static auto handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
-    //auto handle = h_RTV[IND_frame];
+    //static auto handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
+    auto handle = h_RTV[IND_frame];
 
     
     brr = {};
@@ -1149,17 +1150,6 @@ void D3d::write()
             S_Draw::Flush(MDIND);
             MDIND++;
     }
-
-    brr = {};
-    {
-        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-        brr.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-        brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        brr.Transition.pResource = post_;
-        brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-    }
-    cmdlist_->ResourceBarrier(1, &brr);
 }
 
 void D3d::waitGPU()
@@ -1268,7 +1258,7 @@ void D3d::preeffectUI()
             //SB_UI[IND_frame];
         }
 //---------------------------------
-        cmdlist_->OMSetRenderTargets(1,&handle , false, nullptr);
+        cmdlist_->OMSetRenderTargets(1,&h_RTV[IND_frame], false, nullptr);
 
         cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetRTSG());
         cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetPSO());
@@ -1289,8 +1279,25 @@ void D3d::preeffectUI()
 
         cmdlist_->DrawInstanced(C_UI::QUAD_VERTEX, cnt, 0, 0);
 
-      
+        cmdlist_->Close();
+        ID3D12CommandList* commands[] = { cmdlist_ };
+        cmdque_->ExecuteCommandLists(1, commands);
+
+        waitGPU();
+        cmdalloc_[IND_frame]->Reset();
+        cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
     }
+
+    brr = {};
+    {
+        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        brr.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+        brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        brr.Transition.pResource = post_;
+        brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    }
+   // cmdlist_->ResourceBarrier(1, &brr);
    
 }
 

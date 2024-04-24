@@ -18,5 +18,4 @@ private:
 	ObjInfo oi;
 	uint16_t md;
 
-	Entity* e_title;
 };

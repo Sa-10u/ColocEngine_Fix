@@ -11,7 +11,7 @@ void C_Player::initialize()
 	DataManager::CreateEntity(&this->entity, "Player");
 	trans = DataManager::AddComponent<C_Trans>(&(this->entity->comps), "TRANSFORM", this->entity);
 
-	auto ui = DataManager::AddComponent<C_UI>(&e_title->comps, "title", e_title);
+	auto ui = DataManager::AddComponent<C_UI>(&(this->entity->comps), "title", this->entity);
 
 	Rect2D rect(-1, -1, 1, 1);
 	ui->SetPos(rect);
