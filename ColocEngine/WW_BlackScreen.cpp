@@ -38,10 +38,7 @@ void WW_BlackScreen::P1_BlackToWhite()
 		val0 = 0;
 		val1 = 0;
 
-		auto ui = DataManager::AddComponent<C_UI>(&e_title->comps, "title", e_title);
-
-		Rect2D rect(-1, -1, 1, 1);
-		ui->SetPos(rect);
+		
 	}
 
 	val1 = col;
@@ -58,7 +55,7 @@ void WW_BlackScreen::P2_Title()
 		ptr = &WW_BlackScreen::P3_TitleToSelect;
 		val0 = 0;
 		val1 = 0;
-	
+		PTR_D3D::ptr->SetColorBG(1, 0, 0, 0);
 	}
 
 }

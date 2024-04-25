@@ -1,13 +1,19 @@
 struct VSinput
 {
-    float3 pos	: POSITION;
-    float2 uv	: TEXCOORD;
+    float3 pos : POSITION;
+    float2 uv : TEXCOORD;
+
+    uint ID : SV_InstanceID;
+    uint VID : SV_VertexID;
 };
 
 struct VSoutput
 {
     float4 pos : SV_POSITION;
     float2 uv : TEXCOORD;
+
+    uint ID : InstanceID;
+    uint VID : VertexID;
 };
 
 struct PSoutput

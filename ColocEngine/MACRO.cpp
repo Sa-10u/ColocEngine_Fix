@@ -19,7 +19,7 @@ namespace SHADER_FILENAME
 	LPCWSTR DefPS = s_path "DefPS.cso";
 	LPCWSTR ToonPS = s_path "Toon.cso";
 
-	LPCWSTR DefPostVS = s_path "PostEffect_Default_PS.cso";
+	LPCWSTR DefPostVS = s_path "PostEffect_Default_VS.cso";
 	LPCWSTR DefPostPS = s_path "PostEffect_Default_PS.cso";
 
 	LPCWSTR UI_VS = s_path"UI_VS.cso";
