@@ -23,6 +23,7 @@
     <ClCompile Include="CAM.cpp" />
     <ClCompile Include="C_Player.cpp" />
     <ClCompile Include="C_Quad.cpp" />
+    <ClCompile Include="C_Text.cpp" />
     <ClCompile Include="C_UI.cpp" />
     <ClCompile Include="PSO.cpp" />
     <ClCompile Include="PSOManager.cpp" />
@@ -51,6 +52,7 @@
     <ClInclude Include="CAM.h" />
     <ClInclude Include="C_Player.h" />
     <ClInclude Include="C_Quad.h" />
+    <ClInclude Include="C_Text.h" />
     <ClInclude Include="C_UI.h" />
     <ClInclude Include="PSO.h" />
     <ClInclude Include="PSOManager.h" />

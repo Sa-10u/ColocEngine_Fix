@@ -188,7 +188,7 @@ void WinView::loop()
             
             tick = lim;
 
-            SetWindowText(h_wnd, std::to_wstring().c_str());
+            SetWindowText(h_wnd, std::to_wstring(0).c_str());
         }
     }
 }

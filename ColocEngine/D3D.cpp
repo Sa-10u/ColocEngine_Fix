@@ -281,12 +281,18 @@ bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
     {
         if (!InitUI())       return false;
     }
+
+    __CREATE("Context for Text")
+    {
+        if (!InitText())       return false;
+    }
+
     return true;
 }
 
 bool D3d::InitGBO()
 {
-    HRESULT res = FALSE;
+    HRESULT&& res = FALSE;
 
     //----------------------------
     {
@@ -765,7 +771,7 @@ bool D3d::InitGBO()
 
 bool D3d::InitPost()
 {
-    HRESULT res = {};
+    HRESULT&& res = NULL;
     auto desc_hp = heapRTV_->GetDesc();
     auto desc_rsc = colbuf_[0]->GetDesc();
 
@@ -958,6 +964,31 @@ bool D3d::InitUI()
         if (FAILED(res)) return false;
 
         ResourceManager::DHUI_CbSrUaV = new DH(device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV), &ResourceManager::uiCBV_SRV_UAV_);
+    }
+
+    return true;
+}
+
+bool D3d::InitText()
+{
+    HRESULT&& res = NULL;
+
+    res = DWriteCreateFactory
+    (
+        DWRITE_FACTORY_TYPE_SHARED,
+        __uuidof(IDWriteFactory),
+        reinterpret_cast<IUnknown**>(&dwfac_)
+    );
+    if (FAILED(res)) return false;
+
+    {
+        ID3D11Device* dev_;
+
+        res = D3D11On12CreateDevice
+        (
+            device_,
+            D3D11_CREATE_DEVICE_
+        );
     }
 
     return true;
