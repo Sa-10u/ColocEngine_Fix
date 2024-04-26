@@ -435,8 +435,8 @@ bool DefUI::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sample
 
 		D3D12_DEPTH_STENCIL_DESC dss_desc = {};
 		{
-			dss_desc.DepthEnable = 0;
-			dss_desc.StencilEnable = 0;
+			dss_desc.DepthEnable = false;
+			dss_desc.StencilEnable = false;
 		}
 
 		ID3DBlob* VSBlob = nullptr;

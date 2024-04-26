@@ -13,7 +13,7 @@ void C_Player::initialize()
 
 	auto ui = DataManager::AddComponent<C_UI>(&(this->entity->comps), "title", this->entity);
 
-	Rect2D rect(-1, -1, 1, 1);
+	Rect2D rect(-1, -1, -0.3, -0.3);
 	ui->SetPos(rect);
 }
 

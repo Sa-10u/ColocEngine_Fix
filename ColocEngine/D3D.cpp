@@ -277,15 +277,18 @@ bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
         if (!InitPost())      return false;
     }
 
-    __CREATE("Heap for UI")
+    __CREATE("Buffer for UI")
     {
         if (!InitUI())       return false;
     }
 
-    __CREATE("Context for Text")
+    __CREATE("Buffer for Text")
     {
         if (!InitText())       return false;
     }
+
+    cmdalloc_[IND_frame]->Reset();
+    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
 
     return true;
 }
@@ -731,16 +734,8 @@ bool D3d::InitGBO()
                     hpd_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
                 }
 
-                device_->CreateDescriptorHeap
-                (
-                    &hpd_desc,
-                    IID_PPV_ARGS(&ResourceManager::uiCBV_SRV_UAV_)
-                );
-
-                ResourceManager::DHUI_CbSrUaV = new DH(device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV), &ResourceManager::uiCBV_SRV_UAV_);
-
-                SB_UI[i].HCPU = ResourceManager::DHUI_CbSrUaV->GetAndIncreCPU();
-                SB_UI[i].HGPU = ResourceManager::DHUI_CbSrUaV->GetAndIncreGPU();
+                SB_UI[i].HCPU = ResourceManager::DHH_CbSrUaV->GetAndIncreCPU();
+                SB_UI[i].HGPU = ResourceManager::DHH_CbSrUaV->GetAndIncreGPU();
 
                 device_->CreateShaderResourceView
                 (
@@ -784,15 +779,6 @@ bool D3d::InitPost()
             hpd_desc.NumDescriptors = FrameAmount * POST_HPSIZE;
             hpd_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
         }
-
-        res = device_->CreateDescriptorHeap
-        (
-            &hpd_desc,
-            IID_PPV_ARGS(&ResourceManager::postCBV_SRV_UAV_)
-        );
-        ResourceManager::DHPost_CbSrUaV = new DH(device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV), &ResourceManager::postCBV_SRV_UAV_);
-
-        if (FAILED(res)) return false;
 
         D3D12_HEAP_PROPERTIES prop_hp = {};
         {
@@ -880,16 +866,16 @@ bool D3d::InitPost()
     //----------------------------------------------
     SIMPLEVERTEX vxs[C_Quad::QUAD_VERTEX] = {};
     {
-        float z = -1;
+        float z = 1;
        
-        vxs[0].pos = { -1,1,z };
-        vxs[0].uv = { 0,0 };  
+        vxs[0].pos = { 1,1,z };
+        vxs[0].uv = { 1,0 };  
         
-        vxs[1].pos = { 1,1,z };
-        vxs[1].uv = { 1,0 };
+        vxs[1].pos = { 1,-1,z };
+        vxs[1].uv = { 1,1 };
 
-        vxs[2].pos = { 1,-1,z };
-        vxs[2].uv = { 1,1 };
+        vxs[2].pos = { -1,1,z };
+        vxs[2].uv = { 0,0 };
 
         vxs[3].pos = { -1,-1,z };
         vxs[3].uv = { 0,1 };
@@ -955,15 +941,6 @@ bool D3d::InitUI()
             hp_desc.NumDescriptors = ResourceManager::CBCOUNT;
             hp_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
         }
-
-        res = device_->CreateDescriptorHeap
-        (
-            &hp_desc,
-            IID_PPV_ARGS(&ResourceManager::uiCBV_SRV_UAV_)
-        );
-        if (FAILED(res)) return false;
-
-        ResourceManager::DHUI_CbSrUaV = new DH(device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV), &ResourceManager::uiCBV_SRV_UAV_);
     }
 
     return true;
@@ -971,26 +948,6 @@ bool D3d::InitUI()
 
 bool D3d::InitText()
 {
-    HRESULT&& res = NULL;
-
-    res = DWriteCreateFactory
-    (
-        DWRITE_FACTORY_TYPE_SHARED,
-        __uuidof(IDWriteFactory),
-        reinterpret_cast<IUnknown**>(&dwfac_)
-    );
-    if (FAILED(res)) return false;
-
-    {
-        ID3D11Device* dev_;
-
-        res = D3D11On12CreateDevice
-        (
-            device_,
-            D3D11_CREATE_DEVICE_
-        );
-    }
-
     return true;
 }
 
@@ -1016,8 +973,6 @@ void D3d::Termination()
 
     SAFE_RELEASE(device_);
     delete ResourceManager::DHH_CbSrUaV;
-    delete ResourceManager::DHPost_CbSrUaV;
-    delete ResourceManager::DHUI_CbSrUaV;
 }
 
 void D3d::TermGBO()
@@ -1030,7 +985,7 @@ void D3d::Run(int interval)
     write();
     preeffectUI();
     //postEffect();
-    constantUI();
+   // constantUI();
     render();
     present(0);
 
@@ -1114,7 +1069,6 @@ void D3d::write()
 {
     //static auto handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
     auto handle = h_RTV[IND_frame];
-
     
     brr = {};
     {
@@ -1133,6 +1087,7 @@ void D3d::write()
     }
     cmdlist_->ResourceBarrier(1, &brr);
 
+    cmdlist_->Close();
     cmdalloc_[IND_frame]->Reset();
     cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
 
@@ -1146,10 +1101,10 @@ void D3d::write()
             auto v = 0u;
             for (auto& cnt : itr.Mesh_) {
 
+                cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
+
                 cmdlist_->OMSetRenderTargets(1, &handle, FALSE, &h_ZBV);
                 cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::Shader3D::Default)->GetRTSG());
-
-                cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
 
                 cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_U, CBV_Util[IND_frame].desc.BufferLocation);
                 cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_C, CBV_Cam[IND_frame].desc.BufferLocation);
@@ -1191,9 +1146,9 @@ void D3d::write()
                 cmdque_->ExecuteCommandLists(1, commands);
 
                 waitGPU();
+
                 cmdalloc_[IND_frame]->Reset();
                 cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
-
             }
             S_Draw::Flush(MDIND);
             MDIND++;
@@ -1231,6 +1186,9 @@ void D3d::present(int itv)
     }
 
     fencecnt_[IND_frame] = curval + 1;
+
+    cmdalloc_[IND_frame]->Reset();
+    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
 }
 
 void D3d::postEffect()
@@ -1256,7 +1214,7 @@ void D3d::postEffect()
 
     cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::ShaderPost::Default)->GetRTSG());
 
-    cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHPost_CbSrUaV->ppHeap_);
+    cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
     {
         cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::P_CB, CBV_Util[IND_frame].desc.BufferLocation);
     }
@@ -1311,13 +1269,13 @@ void D3d::preeffectUI()
         cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetRTSG());
         cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetPSO());
 
-        cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHUI_CbSrUaV->ppHeap_);
+      //  cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
 
-        cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::U_CB, CBV_Util[IND_frame].desc.BufferLocation);
+       // cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::U_CB, CBV_Util[IND_frame].desc.BufferLocation);
 
-        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_SB_OI, SB_UI[IND_frame].HGPU);
-        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_SB_MB, SB_MB[IND_frame].HGPU);
-        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_TEX, ResourceManager::textures_.data()->tex_.HGPU);
+       // cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_SB_OI, SB_UI[IND_frame].HGPU);
+       // cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_SB_MB, SB_MB[IND_frame].HGPU);
+       // cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_TEX, ResourceManager::textures_.data()->tex_.HGPU);
 
         cmdlist_->RSSetViewports(1, &view_);
         cmdlist_->RSSetScissorRects(1, &rect_);
@@ -1335,6 +1293,7 @@ void D3d::preeffectUI()
         cmdalloc_[IND_frame]->Reset();
         cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
     }
+
 
     brr = {};
     {

@@ -9,9 +9,6 @@
 #include "MeshLoader.h"
 #include<DirectXTex.h>
 
-#include<dwrite.h>
-#include<d3d11on12.h>
-
 #include"C_UI.h"
 #include"S_Light.h"
 
@@ -19,8 +16,6 @@
 #pragma comment(lib,"dxgi.lib")
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"d3dcompiler.lib")
-
-#pragma comment(lib,"dwrite.lib" )
 
 #pragma comment(lib,"assimp-vc143-mtd.lib")
 using namespace DirectX;
@@ -126,9 +121,6 @@ private:
 
 	//-----
 	float backcolor_[4];
-
-	//-----------------
-	IDWriteFactory* dwfac_;
 };
 
 namespace PTR_D3D
