@@ -32,7 +32,6 @@ public:
 	bool Initialize(HWND hwnd, uint32_t h, uint32_t w);
 	bool InitGBO();
 	bool InitPost();
-	bool InitUI();
 	bool InitText();
 	void Termination();
 	void TermGBO();		//Graphic Buffer Object

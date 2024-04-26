@@ -48,3 +48,5 @@ StructuredBuffer<MapBOOL>	Map	: register(t0);
 Texture2D raw[] : register(t512);
 SamplerState smp : register(s0);
 
+
+
