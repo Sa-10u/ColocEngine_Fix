@@ -53,8 +53,8 @@ void ResourceManager::Init()
 
 void ResourceManager::Term()
 {
-    ModelFlush();
-    TexFlush();
+    //ModelFlush();
+    //TexFlush();
 
     ALL_RELEASE_MODEL();
     ALL_RELEASE_TEX();
@@ -386,7 +386,7 @@ UINT ResourceManager::TexLoad(std::wstring str)
 
 void ResourceManager::ModelFlush()
 {
-    for (auto md : models_) {
+    for (auto& md : models_) {
 
         md.Name_.clear();
         md.VB.clear();
@@ -401,7 +401,7 @@ void ResourceManager::TexFlush()
 {
     for (auto& itr : textures_) {
 
-        if (itr.tex_.rsc_ptr != NULL)
+        if (itr.tex_.rsc_ptr != NULL && itr.tex_.rsc_ptr != E_Tex.tex_.rsc_ptr)
         {
             itr.tex_.rsc_ptr->Release();
             itr.Name_.clear();
@@ -440,8 +440,12 @@ void ResourceManager::ALL_RELEASE_MODEL()
 void ResourceManager::ALL_RELEASE_TEX()
 {
     for (auto& itr : textures_) {
-        itr.tex_.rsc_ptr->Release();
-        itr.Name_.clear();
+
+        if (itr.tex_.rsc_ptr != NULL)
+        {
+            itr.tex_.rsc_ptr->Release();
+            itr.Name_.clear();
+        }
     }
     textures_.clear();
 

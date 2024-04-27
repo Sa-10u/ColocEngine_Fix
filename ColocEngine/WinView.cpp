@@ -133,6 +133,7 @@ bool WinView::initialize()
 
 void WinView::termination()
 {
+
     if (h_ins != nullptr)
     {
         D3D->Termination();
@@ -148,8 +149,8 @@ void WinView::termination()
     WorldManager::Release();
     DataManager::Release();
     
-    ResourceManager::Term();
     PSOManager::Term();
+    ResourceManager::Term();
 }
 
 void WinView::loop()

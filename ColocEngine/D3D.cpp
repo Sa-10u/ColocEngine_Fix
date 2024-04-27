@@ -854,9 +854,10 @@ bool D3d::InitPost()
     {
         for (auto i = 0u; i < C_Quad::QUAD_VERTEX; ++i) {
 
-            auto& [Vertex_ID ,uv] = vxs[i];
+            auto& [Vert ,uv] = vxs[i];
+            auto& [Vertex_ID, Sub0, Sub1] = Vert;
 
-            Vertex_ID.x = i;
+            Vertex_ID= i;
         }
 
         vxs[0].uv = { 1,0 };
