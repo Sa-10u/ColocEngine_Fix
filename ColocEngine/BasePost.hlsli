@@ -36,6 +36,8 @@ struct MapBOOL
 
 //-------------------------------
 
+static const uint Num_Render = 8;
+
 cbuffer Util : register(b0)
 {
     float4x4 View		: packoffset(c0);
@@ -43,9 +45,11 @@ cbuffer Util : register(b0)
     float Time : packoffset(c8);
 };
 
-StructuredBuffer<MapBOOL>	Map	: register(t0);
+StructuredBuffer<MapBOOL>	Map	: register(t8);
 
-Texture2D raw[] : register(t512);
+Texture2D Pre_Render[Num_Render] :register(t0);
+
+Texture2D raw[] : register(t520);
 SamplerState smp : register(s0);
 
 

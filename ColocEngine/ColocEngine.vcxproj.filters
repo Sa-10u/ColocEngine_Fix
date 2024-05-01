@@ -141,6 +141,9 @@
     <ClCompile Include="C_Player.cpp">
       <Filter>Components\YourComponents\source</Filter>
     </ClCompile>
+    <ClCompile Include="C_Text.cpp">
+      <Filter>Components\ColocEngine\source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinView.h">
@@ -217,6 +220,9 @@
     </ClInclude>
     <ClInclude Include="C_Player.h">
       <Filter>Components\YourComponents\header</Filter>
+    </ClInclude>
+    <ClInclude Include="C_Text.h">
+      <Filter>Components\ColocEngine\header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -953,7 +953,7 @@ void D3d::Run(int interval)
     Update();
     write();
     preeffectUI();
-    //postEffect();
+    postEffect();
    // constantUI();
     render();
     present(0);
@@ -984,6 +984,242 @@ void D3d::Update()
     }
 
     CAM::Run();
+}
+
+void D3d::write()
+{
+    static auto handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
+    //auto handle = h_RTV[IND_frame];
+    
+    brr = {};
+    {
+        brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+
+        brr.Transition.pResource = post_;
+        //brr.Transition.pResource = colbuf_[IND_frame];
+
+        brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+        //brr.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+
+        brr.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    }
+    cmdlist_->ResourceBarrier(1, &brr);
+
+    cmdlist_->Close();
+    cmdalloc_[IND_frame]->Reset();
+    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
+
+    cmdlist_->OMSetRenderTargets(1, &handle, FALSE, &h_ZBV);
+    cmdlist_->ClearRenderTargetView(handle, backcolor_, 0, nullptr);
+    cmdlist_->ClearDepthStencilView(h_ZBV, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+
+    auto MDIND = 0u;
+    for (auto& itr : ResourceManager::models_) {
+
+        auto v = 0u;
+        for (auto& cnt : itr.Mesh_) {
+
+            cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
+
+            cmdlist_->OMSetRenderTargets(1, &handle, FALSE, &h_ZBV);
+            cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::Shader3D::Default)->GetRTSG());
+
+            cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_U, CBV_Util[IND_frame].desc.BufferLocation);
+            cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_C, CBV_Cam[IND_frame].desc.BufferLocation);
+            cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_L, CBV_LGT[IND_frame].desc.BufferLocation);
+
+            cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::TEX, ResourceManager::textures_[0].tex_.HGPU);
+
+            cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_MTL, SB_MTL[IND_frame].HGPU);
+            cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_OI, SB_OI[IND_frame].HGPU);
+            cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_MB, SB_MB[IND_frame].HGPU);
+
+            cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::Shader3D::Default)->GetPSO());
+
+            cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            cmdlist_->RSSetViewports(1, &view_);
+            cmdlist_->RSSetScissorRects(1, &rect_);
+
+            {
+                SB_MTL[IND_frame].view[v].alp = itr.Mtr_[v].alpha_;
+                SB_MTL[IND_frame].view[v].dif = itr.Mtr_[v].dif_;
+                SB_MTL[IND_frame].view[v].emis = itr.Mtr_[v].emis_;
+                SB_MTL[IND_frame].view[v].shin = itr.Mtr_[v].shin_;
+                SB_MTL[IND_frame].view[v].spec = itr.Mtr_[v].spec_;
+                SB_MTL[IND_frame].view[v].val0 = 0;
+            }
+
+            {
+                memcpy(SB_OI[IND_frame].view, itr.info.data(), sizeof(ObjInfo) * itr.info.size());
+                memcpy(SB_MB[IND_frame].view, itr.Mesh_[v].texIndex_.data(), sizeof(MapBOOL) * itr.Mesh_[v].texIndex_.size());
+            }
+
+            cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
+            cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
+            cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_, 0, 0, 0);
+
+            v++;
+            cmdlist_->Close();
+            ID3D12CommandList* commands[] = { cmdlist_ };
+            cmdque_->ExecuteCommandLists(1, commands);
+
+            waitGPU();
+
+            cmdalloc_[IND_frame]->Reset();
+            cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
+        }
+        S_Draw::Flush(MDIND);
+        MDIND++;
+    }
+}
+
+void D3d::preeffectUI()
+{
+    auto cnt = C_UI::GetDrawCount();
+    static auto handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
+
+    if (cnt)
+    {
+        {
+            memcpy(SB_MB[IND_frame].view, C_UI::mb.data(), C_UI::mb.size() * sizeof(MapBOOL));
+            memcpy(SB_UI[IND_frame].view, C_UI::data.data(), sizeof(SimpleInfo_UI) * C_UI::data.size());
+            //SB_UI[IND_frame];
+        }
+        //---------------------------------
+        cmdlist_->OMSetRenderTargets(1, &handle, false, nullptr);
+
+        cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetRTSG());
+        cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetPSO());
+
+        cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
+
+        cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::U_CB, CBV_Util[IND_frame].desc.BufferLocation);
+
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_SB_OI, SB_UI[IND_frame].HGPU);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_SB_MB, SB_MB[IND_frame].HGPU);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_TEX, ResourceManager::textures_.data()->tex_.HGPU);
+
+        cmdlist_->RSSetViewports(1, &view_);
+        cmdlist_->RSSetScissorRects(1, &rect_);
+
+        cmdlist_->IASetVertexBuffers(0, 1, &quadVBV_);
+        cmdlist_->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+        cmdlist_->DrawInstanced(C_UI::QUAD_VERTEX, cnt, 0, 0);
+    }
+
+    cmdlist_->Close();
+    ID3D12CommandList* commands[] = { cmdlist_ };
+    cmdque_->ExecuteCommandLists(1, commands);
+
+    waitGPU();
+    cmdalloc_[IND_frame]->Reset();
+    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
+
+    brr = {};
+    {
+        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        brr.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+        brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        brr.Transition.pResource = post_;
+        brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+    }
+     cmdlist_->ResourceBarrier(1, &brr);
+
+}
+
+void D3d::postEffect()
+{
+    cmdlist_->Close();
+    cmdalloc_[IND_frame]->Reset();
+    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
+
+    brr = {};
+    {
+        brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+
+        brr.Transition.pResource = colbuf_[IND_frame];
+        brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+        brr.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    }
+    cmdlist_->ResourceBarrier(1, &brr);
+
+    cmdlist_->Close();
+    cmdalloc_[IND_frame]->Reset();
+    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
+
+    cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], 0, nullptr);
+    cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
+
+    cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::ShaderPost::Default)->GetRTSG());
+
+    cmdlist_->SetDescriptorHeaps(1, &postSRV_);
+    {
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_RENDER, postSRV_->GetGPUDescriptorHandleForHeapStart());
+        //cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::P_CB, CBV_Util[IND_frame].desc.BufferLocation);
+        //cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_TEX, ResourceManager::textures_.data()->tex_.HGPU);
+    }
+
+    cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderPost::Default)->GetPSO());
+    cmdlist_->RSSetViewports(1, &view_);
+    cmdlist_->RSSetScissorRects(1, &rect_);
+
+    cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+    cmdlist_->IASetVertexBuffers(0, 1, &quadVBV_);
+
+    cmdlist_->DrawInstanced(C_UI::QUAD_VERTEX, 1, 0, 0);
+}
+
+void D3d::render()
+{
+    brr = {};
+    {
+        brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+
+        brr.Transition.pResource = colbuf_[IND_frame];
+        brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        brr.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+    }
+    cmdlist_->ResourceBarrier(1, &brr);
+    cmdlist_->Close();
+
+    ID3D12CommandList* commands[] = { cmdlist_ };
+    cmdque_->ExecuteCommandLists(1, commands);
+}
+
+void D3d::present(int itv)
+{
+    swpchain_->Present(itv, 0);
+
+    const auto curval = fencecnt_[IND_frame];
+    cmdque_->Signal(fence_, curval);
+
+    IND_frame = swpchain_->GetCurrentBackBufferIndex();
+
+    if (fence_->GetCompletedValue() < fencecnt_[IND_frame])
+    {
+        fence_->SetEventOnCompletion(fencecnt_[IND_frame], event_fence);
+        WaitForSingleObjectEx(event_fence, INFINITE, FALSE);
+    }
+
+    fencecnt_[IND_frame] = curval + 1;
+
+    cmdalloc_[IND_frame]->Reset();
+    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
+}
+
+void D3d::constantUI()
+{
 }
 
 void D3d::SetHeight(float h)
@@ -1034,95 +1270,7 @@ D3d::D3d()
     Width = 0.0f;
 }
 
-void D3d::write()
-{
-    //static auto handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
-    auto handle = h_RTV[IND_frame];
-    
-    brr = {};
-    {
-        brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 
-        brr.Transition.pResource = post_;
-        //brr.Transition.pResource = colbuf_[IND_frame];
-
-        brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-
-        //brr.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-
-        brr.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-    }
-    cmdlist_->ResourceBarrier(1, &brr);
-
-    cmdlist_->Close();
-    cmdalloc_[IND_frame]->Reset();
-    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
-
-    cmdlist_->OMSetRenderTargets(1, &handle, FALSE, &h_ZBV);
-    cmdlist_->ClearRenderTargetView(handle, backcolor_, 0, nullptr);
-    cmdlist_->ClearDepthStencilView(h_ZBV, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-    
-    auto MDIND = 0u;
-    for (auto& itr : ResourceManager::models_) {
-        
-            auto v = 0u;
-            for (auto& cnt : itr.Mesh_) {
-
-                cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
-
-                cmdlist_->OMSetRenderTargets(1, &handle, FALSE, &h_ZBV);
-                cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::Shader3D::Default)->GetRTSG());
-
-                cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_U, CBV_Util[IND_frame].desc.BufferLocation);
-                cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_C, CBV_Cam[IND_frame].desc.BufferLocation);
-                cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_L, CBV_LGT[IND_frame].desc.BufferLocation);
-
-                cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::TEX, ResourceManager::textures_[0].tex_.HGPU);
-
-                cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_MTL,SB_MTL[IND_frame].HGPU);
-                cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_OI, SB_OI[IND_frame].HGPU);
-                cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_MB, SB_MB[IND_frame].HGPU);
-
-                cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::Shader3D::Default)->GetPSO());
-
-                cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-                cmdlist_->RSSetViewports(1, &view_);
-                cmdlist_->RSSetScissorRects(1, &rect_);
-
-                {
-                    SB_MTL[IND_frame].view[v].alp = itr.Mtr_[v].alpha_;
-                    SB_MTL[IND_frame].view[v].dif = itr.Mtr_[v].dif_;
-                    SB_MTL[IND_frame].view[v].emis = itr.Mtr_[v].emis_;
-                    SB_MTL[IND_frame].view[v].shin = itr.Mtr_[v].shin_;
-                    SB_MTL[IND_frame].view[v].spec = itr.Mtr_[v].spec_;
-                    SB_MTL[IND_frame].view[v].val0 = 0;
-                }
-
-                {
-                    memcpy(SB_OI[IND_frame].view, itr.info.data(), sizeof(ObjInfo)* itr.info.size());
-                    memcpy(SB_MB[IND_frame].view, itr.Mesh_[v].texIndex_.data(), sizeof(MapBOOL)* itr.Mesh_[v].texIndex_.size());
-                }
-
-                cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
-                cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
-                cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_, 0, 0, 0);
-
-                v++;
-                cmdlist_->Close();
-                ID3D12CommandList* commands[] = { cmdlist_ };
-                cmdque_->ExecuteCommandLists(1, commands);
-
-                waitGPU();
-
-                cmdalloc_[IND_frame]->Reset();
-                cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
-            }
-            S_Draw::Flush(MDIND);
-            MDIND++;
-    }
-}
 
 void D3d::waitGPU()
 {
@@ -1137,148 +1285,6 @@ void D3d::waitGPU()
     WaitForSingleObjectEx(event_fence, INFINITE, FALSE);
 
     fencecnt_[IND_frame]++;
-}
-
-void D3d::present(int itv)
-{
-    swpchain_->Present(itv, 0);
-
-    const auto curval = fencecnt_[IND_frame];
-    cmdque_->Signal(fence_, curval);
-
-    IND_frame = swpchain_->GetCurrentBackBufferIndex();
-
-    if (fence_->GetCompletedValue() < fencecnt_[IND_frame])
-    {
-        fence_->SetEventOnCompletion(fencecnt_[IND_frame], event_fence);
-        WaitForSingleObjectEx(event_fence, INFINITE, FALSE);
-    }
-
-    fencecnt_[IND_frame] = curval + 1;
-
-    cmdalloc_[IND_frame]->Reset();
-    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
-}
-
-void D3d::postEffect()
-{
-    cmdalloc_[IND_frame]->Reset();
-    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
-
-    brr = {};
-    {
-        brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-
-        brr.Transition.pResource = colbuf_[IND_frame];
-        brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-
-        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-        brr.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-    }
-    cmdlist_->ResourceBarrier(1, &brr);
-
-    cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], 0, nullptr);
-    //cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
-
-    cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::ShaderPost::Default)->GetRTSG());
-
-    cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
-    {
-        cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::P_CB, CBV_Util[IND_frame].desc.BufferLocation);
-    }
-
-    cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderPost::Default)->GetPSO());
-    cmdlist_->RSSetViewports(1, &view_);
-    cmdlist_->RSSetScissorRects(1, &rect_);
-
-    cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-    cmdlist_->IASetVertexBuffers(0, 1, &quadVBV_);
-
-    cmdlist_->DrawInstanced(C_UI::QUAD_VERTEX, 1, 0, 0);
-
-
-}
-
-void D3d::render()
-{
-    brr = {};
-    {
-        brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-
-        brr.Transition.pResource = colbuf_[IND_frame];
-        brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-
-        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-        brr.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-    }
-    cmdlist_->ResourceBarrier(1, &brr);
-    cmdlist_->Close();
-
-    ID3D12CommandList* commands[] = { cmdlist_ };
-    cmdque_->ExecuteCommandLists(1, commands);
-}
-
-void D3d::preeffectUI()
-{
-    auto cnt = C_UI::GetDrawCount();
-    //static auto handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
-
-    if (cnt)
-    {
-        {
-            memcpy(SB_MB[IND_frame].view, C_UI::mb.data(), C_UI::mb.size() * sizeof(MapBOOL));
-            memcpy(SB_UI[IND_frame].view, C_UI::data.data(), sizeof(SimpleInfo_UI) * C_UI::data.size());
-            //SB_UI[IND_frame];
-        }
-//---------------------------------
-        cmdlist_->OMSetRenderTargets(1,&h_RTV[IND_frame], false, nullptr);
-
-        cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetRTSG());
-        cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetPSO());
-
-        cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
-
-        cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::U_CB, CBV_Util[IND_frame].desc.BufferLocation);
-
-        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_SB_OI, SB_UI[IND_frame].HGPU);
-        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_SB_MB, SB_MB[IND_frame].HGPU);
-        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_TEX, ResourceManager::textures_.data()->tex_.HGPU);
-
-        cmdlist_->RSSetViewports(1, &view_);
-        cmdlist_->RSSetScissorRects(1, &rect_);
-
-        cmdlist_->IASetVertexBuffers(0, 1, &quadVBV_);
-        cmdlist_->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-
-        cmdlist_->DrawInstanced(C_UI::QUAD_VERTEX, cnt, 0, 0);
-
-        cmdlist_->Close();
-        ID3D12CommandList* commands[] = { cmdlist_ };
-        cmdque_->ExecuteCommandLists(1, commands);
-
-        waitGPU();
-        cmdalloc_[IND_frame]->Reset();
-        cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
-    }
-
-
-    brr = {};
-    {
-        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-        brr.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-        brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        brr.Transition.pResource = post_;
-        brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-    }
-   // cmdlist_->ResourceBarrier(1, &brr);
-   
-}
-
-void D3d::constantUI()
-{
 }
 
 namespace PTR_D3D

@@ -56,6 +56,7 @@ namespace PSOManager
 	enum
 	{
 		P_CB = 0,
+		P_RENDER,
 		P_TEX,
 		P_SB_MB,
 
