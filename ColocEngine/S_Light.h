@@ -107,6 +107,7 @@ struct A_Light : Light
 {
 	A_Light();
 	~A_Light() = default;
+	A_Light(string tag);
 
 	void Reset();
 

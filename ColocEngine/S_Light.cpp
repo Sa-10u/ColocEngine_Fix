@@ -30,6 +30,7 @@ P_Light::P_Light()
 
 P_Light::P_Light(string tag):Light(tag)
 {
+	
 }
 
 P_Light::~P_Light()
@@ -180,6 +181,10 @@ void D_Light::Run(float tick)
 }
 
 A_Light::A_Light()
+{
+}
+
+A_Light::A_Light(string tag) :Light(tag)
 {
 }
 

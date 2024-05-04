@@ -71,7 +71,6 @@ private:
 
 	ID3D12Resource* post_;
 	ID3D12DescriptorHeap* postRTV_;
-	ID3D12DescriptorHeap* postSRV_;
 
 	ID3D12Fence* fence_;
 	HANDLE event_fence;
@@ -103,6 +102,9 @@ private:
 	CBUFFERVIEW<Lights>					CBV_LGT[FrameAmount];
 
 	ID3D12DescriptorHeap* hp_ZBV;
+
+	D3D12_CPU_DESCRIPTOR_HANDLE h_CPU_SRV;
+	D3D12_GPU_DESCRIPTOR_HANDLE h_GPU_SRV;
 
 	//---------------
 	ID3D12Resource* quadVB_;

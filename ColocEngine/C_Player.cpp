@@ -15,6 +15,11 @@ void C_Player::initialize()
 
 	Rect2D rect(-1, 1, -0.3, 0.7);
 	ui->SetPos(rect);
+
+	MapBOOL mb = {};
+	mb.isD = 1;
+
+	ui->SetTexture(mb);
 }
 
 void C_Player::Run(float tick)
@@ -24,9 +29,14 @@ void C_Player::Run(float tick)
 
 	oi.wld = trans->WLDGetMTX();
 
-	S_Draw::Draw(&oi, md, nullptr, NULL);
+	MapBOOL mb = {};
+	mb.isD = ResourceManager::TexLoad(L"MK_tex1.png");
 
+	MapBOOL* ptr[1] = { &mb };
 
+	S_Draw::Draw(&oi, md, ptr, _countof(ptr));
+
+	
 }
 
 void C_Player::release()

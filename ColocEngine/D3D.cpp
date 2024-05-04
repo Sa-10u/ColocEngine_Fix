@@ -823,15 +823,9 @@ bool D3d::InitPost()
         //-------------------------------------------------------------
 
         {
-            desc_hp.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-            desc_hp.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
-            res = device_->CreateDescriptorHeap
-            (
-                &desc_hp,
-                IID_PPV_ARGS(&postSRV_)
-            );
-            if (FAILED(res)) return false;
+            h_CPU_SRV = ResourceManager::DHH_CbSrUaV->GetAndIncreCPU();
+            h_GPU_SRV = ResourceManager::DHH_CbSrUaV->GetAndIncreGPU();
 
             D3D12_SHADER_RESOURCE_VIEW_DESC desc_psrv = {};
             {
@@ -845,7 +839,7 @@ bool D3d::InitPost()
             (
                 post_,
                 &desc_psrv,
-                postSRV_->GetCPUDescriptorHandleForHeapStart()
+                h_CPU_SRV
             );
         }
     }
@@ -1156,15 +1150,14 @@ void D3d::postEffect()
     cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
 
     cmdlist_->OMSetRenderTargets(1, &h_RTV[IND_frame], 0, nullptr);
-    cmdlist_->ClearRenderTargetView(h_RTV[IND_frame], backcolor_, 0, nullptr);
 
     cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::ShaderPost::Default)->GetRTSG());
 
-    cmdlist_->SetDescriptorHeaps(1, &postSRV_);
+    cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
     {
-        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_RENDER, postSRV_->GetGPUDescriptorHandleForHeapStart());
-        //cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::P_CB, CBV_Util[IND_frame].desc.BufferLocation);
-        //cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_TEX, ResourceManager::textures_.data()->tex_.HGPU);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_RENDER, h_GPU_SRV);
+        cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::P_CB, CBV_Util[IND_frame].desc.BufferLocation);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_TEX, ResourceManager::textures_.data()->tex_.HGPU);
     }
 
     cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderPost::Default)->GetPSO());
