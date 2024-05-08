@@ -824,7 +824,6 @@ bool D3d::InitPost()
 
             {
                 desc_hp.NumDescriptors = static_cast<uint16_t>(Amount);
-                auto _handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
 
                 res = device_->CreateDescriptorHeap
                 (
@@ -832,6 +831,8 @@ bool D3d::InitPost()
                     IID_PPV_ARGS(&postRTV_)
                 );
                 if (FAILED(res)) return false;
+
+                auto _handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
 
                 D3D12_RENDER_TARGET_VIEW_DESC desc_prtv = {};
                 {
@@ -846,7 +847,7 @@ bool D3d::InitPost()
                         &desc_prtv,
                         _handle
                     );
-
+                    
                     _handle.ptr += device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
                     //-------------------------------------------------------------
@@ -1017,28 +1018,31 @@ void D3d::write()
     static auto handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
     //auto handle = h_RTV[IND_frame];
     
-    brr = {};
     {
-        brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        using enum RenderUsage;
+        for (auto i = 0u; i < static_cast<uint16_t>(Amount); i++) {
 
-        brr.Transition.pResource = post_;
-        //brr.Transition.pResource = colbuf_[IND_frame];
+            brr[i] = {};
+            {
+                brr[i].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+                brr[i].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 
-        brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+                brr[i].Transition.pResource = post_[i];
 
-        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-        //brr.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+                brr[i].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
-        brr.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+                brr[i].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+                brr[i].Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+            }
+        }
+        cmdlist_->ResourceBarrier(static_cast<uint16_t>(Amount), brr);
     }
-    cmdlist_->ResourceBarrier(1, &brr);
 
     cmdlist_->Close();
     cmdalloc_[IND_frame]->Reset();
     cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
 
-    cmdlist_->OMSetRenderTargets(1, &handle, FALSE, &h_ZBV);
+    cmdlist_->OMSetRenderTargets(static_cast<uint16_t>(RenderUsage::Amount), &handle, FALSE, &h_ZBV);
     cmdlist_->ClearRenderTargetView(handle, backcolor_, 0, nullptr);
     cmdlist_->ClearDepthStencilView(h_ZBV, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
@@ -1050,7 +1054,7 @@ void D3d::write()
 
             cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
 
-            cmdlist_->OMSetRenderTargets(1, &handle, FALSE, &h_ZBV);
+            cmdlist_->OMSetRenderTargets(static_cast<uint16_t>(RenderUsage::Amount), &handle, FALSE, &h_ZBV);
             cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::Shader3D::Default)->GetRTSG());
 
             cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_U, CBV_Util[IND_frame].desc.BufferLocation);
@@ -1115,7 +1119,7 @@ void D3d::preeffectUI()
             //SB_UI[IND_frame];
         }
         //---------------------------------
-        cmdlist_->OMSetRenderTargets(1, &handle, false, nullptr);
+        cmdlist_->OMSetRenderTargets(static_cast<uint16_t>(RenderUsage::Amount), &handle, false, nullptr);
 
         cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetRTSG());
         cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetPSO());
@@ -1145,16 +1149,25 @@ void D3d::preeffectUI()
     cmdalloc_[IND_frame]->Reset();
     cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
 
-    brr = {};
     {
-        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-        brr.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-        brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        brr.Transition.pResource = post_;
-        brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        using enum RenderUsage;
+        for (auto i = 0u; i < static_cast<uint16_t>(Amount); i++) {
+
+            brr[i] = {};
+            {
+                brr[i].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+                brr[i].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+
+                brr[i].Transition.pResource = post_[i];
+
+                brr[i].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+                brr[i].Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+                brr[i].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+            }
+        }
+        cmdlist_->ResourceBarrier(static_cast<uint16_t>(Amount), brr);
     }
-     cmdlist_->ResourceBarrier(1, &brr);
 
 }
 
@@ -1164,18 +1177,18 @@ void D3d::postEffect()
     cmdalloc_[IND_frame]->Reset();
     cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
 
-    brr = {};
+    brr[0] = {};
     {
-        brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        brr[0].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        brr[0].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 
-        brr.Transition.pResource = colbuf_[IND_frame];
-        brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        brr[0].Transition.pResource = colbuf_[IND_frame];
+        brr[0].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
-        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-        brr.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        brr[0].Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+        brr[0].Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
     }
-    cmdlist_->ResourceBarrier(1, &brr);
+    cmdlist_->ResourceBarrier(1, brr);
 
     cmdlist_->Close();
     cmdalloc_[IND_frame]->Reset();
@@ -1204,18 +1217,18 @@ void D3d::postEffect()
 
 void D3d::render()
 {
-    brr = {};
+    brr[0] = {};
     {
-        brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        brr[0].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        brr[0].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 
-        brr.Transition.pResource = colbuf_[IND_frame];
-        brr.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        brr[0].Transition.pResource = colbuf_[IND_frame];
+        brr[0].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
-        brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-        brr.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+        brr[0].Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        brr[0].Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
     }
-    cmdlist_->ResourceBarrier(1, &brr);
+    cmdlist_->ResourceBarrier(1, brr);
     cmdlist_->Close();
 
     ID3D12CommandList* commands[] = { cmdlist_ };

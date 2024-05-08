@@ -128,9 +128,12 @@ bool Def3D::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sample
 		pso_desc.SampleMask = UINT_MAX;
 		pso_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		pso_desc.DepthStencilState = dss_desc;
-		pso_desc.NumRenderTargets = 1;
-		pso_desc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 		pso_desc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+
+		pso_desc.NumRenderTargets = static_cast<uint16_t>(D3d::RenderUsage::Amount);
+		for (auto i = 0u; i < static_cast<uint16_t>(D3d::RenderUsage::Amount);i++) {
+			pso_desc.RTVFormats[i] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		}
 	}
 
 	res = device_->CreateGraphicsPipelineState
@@ -247,9 +250,12 @@ bool DefToon::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* samp
 		pso_desc.SampleMask = UINT_MAX;
 		pso_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		pso_desc.DepthStencilState = dss_desc;
-		pso_desc.NumRenderTargets = 1;
-		pso_desc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 		pso_desc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+
+		pso_desc.NumRenderTargets = static_cast<uint16_t>(D3d::RenderUsage::Amount);
+		for (auto i = 0u; i < static_cast<uint16_t>(D3d::RenderUsage::Amount); i++) {
+			pso_desc.RTVFormats[i] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		}
 	}
 
 	res = device_->CreateGraphicsPipelineState
@@ -467,8 +473,6 @@ bool DefUI::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sample
 		{
 			gps_desc.InputLayout = SIMPLEVERTEX::inp_Layout;
 			gps_desc.BlendState = bld_desc;
-			gps_desc.NumRenderTargets = 1;
-			gps_desc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 			gps_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 			gps_desc.RasterizerState = rs_desc;
 			gps_desc.PS.BytecodeLength = PSBlob->GetBufferSize();
@@ -481,6 +485,11 @@ bool DefUI::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sample
 			gps_desc.SampleDesc.Quality = 0;
 			gps_desc.pRootSignature = rtsg;
 			gps_desc.DepthStencilState = dss_desc;
+
+			gps_desc.NumRenderTargets = static_cast<uint16_t>(D3d::RenderUsage::Amount);
+			for (auto i = 0u; i < static_cast<uint16_t>(D3d::RenderUsage::Amount); i++) {
+				gps_desc.RTVFormats[i] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+			}
 		}
 
 		res = device_->CreateGraphicsPipelineState

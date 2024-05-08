@@ -79,7 +79,7 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE h_RTV[FrameAmount];
 	D3D12_CPU_DESCRIPTOR_HANDLE h_ZBV;
 
-	D3D12_RESOURCE_BARRIER brr;
+	D3D12_RESOURCE_BARRIER brr[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT];
 
 	//-----------------
 
@@ -126,6 +126,7 @@ private:
 
 	//------------
 
+	public:
 	enum class RenderUsage
 	{
 		Color = 0,
