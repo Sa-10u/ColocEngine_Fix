@@ -69,7 +69,7 @@ private:
 	ID3D12GraphicsCommandList* cmdlist_;
 	ID3D12DescriptorHeap* heapRTV_;
 
-	ID3D12Resource* post_;
+	ID3D12Resource* post_[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT];
 	ID3D12DescriptorHeap* postRTV_;
 
 	ID3D12Fence* fence_;
@@ -103,8 +103,8 @@ private:
 
 	ID3D12DescriptorHeap* hp_ZBV;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE h_CPU_SRV;
-	D3D12_GPU_DESCRIPTOR_HANDLE h_GPU_SRV;
+	D3D12_CPU_DESCRIPTOR_HANDLE h_CPU_SRV[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT];
+	D3D12_GPU_DESCRIPTOR_HANDLE h_GPU_SRV[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT];
 
 	//---------------
 	ID3D12Resource* quadVB_;
@@ -122,6 +122,23 @@ private:
 
 	//-----
 	float backcolor_[4];
+	float zerocolor_[4];
+
+	//------------
+
+	enum class RenderUsage
+	{
+		Color = 0,
+		Normal,
+		Emission,
+		Depth,
+		Shadow,
+		t0,
+		t1,
+		t3,
+
+		Amount = D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT
+	};
 };
 
 namespace PTR_D3D

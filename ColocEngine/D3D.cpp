@@ -10,7 +10,7 @@
 #include"S_Draw.h"
 #include"PSOManager.h"
 
-constexpr UINT HPSIZE = 10;
+constexpr UINT HPSIZE = 64;
 constexpr UINT POST_HPSIZE = 1;
 constexpr UINT UI_HPSIZE = 1;
 
@@ -34,6 +34,11 @@ bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
     backcolor_[1] = .0f;
     backcolor_[2] = .5f;
     backcolor_[3] = 1.0f;
+
+    zerocolor_[0] = .0f;
+    zerocolor_[1] = .0f;
+    zerocolor_[2] = .0f;
+    zerocolor_[3] = .0f;
 
     for (auto i = 0u; i < FrameAmount; ++i) {
 
@@ -113,7 +118,7 @@ bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
     SAFE_RELEASE(p_swch);
 
 
-    for (int i = 0u; i < FrameAmount; ++i) {
+    for (auto i = 0u; i < FrameAmount; ++i) {
 
         res = device_->CreateCommandAllocator
         (
@@ -147,7 +152,7 @@ bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
     D3D12_CPU_DESCRIPTOR_HANDLE handle = heapRTV_->GetCPUDescriptorHandleForHeapStart();
     UINT incre = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
-    for (UINT i = 0u; i < FrameAmount; ++i) {
+    for (auto i = 0u; i < FrameAmount; ++i) {
 
         res = swpchain_->GetBuffer(i, IID_PPV_ARGS(&colbuf_[i]));
         if (FAILED(res))     return FAIL;
@@ -299,7 +304,7 @@ bool D3d::InitGBO()
             {
                 hp_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
                 hp_desc.NodeMask = 0;
-                hp_desc.NumDescriptors = (HPSIZE * FrameAmount) + ResourceManager::MAX_Textures;
+                hp_desc.NumDescriptors = HPSIZE+ ResourceManager::MAX_Textures;
                 hp_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
             }
 
@@ -785,62 +790,89 @@ bool D3d::InitPost()
             val.Color[3] = backcolor_[3];
         }
 
-        res = device_->CreateCommittedResource
-        (
-            &prop_hp,
-            D3D12_HEAP_FLAG_NONE,
-            &desc_rsc,
-            D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-            &val,
-            IID_PPV_ARGS(&post_)
-        );
-        if (FAILED(res)) return false;
-    }
-    //-----------------------------------------
-
-    {
-        desc_hp.NumDescriptors = 1;
-
-        res = device_->CreateDescriptorHeap
-        (
-            &desc_hp,
-            IID_PPV_ARGS(&postRTV_)
-        );
-        if (FAILED(res)) return false;
-
-        D3D12_RENDER_TARGET_VIEW_DESC desc_prtv = {};
         {
-            desc_prtv.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-            desc_prtv.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-        }
+            using enum RenderUsage;
+            res = device_->CreateCommittedResource
+            (
+                &prop_hp,
+                D3D12_HEAP_FLAG_NONE,
+                &desc_rsc,
+                D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+                &val,
+                IID_PPV_ARGS(&post_[static_cast<uint16_t>(Color)])
+            );
+            if (FAILED(res)) return false;
 
-        device_->CreateRenderTargetView
-        (
-            post_,
-            &desc_prtv,
-            postRTV_->GetCPUDescriptorHandleForHeapStart()
-        );
-        //-------------------------------------------------------------
-
-        {
-
-            h_CPU_SRV = ResourceManager::DHH_CbSrUaV->GetAndIncreCPU();
-            h_GPU_SRV = ResourceManager::DHH_CbSrUaV->GetAndIncreGPU();
-
-            D3D12_SHADER_RESOURCE_VIEW_DESC desc_psrv = {};
-            {
-                desc_psrv.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-                desc_psrv.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-                desc_psrv.Texture2D.MipLevels = 1;
-                desc_psrv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+            val.Color[0] = zerocolor_[0];
+            val.Color[1] = zerocolor_[1];
+            val.Color[2] = zerocolor_[2];
+            val.Color[3] = zerocolor_[3];
+            for (auto i = 1u; i < static_cast<uint16_t>(Amount); ++i) {
+                res = device_->CreateCommittedResource
+                (
+                    &prop_hp,
+                    D3D12_HEAP_FLAG_NONE,
+                    &desc_rsc,
+                    D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+                    &val,
+                    IID_PPV_ARGS(&post_[i])
+                );
+                if (FAILED(res)) return false;
             }
 
-            device_->CreateShaderResourceView
-            (
-                post_,
-                &desc_psrv,
-                h_CPU_SRV
-            );
+            //-----------------------------------------
+
+            {
+                desc_hp.NumDescriptors = static_cast<uint16_t>(Amount);
+                auto _handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
+
+                res = device_->CreateDescriptorHeap
+                (
+                    &desc_hp,
+                    IID_PPV_ARGS(&postRTV_)
+                );
+                if (FAILED(res)) return false;
+
+                D3D12_RENDER_TARGET_VIEW_DESC desc_prtv = {};
+                {
+                    desc_prtv.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+                    desc_prtv.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+                }
+
+                for (auto i = 0u; i < static_cast<uint16_t>(Amount); ++i) {
+                    device_->CreateRenderTargetView
+                    (
+                        post_[i],
+                        &desc_prtv,
+                        _handle
+                    );
+
+                    _handle.ptr += device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+                    //-------------------------------------------------------------
+
+                    {
+
+                        h_CPU_SRV[i] = ResourceManager::DHH_CbSrUaV->GetAndIncreCPU();
+                        h_GPU_SRV[i] = ResourceManager::DHH_CbSrUaV->GetAndIncreGPU();
+
+                        D3D12_SHADER_RESOURCE_VIEW_DESC desc_psrv = {};
+                        {
+                            desc_psrv.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+                            desc_psrv.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+                            desc_psrv.Texture2D.MipLevels = 1;
+                            desc_psrv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+                        }
+
+                        device_->CreateShaderResourceView
+                        (
+                            post_[i],
+                            &desc_psrv,
+                            h_CPU_SRV[i]
+                        );
+                    }
+                }
+            }
         }
     }
     //----------------------------------------------
@@ -1155,7 +1187,7 @@ void D3d::postEffect()
 
     cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
     {
-        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_RENDER, h_GPU_SRV);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_RENDER, h_GPU_SRV[static_cast<uint64_t>(RenderUsage::Color)]);
         cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::P_CB, CBV_Util[IND_frame].desc.BufferLocation);
         cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_TEX, ResourceManager::textures_.data()->tex_.HGPU);
     }
