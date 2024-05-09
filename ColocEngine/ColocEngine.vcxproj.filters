@@ -61,6 +61,9 @@
     <Filter Include="Head\Scene\source">
       <UniqueIdentifier>{6b1c64a3-723a-43a4-b568-3b164c2575cd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shader\Deferred">
+      <UniqueIdentifier>{0138dbb1-d50f-4ed6-9b9f-dd92c0fabba9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MAIN.cpp">
@@ -226,9 +229,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Toon.hlsl">
-      <Filter>shader\ModelRendaring</Filter>
-    </FxCompile>
     <FxCompile Include="DefPS.hlsl">
       <Filter>shader\ModelRendaring</Filter>
     </FxCompile>
@@ -247,6 +247,12 @@
     <FxCompile Include="UI_VS.hlsl">
       <Filter>shader\UI</Filter>
     </FxCompile>
+    <FxCompile Include="Deferred_Def_VS.hlsl">
+      <Filter>shader\Deferred</Filter>
+    </FxCompile>
+    <FxCompile Include="Deferred_Def_PS.hlsl">
+      <Filter>shader\Deferred</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -264,6 +270,9 @@
     </None>
     <None Include="BaseUI.hlsli">
       <Filter>shader\UI</Filter>
+    </None>
+    <None Include="BaseDeferred.hlsli">
+      <Filter>shader\Deferred</Filter>
     </None>
   </ItemGroup>
 </Project>

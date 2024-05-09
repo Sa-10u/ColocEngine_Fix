@@ -4,13 +4,18 @@
 
 namespace PSOManager
 {
-    std::array<PSO*, static_cast<uint32_t>(Shader3D::AMOUNT)> PSO3D = {&def3D , &defToon};
+    std::array<PSO*, static_cast<uint32_t>(Shader3D::AMOUNT)> PSO3D = {&def3D };
     std::array<PSO*, static_cast<uint32_t>(ShaderPost::AMOUNT)> PSOPost = {&defPost};
     std::array<PSO*, static_cast<uint32_t>(ShaderUI::AMOUNT)>PSOUI = { &defUI };
 }
 
 bool PSOManager::Init()
 {
+    {
+        D3D12_ROOT_PARAMETER r_param[D_Amount] = {};
+
+    }
+
     {
         D3D12_ROOT_PARAMETER r_param[Amount] = {};
         {
@@ -25,13 +30,6 @@ bool PSOManager::Init()
             r_param[CB_C].Descriptor.RegisterSpace = 0;
             r_param[CB_C].Descriptor.ShaderRegister = 256;
             r_param[CB_C].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-        }
-
-        {
-            r_param[CB_L].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-            r_param[CB_L].Descriptor.RegisterSpace = 0;
-            r_param[CB_L].Descriptor.ShaderRegister = 512;
-            r_param[CB_L].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
         }
 
         D3D12_DESCRIPTOR_RANGE range_SBOI = {};

@@ -8,10 +8,16 @@ namespace PSOManager
 	bool Init();
 	void Term();
 
+	enum class ShaderDefard
+	{
+		Default ,
+
+		AMOUNT
+	};
+
 	enum class Shader3D
 	{
 		Default,
-		Toon,
 
 		AMOUNT
 	};
@@ -34,17 +40,28 @@ namespace PSOManager
 	extern std::array<PSO*, static_cast<uint32_t>(ShaderPost::AMOUNT)> PSOPost;
 	extern std::array<PSO*, static_cast<uint32_t>(ShaderUI::AMOUNT)>PSOUI;
 
+	PSO* GetPSO(ShaderDefard ind);
 	PSO* GetPSO(Shader3D ind);
 	PSO* GetPSO(ShaderPost ind);
 	PSO* GetPSO(ShaderUI ind);
 
 //-------------------------------------------------
 
-	enum 
+	enum
 	{
 		CB_U = 0,
 		CB_C,
 		CB_L,
+		D_TEX,
+		D_RENDER,
+
+		D_Amount
+	};
+
+	enum 
+	{
+		CB_U = 0,
+		CB_C,
 		SB_MTL,
 		SB_OI,
 		SB_MB,

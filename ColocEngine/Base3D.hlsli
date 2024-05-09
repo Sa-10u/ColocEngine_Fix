@@ -32,10 +32,10 @@ struct PSoutput
     float4 normal: SV_Target1;
     float4 emission : SV_Target2;
     float4 depth : SV_Target3;
-    float4 shadow : SV_Target4;
-    float4 position : SV_Target5;
-    float4 t0 : SV_Target6;
-    float4 t1 : SV_Target7;
+    float4 position : SV_Target4;
+    float4 t0 : SV_Target5;
+    float4 t1 : SV_Target6;
+    float4 t2 : SV_Target7;
 };
 //--------------------------
 
@@ -74,63 +74,20 @@ struct Material
 	float val0;	
 };
 
-//-------------------
-
-struct P_LIGHT
-{
-	float3 color;
-	float inten;
-
-	float3 pos;
-	int flag;
-};
-
-struct D_LIGHT
-{
-	float3 color;
-	float inten;
-
-	float3 pos;
-	int flag;
-	
-	float3 rot;
-	float thr;
-};
-
-struct A_LIGHT
-{
-	float3 color;
-	float inten;
-	
-	int flag;
-	float val0;
-	float val1;
-	float val2;
-};
-
-//------------------------
-
-cbuffer Util : register(b0)
-{
-	float4x4 View		: packoffset(c0);
-	float4x4 Projection : packoffset(c4);
-	float Time : packoffset(c8);
-	uint PL_CNT;
-	uint DL_CNT;
-	uint AL_CNT;
-};
-
 cbuffer CAM	:register(b256)
 {
 	float3 Cpos;
 	float3 Ctgt;
 };
 
-cbuffer Lights : register (b512) // Alignment Error
+cbuffer Util : register(b0)
 {
-	P_LIGHT pl[MAX_LIGHT];
-	D_LIGHT dl[MAX_LIGHT];
-	A_LIGHT al[MAX_LIGHT];
+    float4x4 View : packoffset(c0);
+    float4x4 Projection : packoffset(c4);
+    float Time : packoffset(c8);
+    uint PL_CNT;
+    uint DL_CNT;
+    uint AL_CNT;
 };
 
 StructuredBuffer<PerInstance> Data	: register(t0);

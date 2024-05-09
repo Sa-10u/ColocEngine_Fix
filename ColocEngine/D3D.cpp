@@ -792,7 +792,7 @@ bool D3d::InitPost()
 
         {
             using enum RenderUsage;
-            for (auto i = 0u; i < static_cast<uint16_t>(Amount); ++i) {
+            for (auto i = 0u; i < static_cast<uint16_t>(AMOUNT); ++i) {
                 res = device_->CreateCommittedResource
                 (
                     &prop_hp,
@@ -800,7 +800,7 @@ bool D3d::InitPost()
                     &desc_rsc,
                     D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
                     &val,
-                    IID_PPV_ARGS(&post_[i])
+                    IID_PPV_ARGS(&pre_[i])
                 );
                 if (FAILED(res)) return false;
             }
@@ -808,16 +808,16 @@ bool D3d::InitPost()
             //-----------------------------------------
 
             {
-                desc_hp.NumDescriptors = static_cast<uint16_t>(Amount);
+                desc_hp.NumDescriptors = static_cast<uint16_t>(AMOUNT);
 
                 res = device_->CreateDescriptorHeap
                 (
                     &desc_hp,
-                    IID_PPV_ARGS(&postRTV_)
+                    IID_PPV_ARGS(&preRTV_)
                 );
                 if (FAILED(res)) return false;
 
-                auto _handle = postRTV_->GetCPUDescriptorHandleForHeapStart();
+                auto _handle = preRTV_->GetCPUDescriptorHandleForHeapStart();
 
                 D3D12_RENDER_TARGET_VIEW_DESC desc_prtv = {};
                 {
@@ -825,15 +825,15 @@ bool D3d::InitPost()
                     desc_prtv.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
                 }
 
-                for (auto i = 0u; i < static_cast<uint16_t>(Amount); ++i) {
+                for (auto i = 0u; i < static_cast<uint16_t>(AMOUNT); ++i) {
                     device_->CreateRenderTargetView
                     (
-                        post_[i],
+                        pre_[i],
                         &desc_prtv,
                         _handle
                     );
 
-                    h_postRTV[i] = _handle;
+                    h_preRTV[i] = _handle;
                     
                     _handle.ptr += device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
@@ -854,7 +854,7 @@ bool D3d::InitPost()
 
                         device_->CreateShaderResourceView
                         (
-                            post_[i],
+                            pre_[i],
                             &desc_psrv,
                             h_CPU_SRV[i]
                         );
@@ -1004,14 +1004,14 @@ void D3d::write()
 {
     {
         using enum RenderUsage;
-        for (auto i = 0u; i < static_cast<uint16_t>(Amount); i++) {
+        for (auto i = 0u; i < static_cast<uint16_t>(AMOUNT); i++) {
 
             brr[i] = {};
             {
                 brr[i].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
                 brr[i].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 
-                brr[i].Transition.pResource = post_[i];
+                brr[i].Transition.pResource = pre_[i];
 
                 brr[i].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
@@ -1019,20 +1019,20 @@ void D3d::write()
                 brr[i].Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
             }
         }
-        cmdlist_->ResourceBarrier(static_cast<uint16_t>(Amount), brr);
+        cmdlist_->ResourceBarrier(static_cast<uint16_t>(AMOUNT), brr);
        
     }
 
     cmdlist_->Close();
     cmdalloc_[IND_frame]->Reset();
     cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
-    cmdlist_->OMSetRenderTargets(static_cast<uint16_t>(RenderUsage::Amount), h_postRTV, FALSE, &h_ZBV);
+    cmdlist_->OMSetRenderTargets(static_cast<uint16_t>(RenderUsage::AMOUNT), h_preRTV, FALSE, &h_ZBV);
 
     {   
         using enum RenderUsage;
-        cmdlist_->ClearRenderTargetView(h_postRTV[static_cast<uint16_t>(Color)], backcolor_, 0, nullptr);
-        for (auto i = static_cast<uint16_t>(Normal); i < static_cast<uint16_t>(Amount); i++) {
-            cmdlist_->ClearRenderTargetView(h_postRTV[i], zerocolor_, 0, nullptr);
+        cmdlist_->ClearRenderTargetView(h_preRTV[static_cast<uint16_t>(Color)], backcolor_, 0, nullptr);
+        for (auto i = static_cast<uint16_t>(Normal); i < static_cast<uint16_t>(AMOUNT); i++) {
+            cmdlist_->ClearRenderTargetView(h_preRTV[i], zerocolor_, 0, nullptr);
         }
     }
     cmdlist_->ClearDepthStencilView(h_ZBV, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
@@ -1045,12 +1045,11 @@ void D3d::write()
 
             cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
 
-            cmdlist_->OMSetRenderTargets(static_cast<uint16_t>(RenderUsage::Amount), h_postRTV, FALSE, &h_ZBV);
+            cmdlist_->OMSetRenderTargets(static_cast<uint16_t>(RenderUsage::AMOUNT), h_preRTV, FALSE, &h_ZBV);
             cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::Shader3D::Default)->GetRTSG());
 
             cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_U, CBV_Util[IND_frame].desc.BufferLocation);
             cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_C, CBV_Cam[IND_frame].desc.BufferLocation);
-            cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_L, CBV_LGT[IND_frame].desc.BufferLocation);
 
             cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::TEX, ResourceManager::textures_[0].tex_.HGPU);
 
@@ -1108,7 +1107,7 @@ void D3d::preeffectUI()
             memcpy(SB_UI[IND_frame].view, C_UI::data.data(), sizeof(SimpleInfo_UI) * C_UI::data.size());
         }
         //---------------------------------
-        cmdlist_->OMSetRenderTargets(static_cast<uint16_t>(RenderUsage::Amount), h_postRTV, false, nullptr);
+        cmdlist_->OMSetRenderTargets(static_cast<uint16_t>(RenderUsage::AMOUNT), h_preRTV, false, nullptr);
 
         cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetRTSG());
         cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderUI::Default)->GetPSO());
@@ -1140,14 +1139,14 @@ void D3d::preeffectUI()
 
     {
         using enum RenderUsage;
-        for (auto i = 0u; i < static_cast<uint16_t>(Amount); i++) {
+        for (auto i = 0u; i < static_cast<uint16_t>(AMOUNT); i++) {
 
             brr[i] = {};
             {
                 brr[i].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
                 brr[i].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 
-                brr[i].Transition.pResource = post_[i];
+                brr[i].Transition.pResource = pre_[i];
 
                 brr[i].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
@@ -1155,7 +1154,7 @@ void D3d::preeffectUI()
                 brr[i].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
             }
         }
-        cmdlist_->ResourceBarrier(static_cast<uint16_t>(Amount), brr);
+        cmdlist_->ResourceBarrier(static_cast<uint16_t>(AMOUNT), brr);
     }
 
 }
