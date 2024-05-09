@@ -12,7 +12,6 @@ PSoutput main(VSoutput inp)
 
     float3 norm = Map[inp.ID].isN ? colmap[Map[inp.ID].isN].Sample(colsmp, inp.uv + Data[inp.ID].val0) :normalize(inp.norm);
 
-    norm = colmap[Map[inp.ID].isN].Sample(colsmp, inp.uv + Data[inp.ID].val0) + colmap[Map[inp.ID].isN].Sample(colsmp, inp.uv - Data[inp.ID].val0);
     norm = norm / 2;
 
     norm = normalize(mul(norm, Data[inp.ID].World));
@@ -46,10 +45,14 @@ PSoutput main(VSoutput inp)
         Acol += al[i].color;
     }
 
-    res.color.rgb = (base) * ((mirp + difp) * Pcol);
-    res.color.rgb += (res.color.rgb) + (ap * Acol);
-        res.color.rgb = base.rgb;
+    //res.color.rgb =  (base) * ((mirp + difp) * Pcol);
+    //res.color.rgb += (res.color.rgb) + (ap * Acol);
+    res.color.rgb = base.rgb;
     //res.color.a = (mirp + difp + ap)/3;
 
+    res.normal = float4(norm,1);
+    res.position = float4(inp.Wpos,1);
+    res.depth = inp.Ppos;
+    
     return res;
 }

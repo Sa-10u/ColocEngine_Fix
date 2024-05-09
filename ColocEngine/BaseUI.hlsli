@@ -18,7 +18,14 @@ struct VSoutput
 
 struct PSoutput
 {
-    float4 col : SV_TARGET0;
+    float4 color : SV_TARGET0;
+    float4 normal : SV_Target1;
+    float4 emission : SV_Target2;
+    float4 depth : SV_Target3;
+    float4 shadow : SV_Target4;
+    float4 position : SV_Target5;
+    float4 t0 : SV_Target6;
+    float4 t1 : SV_Target7;
 };
 
 struct Quad
