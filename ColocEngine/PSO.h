@@ -33,6 +33,8 @@ class Def3D : public PSO
 {
 public:
 
+	Def3D();
+
 	bool Init
 	(
 		D3D12_ROOT_PARAMETER* params,
@@ -46,6 +48,9 @@ public:
 class DefDeferred : public PSO
 {
 public:
+
+	DefDeferred();
+
 	bool Init
 	(
 		D3D12_ROOT_PARAMETER* params,
@@ -59,6 +64,9 @@ public:
 class DefPost : public PSO
 {
 public:
+
+	DefPost();
+
 	bool Init
 	(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sampler, D3D12_ROOT_SIGNATURE_FLAGS flag, uint16_t paramcnt, uint16_t sampcnt)override;
 };
@@ -66,6 +74,9 @@ public:
 class DefUI : public PSO
 {
 public:
+
+	DefUI();
+
 	bool Init
 	(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sampler, D3D12_ROOT_SIGNATURE_FLAGS flag, uint16_t paramcnt, uint16_t sampcnt)override;
 };

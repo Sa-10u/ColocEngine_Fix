@@ -56,7 +56,6 @@
     <ClInclude Include="C_UI.h" />
     <ClInclude Include="PSO.h" />
     <ClInclude Include="PSOManager.h" />
-    <ClInclude Include="PSOs.h" />
     <ClInclude Include="S_Light.h" />
     <ClInclude Include="WW_Play.h" />
     <ClInclude Include="S_Sound.h" />

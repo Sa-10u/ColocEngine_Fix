@@ -1,12 +1,12 @@
 #include "PSOManager.h"
 #include"ResourceManager.h"
-#include"PSOs.h"
 
 namespace PSOManager
 {
-    std::array<PSO*, static_cast<uint32_t>(Shader3D::AMOUNT)> PSO3D = {&def3D };
-    std::array<PSO*, static_cast<uint32_t>(ShaderPost::AMOUNT)> PSOPost = {&defPost};
-    std::array<PSO*, static_cast<uint32_t>(ShaderUI::AMOUNT)>PSOUI = { &defUI };
+    std::array<PSO*, static_cast<uint32_t>(ShaderDeferred::AMOUNT)> PSODeferred = { new DefDeferred()};
+    std::array<PSO*, static_cast<uint32_t>(Shader3D::AMOUNT)> PSO3D = {new Def3D()};
+    std::array<PSO*, static_cast<uint32_t>(ShaderPost::AMOUNT)> PSOPost = {new DefPost()};
+    std::array<PSO*, static_cast<uint32_t>(ShaderUI::AMOUNT)>PSOUI = {new DefUI()};
 }
 
 bool PSOManager::Init()
@@ -14,6 +14,89 @@ bool PSOManager::Init()
     {
         D3D12_ROOT_PARAMETER r_param[D_Amount] = {};
 
+        {
+            r_param[D_CB_U].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+            r_param[D_CB_U].Descriptor.RegisterSpace = 0;
+            r_param[D_CB_U].Descriptor.ShaderRegister = 0;
+            r_param[D_CB_U].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        }
+
+        {
+            r_param[D_CB_C].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+            r_param[D_CB_C].Descriptor.RegisterSpace = 256;
+            r_param[D_CB_C].Descriptor.ShaderRegister = 0;
+            r_param[D_CB_C].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        }
+
+        {
+            r_param[D_CB_L].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+            r_param[D_CB_L].Descriptor.RegisterSpace = 512;
+            r_param[D_CB_L].Descriptor.ShaderRegister = 0;
+            r_param[D_CB_L].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        }
+
+        D3D12_DESCRIPTOR_RANGE range_tex = {};
+        {
+            range_tex.BaseShaderRegister = 520;
+            range_tex.NumDescriptors = -1;
+            range_tex.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+            range_tex.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            range_tex.RegisterSpace = 0;
+        }
+
+        {
+            r_param[D_TEX].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+            r_param[D_TEX].DescriptorTable.NumDescriptorRanges = 1;
+            r_param[D_TEX].DescriptorTable.pDescriptorRanges = &range_tex;
+            r_param[D_TEX].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+        }
+
+        D3D12_DESCRIPTOR_RANGE range_render = {};
+        {
+            range_render.BaseShaderRegister = 0;
+            range_render.NumDescriptors = D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT;
+            range_render.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+            range_render.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            range_render.RegisterSpace = 0;
+        }
+
+        {
+            r_param[D_RENDER].DescriptorTable.NumDescriptorRanges = 1;
+            r_param[D_RENDER].DescriptorTable.pDescriptorRanges = &range_render;
+            r_param[D_RENDER].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+            r_param[D_RENDER].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+        }
+
+        D3D12_STATIC_SAMPLER_DESC sampler = {};
+        {
+            sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+            sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+            sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+            sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+            sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+            sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+            sampler.MaxAnisotropy = 1;
+            sampler.MaxLOD = D3D12_FLOAT32_MAX;
+            sampler.MinLOD = D3D12_FLOAT32_MAX * -1;
+            sampler.MipLODBias = D3D12_DEFAULT_MIP_LOD_BIAS;
+            sampler.RegisterSpace = 0;
+            sampler.ShaderRegister = 0;
+            sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+        }
+
+        auto res = 0u;
+        {
+
+            D3D12_ROOT_SIGNATURE_FLAGS flag = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+            flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS;
+            flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS;
+            flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
+
+            for (auto i = 0u; i < static_cast<size_t>(ShaderDeferred::AMOUNT); i++) {
+
+                if (!PSODeferred[i]->Init(r_param, &sampler, flag, D_Amount, 1))   return false;
+            }
+        }
     }
 
     {
@@ -308,34 +391,48 @@ bool PSOManager::Init()
 
 void PSOManager::Term()
 {
+    for (auto i = 0u; i < static_cast<size_t>(ShaderDeferred::AMOUNT); i++) {
+
+        PSODeferred[i]->Term();
+        delete PSODeferred[i];
+    }
+
     for (auto i = 0u; i < static_cast<size_t>(Shader3D::AMOUNT); i++) {
 
         PSO3D[i]->Term();
+        delete PSO3D[i];
     }
 
     for (auto i = 0u; i < static_cast<size_t>(ShaderPost::AMOUNT); i++) {
 
         PSOPost[i]->Term();
+        delete PSOPost[i];
     }
 
     for (auto i = 0u; i < static_cast<size_t>(ShaderUI::AMOUNT); i++) {
 
         PSOUI[i]->Term();
+        delete PSOUI[i];
     }
+}
+
+PSO* PSOManager::GetPSO(ShaderDeferred ind)
+{
+    return PSODeferred.at(static_cast<size_t>(ind));
 }
 
 PSO* PSOManager::GetPSO(Shader3D ind)
 {
-    return PSO3D[static_cast<size_t>(ind)];
+    return PSO3D.at(static_cast<size_t>(ind));
 }
 
 PSO* PSOManager::GetPSO(ShaderPost ind)
 {
-    return PSOPost[static_cast<size_t>(ind)];
+    return PSOPost.at(static_cast<size_t>(ind));
 }
 
 PSO* PSOManager::GetPSO(ShaderUI ind)
 {
-    return PSOUI[static_cast<size_t>(ind)];
+    return PSOUI.at(static_cast<size_t>(ind));
 }
 

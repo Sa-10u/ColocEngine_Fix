@@ -8,7 +8,7 @@ namespace PSOManager
 	bool Init();
 	void Term();
 
-	enum class ShaderDefard
+	enum class ShaderDeferred
 	{
 		Default ,
 
@@ -36,11 +36,12 @@ namespace PSOManager
 		AMOUNT
 	};
 
+	extern std::array<PSO*, static_cast<uint32_t>(ShaderDeferred::AMOUNT)> PSODeferred;
 	extern std::array<PSO*, static_cast<uint32_t>(Shader3D::AMOUNT)> PSO3D;
 	extern std::array<PSO*, static_cast<uint32_t>(ShaderPost::AMOUNT)> PSOPost;
 	extern std::array<PSO*, static_cast<uint32_t>(ShaderUI::AMOUNT)>PSOUI;
 
-	PSO* GetPSO(ShaderDefard ind);
+	PSO* GetPSO(ShaderDeferred ind);
 	PSO* GetPSO(Shader3D ind);
 	PSO* GetPSO(ShaderPost ind);
 	PSO* GetPSO(ShaderUI ind);
@@ -49,9 +50,9 @@ namespace PSOManager
 
 	enum
 	{
-		CB_U = 0,
-		CB_C,
-		CB_L,
+		D_CB_U = 0,
+		D_CB_C,
+		D_CB_L,
 		D_TEX,
 		D_RENDER,
 

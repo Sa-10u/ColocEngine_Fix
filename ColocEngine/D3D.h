@@ -52,9 +52,10 @@ private:
 
 	void write();
 	void waitGPU();
+	void deferredrender();
 	void present(int itv);
 	void postEffect();
-	void render();
+	void finalrender();
 	void preeffectUI();
 	void constantUI();
 
@@ -63,14 +64,19 @@ private:
 
 	ID3D12Device* device_;
 	IDXGISwapChain3* swpchain_;
-	ID3D12Resource* colbuf_[FrameAmount];
+	ID3D12Resource* colbufRTV_[FrameAmount];
 	ID3D12CommandQueue* cmdque_;
 	ID3D12CommandAllocator* cmdalloc_[FrameAmount];
 	ID3D12GraphicsCommandList* cmdlist_;
-	ID3D12DescriptorHeap* heapRTV_;
+	ID3D12DescriptorHeap* colbuf_;
 
-	ID3D12Resource* pre_[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT];
-	ID3D12DescriptorHeap* preRTV_;
+	ID3D12Resource* preRTV_[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT];
+	ID3D12DescriptorHeap* pre_;
+
+	ID3D12Resource* firstpathRTV_;
+	ID3D12DescriptorHeap* firstpath_;
+	D3D12_CPU_DESCRIPTOR_HANDLE f_CPU_SRV;
+	D3D12_GPU_DESCRIPTOR_HANDLE f_GPU_SRV;
 
 	ID3D12Fence* fence_;
 	HANDLE event_fence;

@@ -15,9 +15,11 @@ namespace SEMANTICS_STR
 
 namespace SHADER_FILENAME
 {
+	LPCWSTR DefDeferredVS = s_path"Deferred_Def_VS.cso";
+	LPCWSTR DefDeferredPS = s_path"Deferred_Def_PS.cso";
+
 	LPCWSTR DefVS = s_path "DefVS.cso";
 	LPCWSTR DefPS = s_path "DefPS.cso";
-	LPCWSTR ToonPS = s_path "Toon.cso";
 
 	LPCWSTR DefPostVS = s_path "PostEffect_Default_VS.cso";
 	LPCWSTR DefPostPS = s_path "PostEffect_Default_PS.cso";
