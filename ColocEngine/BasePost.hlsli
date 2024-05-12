@@ -47,7 +47,14 @@ cbuffer Util : register(b0)
 
 StructuredBuffer<MapBOOL>	Map	: register(t8);
 
-Texture2D Pre_Render[Num_Render] :register(t0);
+Texture2D R_Color : register(t0);
+Texture2D R_Normal : register(t1);
+Texture2D R_Emission : register(t2);
+Texture2D R_Depth : register(t3);
+Texture2D R_Position : register(t4);
+Texture2D R_t0 : register(t5);
+Texture2D R_t1 : register(t6);
+Texture2D R_t2 : register(t7);
 
 Texture2D raw[] : register(t520);
 SamplerState smp : register(s0);

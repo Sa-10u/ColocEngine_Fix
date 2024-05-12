@@ -1041,13 +1041,14 @@ void D3d::write()
     using enum RenderUsage;
 
     static D3D12_CPU_DESCRIPTOR_HANDLE _handle[static_cast<uint16_t>(AMOUNT)] = {
-        firstpath_->GetCPUDescriptorHandleForHeapStart(),h_preRTV[1],
+        firstpath_->GetCPUDescriptorHandleForHeapStart(),
         h_preRTV[static_cast<uint16_t>(Normal)],
         h_preRTV[static_cast<uint16_t>(Emission)],
         h_preRTV[static_cast<uint16_t>(Depth)],
         h_preRTV[static_cast<uint16_t>(Position)],
         h_preRTV[static_cast<uint16_t>(t0)],
         h_preRTV[static_cast<uint16_t>(t1)],
+        h_preRTV[static_cast<uint16_t>(t2)]
     };
 
     {
@@ -1157,7 +1158,106 @@ void D3d::write()
 
 void D3d::deferredrender()
 {
+    using enum RenderUsage;
 
+    static D3D12_CPU_DESCRIPTOR_HANDLE _handle[static_cast<uint16_t>(AMOUNT)] = {
+      firstpath_->GetCPUDescriptorHandleForHeapStart(),
+      h_preRTV[static_cast<uint16_t>(Normal)],
+      h_preRTV[static_cast<uint16_t>(Emission)],
+      h_preRTV[static_cast<uint16_t>(Depth)],
+      h_preRTV[static_cast<uint16_t>(Position)],
+      h_preRTV[static_cast<uint16_t>(t0)],
+      h_preRTV[static_cast<uint16_t>(t1)],
+      h_preRTV[static_cast<uint16_t>(t2)]
+    };
+
+    {
+        brr[0] = {};
+        {
+            brr[0].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+            brr[0].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+
+            brr[0].Transition.pResource = firstpathRTV_;
+
+            brr[0].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+            brr[0].Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+            brr[0].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+        }
+        for (auto i = static_cast<uint16_t>(Normal); i < static_cast<uint16_t>(AMOUNT); i++) {
+
+            brr[i] = {};
+            {
+                brr[i].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+                brr[i].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+
+                brr[i].Transition.pResource = preRTV_[i];
+
+                brr[i].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+                brr[i].Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+                brr[i].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+            }
+        }
+        cmdlist_->ResourceBarrier(static_cast<uint16_t>(AMOUNT), brr);
+    }
+    cmdlist_->Close();
+    cmdalloc_[IND_frame]->Reset();
+    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
+
+    cmdlist_->OMSetRenderTargets(1, h_preRTV, false, nullptr);
+    cmdlist_->ClearRenderTargetView(h_preRTV[static_cast<uint16_t>(Color)], zerocolor_, 0, nullptr);
+
+    cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::ShaderDeferred::Default)->GetRTSG());
+    cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderDeferred::Default)->GetPSO());
+    cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
+
+    cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::D_CB_C, CBV_Cam[IND_frame].desc.BufferLocation);
+    cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::D_CB_L, CBV_LGT[IND_frame].desc.BufferLocation);
+    cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::D_CB_U, CBV_Util[IND_frame].desc.BufferLocation);
+
+    cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::D_TEX, ResourceManager::textures_[0].tex_.HGPU);
+    {
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Color, f_GPU_SRV.ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Normal, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Normal)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Emission, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Emission)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Depth, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Depth)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Position, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Position)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t0, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t0)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t1, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t1)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t2, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t2)].ptr);
+    }
+
+    cmdlist_->RSSetViewports(1, &view_);
+    cmdlist_->RSSetScissorRects(1, &rect_);
+
+    cmdlist_->IASetVertexBuffers(0, 1, &quadVBV_);
+    cmdlist_->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+    cmdlist_->DrawInstanced(C_UI::QUAD_VERTEX, 1, 0, 0);
+
+    {
+        for (auto i = 0u; i < static_cast<uint16_t>(AMOUNT); i++) {
+
+            brr[i] = {};
+            {
+                brr[i].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+                brr[i].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+
+                brr[i].Transition.pResource = preRTV_[i];
+
+                brr[i].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+                brr[i].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+                brr[i].Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+            }
+        }
+        cmdlist_->ResourceBarrier(static_cast<uint16_t>(AMOUNT), brr);
+
+        cmdlist_->Close();
+        cmdalloc_[IND_frame]->Reset();
+        cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
+    }
 }
 
 void D3d::preeffectUI()
@@ -1252,9 +1352,18 @@ void D3d::postEffect()
 
     cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
     {
-        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_RENDER, h_GPU_SRV[static_cast<uint64_t>(RenderUsage::Color)]);
         cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::P_CB, CBV_Util[IND_frame].desc.BufferLocation);
         cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_TEX, ResourceManager::textures_.data()->tex_.HGPU);
+    }
+    {
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Color, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Color)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Normal, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Normal)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Emission, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Emission)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Depth, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Depth)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Position, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Position)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t0, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t0)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t1, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t1)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t2, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t2)].ptr);
     }
 
     cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderPost::Default)->GetPSO());

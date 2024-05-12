@@ -54,7 +54,14 @@ namespace PSOManager
 		D_CB_C,
 		D_CB_L,
 		D_TEX,
-		D_RENDER,
+		D_R_Color ,
+		D_R_Normal,
+		D_R_Emission,
+		D_R_Depth,
+		D_R_Position,
+		D_R_t0,
+		D_R_t1,
+		D_R_t2,
 
 		D_Amount
 	};
@@ -74,9 +81,16 @@ namespace PSOManager
 	enum
 	{
 		P_CB = 0,
-		P_RENDER,
 		P_TEX,
 		P_SB_MB,
+		P_R_Color ,
+		P_R_Normal,
+		P_R_Emission,
+		P_R_Depth,
+		P_R_Position,
+		P_R_t0,
+		P_R_t1,
+		P_R_t2,
 
 		P_Amount
 	};

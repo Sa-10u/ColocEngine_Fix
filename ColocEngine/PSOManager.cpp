@@ -11,6 +11,7 @@ namespace PSOManager
 
 bool PSOManager::Init()
 {
+    constexpr size_t SigmaBufferRegisterSize = D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT;
     {
         D3D12_ROOT_PARAMETER r_param[D_Amount] = {};
 
@@ -37,7 +38,7 @@ bool PSOManager::Init()
 
         D3D12_DESCRIPTOR_RANGE range_tex = {};
         {
-            range_tex.BaseShaderRegister = 520;
+            range_tex.BaseShaderRegister = 512 + SigmaBufferRegisterSize;
             range_tex.NumDescriptors = -1;
             range_tex.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
             range_tex.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -51,21 +52,15 @@ bool PSOManager::Init()
             r_param[D_TEX].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
         }
 
-        D3D12_DESCRIPTOR_RANGE range_render = {};
-        {
-            range_render.BaseShaderRegister = 0;
-            range_render.NumDescriptors = D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT;
-            range_render.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-            range_render.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-            range_render.RegisterSpace = 0;
+        for(uint16_t i = D_R_Color; i < D_Amount; ++i){
+            r_param[i] = {};
+
+            r_param[i].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+            r_param[i].Descriptor.ShaderRegister = (i-D_R_Color);
+            r_param[i].Descriptor.RegisterSpace = 0;
+            r_param[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
         }
 
-        {
-            r_param[D_RENDER].DescriptorTable.NumDescriptorRanges = 1;
-            r_param[D_RENDER].DescriptorTable.pDescriptorRanges = &range_render;
-            r_param[D_RENDER].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-            r_param[D_RENDER].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-        }
 
         D3D12_STATIC_SAMPLER_DESC sampler = {};
         {
@@ -216,8 +211,6 @@ bool PSOManager::Init()
     }
 
     {
-        const uint8_t _OFFSET = D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT;
-
         D3D12_ROOT_PARAMETER r_param[P_Amount] = {};
         {
             r_param[P_CB].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
@@ -228,7 +221,7 @@ bool PSOManager::Init()
 
         D3D12_DESCRIPTOR_RANGE range_mb = {};
         {
-            range_mb.BaseShaderRegister = 0 + _OFFSET;
+            range_mb.BaseShaderRegister = 0 + SigmaBufferRegisterSize;
             range_mb.NumDescriptors = ResourceManager::CBCOUNT;
             range_mb.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
             range_mb.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -242,25 +235,18 @@ bool PSOManager::Init()
             r_param[P_SB_MB].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
         }
 
-        D3D12_DESCRIPTOR_RANGE range_render = {};
-        {
-            range_render.BaseShaderRegister = 0;
-            range_render.NumDescriptors = _OFFSET;
-            range_render.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-            range_render.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-            range_render.RegisterSpace = 0;
-        }
+        for (uint16_t i = P_R_Color; i < P_Amount; ++i) {
+            r_param[i] = {};
 
-        {
-            r_param[P_RENDER].DescriptorTable.NumDescriptorRanges = 1;
-            r_param[P_RENDER].DescriptorTable.pDescriptorRanges = &range_render;
-            r_param[P_RENDER].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-            r_param[P_RENDER].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+            r_param[i].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+            r_param[i].Descriptor.ShaderRegister = (i - P_R_Color);
+            r_param[i].Descriptor.RegisterSpace = 0;
+            r_param[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
         }
 
         D3D12_DESCRIPTOR_RANGE range_tex = {};
         {
-            range_tex.BaseShaderRegister = 512 + _OFFSET;
+            range_tex.BaseShaderRegister = 512 + SigmaBufferRegisterSize;
             range_tex.NumDescriptors = -1;
             range_tex.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
             range_tex.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
