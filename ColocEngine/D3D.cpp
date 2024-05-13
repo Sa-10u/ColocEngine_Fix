@@ -832,7 +832,6 @@ bool D3d::InitPost()
                         &desc_prtv,
                         _handle
                     );
-
                     h_preRTV[i] = _handle;
                     
                     _handle.ptr += device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
@@ -862,6 +861,18 @@ bool D3d::InitPost()
                 }
                 //-----------------------------------
 
+                res = device_->CreateCommittedResource
+                (
+                    &prop_hp,
+                    D3D12_HEAP_FLAG_NONE,
+                    &desc_rsc,
+                    D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+                    &val,
+                    IID_PPV_ARGS(&firstpathRTV_)
+                );
+                if (FAILED(res)) return false;
+
+                desc_hp.NumDescriptors = 1;
                 res = device_->CreateDescriptorHeap
                 (
                     &desc_hp,
@@ -1088,7 +1099,7 @@ void D3d::write()
     cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
     cmdlist_->OMSetRenderTargets(static_cast<uint16_t>(RenderUsage::AMOUNT), _handle, FALSE, &h_ZBV);
 
-    {   
+    {
         using enum RenderUsage;
         cmdlist_->ClearRenderTargetView(firstpath_->GetCPUDescriptorHandleForHeapStart(), backcolor_, 0, nullptr);
         for (auto i = static_cast<uint16_t>(Normal); i < static_cast<uint16_t>(AMOUNT); i++) {
@@ -1218,14 +1229,14 @@ void D3d::deferredrender()
 
     cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::D_TEX, ResourceManager::textures_[0].tex_.HGPU);
     {
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Color, f_GPU_SRV.ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Normal, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Normal)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Emission, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Emission)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Depth, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Depth)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Position, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Position)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t0, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t0)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t1, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t1)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t2, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t2)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Color, firstpathRTV_->GetGPUVirtualAddress());
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Normal, h_preRTV[static_cast<uint16_t>(RenderUsage::Normal)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Emission, h_preRTV[static_cast<uint16_t>(RenderUsage::Emission)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Depth, h_preRTV[static_cast<uint16_t>(RenderUsage::Depth)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Position, h_preRTV[static_cast<uint16_t>(RenderUsage::Position)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t0, h_preRTV[static_cast<uint16_t>(RenderUsage::t0)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t1, h_preRTV[static_cast<uint16_t>(RenderUsage::t1)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t2, h_preRTV[static_cast<uint16_t>(RenderUsage::t2)].ptr);
     }
 
     cmdlist_->RSSetViewports(1, &view_);
@@ -1356,14 +1367,14 @@ void D3d::postEffect()
         cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_TEX, ResourceManager::textures_.data()->tex_.HGPU);
     }
     {
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Color, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Color)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Normal, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Normal)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Emission, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Emission)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Depth, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Depth)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Position, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Position)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t0, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t0)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t1, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t1)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t2, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t2)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Color, h_preRTV[static_cast<uint16_t>(RenderUsage::Color)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Normal, h_preRTV[static_cast<uint16_t>(RenderUsage::Normal)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Emission, h_preRTV[static_cast<uint16_t>(RenderUsage::Emission)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Depth, h_preRTV[static_cast<uint16_t>(RenderUsage::Depth)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Position, h_preRTV[static_cast<uint16_t>(RenderUsage::Position)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t0, h_preRTV[static_cast<uint16_t>(RenderUsage::t0)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t1, h_preRTV[static_cast<uint16_t>(RenderUsage::t1)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t2, h_preRTV[static_cast<uint16_t>(RenderUsage::t2)].ptr);
     }
 
     cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderPost::Default)->GetPSO());

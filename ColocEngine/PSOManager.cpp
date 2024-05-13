@@ -52,12 +52,21 @@ bool PSOManager::Init()
             r_param[D_TEX].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
         }
 
+        D3D12_DESCRIPTOR_RANGE range_render[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT] = {};
+
         for(uint16_t i = D_R_Color; i < D_Amount; ++i){
             r_param[i] = {};
 
-            r_param[i].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
-            r_param[i].Descriptor.ShaderRegister = (i-D_R_Color);
-            r_param[i].Descriptor.RegisterSpace = 0;
+            auto _index = i - D_R_Color;
+            range_render[_index].BaseShaderRegister = _index;
+            range_render[_index].NumDescriptors = 1;
+            range_render[_index].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+            range_render[_index].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            range_render[_index].RegisterSpace = 0;
+
+            r_param[i].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+            r_param[i].DescriptorTable.NumDescriptorRanges = 1;
+            r_param[i].DescriptorTable.pDescriptorRanges = &range_render[_index];
             r_param[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
         }
 
@@ -235,12 +244,21 @@ bool PSOManager::Init()
             r_param[P_SB_MB].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
         }
 
+        D3D12_DESCRIPTOR_RANGE range_render[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT] = {};
+
         for (uint16_t i = P_R_Color; i < P_Amount; ++i) {
             r_param[i] = {};
 
-            r_param[i].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
-            r_param[i].Descriptor.ShaderRegister = (i - P_R_Color);
-            r_param[i].Descriptor.RegisterSpace = 0;
+            auto _index = i - P_R_Color;
+            range_render[_index].BaseShaderRegister = _index;
+            range_render[_index].NumDescriptors = 1;
+            range_render[_index].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+            range_render[_index].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            range_render[_index].RegisterSpace = 0;
+
+            r_param[i].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+            r_param[i].DescriptorTable.NumDescriptorRanges = 1;
+            r_param[i].DescriptorTable.pDescriptorRanges = &range_render[_index];
             r_param[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
         }
 
