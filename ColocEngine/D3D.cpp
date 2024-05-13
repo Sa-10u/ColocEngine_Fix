@@ -1230,13 +1230,13 @@ void D3d::deferredrender()
     cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::D_TEX, ResourceManager::textures_[0].tex_.HGPU);
     {
         cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Color, firstpathRTV_->GetGPUVirtualAddress());
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Normal, h_preRTV[static_cast<uint16_t>(RenderUsage::Normal)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Emission, h_preRTV[static_cast<uint16_t>(RenderUsage::Emission)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Depth, h_preRTV[static_cast<uint16_t>(RenderUsage::Depth)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Position, h_preRTV[static_cast<uint16_t>(RenderUsage::Position)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t0, h_preRTV[static_cast<uint16_t>(RenderUsage::t0)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t1, h_preRTV[static_cast<uint16_t>(RenderUsage::t1)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t2, h_preRTV[static_cast<uint16_t>(RenderUsage::t2)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Normal, preRTV_[static_cast<uint16_t>(RenderUsage::Normal)]->GetGPUVirtualAddress());
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Emission, preRTV_[static_cast<uint16_t>(RenderUsage::Emission)]->GetGPUVirtualAddress());
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Depth, preRTV_[static_cast<uint16_t>(RenderUsage::Depth)]->GetGPUVirtualAddress());
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Position, preRTV_[static_cast<uint16_t>(RenderUsage::Position)]->GetGPUVirtualAddress());
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t0, preRTV_[static_cast<uint16_t>(RenderUsage::t0)]->GetGPUVirtualAddress());
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t1, preRTV_[static_cast<uint16_t>(RenderUsage::t1)]->GetGPUVirtualAddress());
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t2, preRTV_[static_cast<uint16_t>(RenderUsage::t2)]->GetGPUVirtualAddress());
     }
 
     cmdlist_->RSSetViewports(1, &view_);
@@ -1367,14 +1367,14 @@ void D3d::postEffect()
         cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_TEX, ResourceManager::textures_.data()->tex_.HGPU);
     }
     {
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Color, h_preRTV[static_cast<uint16_t>(RenderUsage::Color)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Normal, h_preRTV[static_cast<uint16_t>(RenderUsage::Normal)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Emission, h_preRTV[static_cast<uint16_t>(RenderUsage::Emission)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Depth, h_preRTV[static_cast<uint16_t>(RenderUsage::Depth)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Position, h_preRTV[static_cast<uint16_t>(RenderUsage::Position)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t0, h_preRTV[static_cast<uint16_t>(RenderUsage::t0)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t1, h_preRTV[static_cast<uint16_t>(RenderUsage::t1)].ptr);
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t2, h_preRTV[static_cast<uint16_t>(RenderUsage::t2)].ptr);
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Color, preRTV_[static_cast<uint16_t>(RenderUsage::Color)]->GetGPUVirtualAddress());
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Normal, preRTV_[static_cast<uint16_t>(RenderUsage::Normal)]->GetGPUVirtualAddress());
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Emission, preRTV_[static_cast<uint16_t>(RenderUsage::Emission)]->GetGPUVirtualAddress());
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Depth, preRTV_[static_cast<uint16_t>(RenderUsage::Depth)]->GetGPUVirtualAddress());
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Position, preRTV_[static_cast<uint16_t>(RenderUsage::Position)]->GetGPUVirtualAddress());
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t0, preRTV_[static_cast<uint16_t>(RenderUsage::t0)]->GetGPUVirtualAddress());
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t1, preRTV_[static_cast<uint16_t>(RenderUsage::t1)]->GetGPUVirtualAddress());
+        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t2, preRTV_[static_cast<uint16_t>(RenderUsage::t2)]->GetGPUVirtualAddress());
     }
 
     cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderPost::Default)->GetPSO());

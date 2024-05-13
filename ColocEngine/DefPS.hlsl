@@ -12,6 +12,7 @@ PSoutput main(VSoutput inp)
     res.normal = float4(norm,1);
     res.position = float4(inp.Wpos,1);
     res.depth = inp.Ppos;
+    res.color = 1;
     
     return res;
 }

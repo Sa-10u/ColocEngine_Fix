@@ -11,7 +11,7 @@ PSoutput main(VSoutput inp)
     
     float4 col = R_Color.Sample(smp,inp.uv);
     
-    res.col.rgb = col;
+    res.col = float4(col.rgb,1);
     
     return res;
 };
