@@ -14,4 +14,5 @@ PSoutput main(VSoutput inp)
     res.col = float4(col.rgb,1);
     
     return res;
+    
 };

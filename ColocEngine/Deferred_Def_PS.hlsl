@@ -1,7 +1,11 @@
 #include"Keyword.hlsli"
 #include"BaseDeferred.hlsli"
 
-float4 main(VSoutput inp) : SV_TARGET
+PSoutput main(VSoutput inp) : SV_TARGET
 {
-	return float4(R_Color.Sample(smp,inp.uv).rgb , 1);
+	PSoutput res = (PSoutput) (0);
+	res.col= float4(R_Color.Sample(smp,inp.uv).rgb , 1);
+	
+	res.col.r = 1;
+	return res;
 }

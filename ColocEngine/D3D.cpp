@@ -1215,9 +1215,27 @@ void D3d::deferredrender()
     cmdlist_->Close();
     cmdalloc_[IND_frame]->Reset();
     cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
+    {
+        brr[0] = {};
+        {
+            brr[0].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+            brr[0].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+
+            brr[0].Transition.pResource = preRTV_[static_cast<uint16_t>(Color)];
+
+            brr[0].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+            brr[0].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+            brr[0].Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+        }
+        cmdlist_->ResourceBarrier(1, brr);
+
+        cmdlist_->Close();
+        cmdalloc_[IND_frame]->Reset();
+        cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
+    }
 
     cmdlist_->OMSetRenderTargets(1, h_preRTV, false, nullptr);
-    cmdlist_->ClearRenderTargetView(h_preRTV[static_cast<uint16_t>(Color)], zerocolor_, 0, nullptr);
 
     cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::ShaderDeferred::Default)->GetRTSG());
     cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderDeferred::Default)->GetPSO());
@@ -1229,14 +1247,14 @@ void D3d::deferredrender()
 
     cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::D_TEX, ResourceManager::textures_[0].tex_.HGPU);
     {
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Color, firstpathRTV_->GetGPUVirtualAddress());
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Normal, preRTV_[static_cast<uint16_t>(RenderUsage::Normal)]->GetGPUVirtualAddress());
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Emission, preRTV_[static_cast<uint16_t>(RenderUsage::Emission)]->GetGPUVirtualAddress());
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Depth, preRTV_[static_cast<uint16_t>(RenderUsage::Depth)]->GetGPUVirtualAddress());
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Position, preRTV_[static_cast<uint16_t>(RenderUsage::Position)]->GetGPUVirtualAddress());
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t0, preRTV_[static_cast<uint16_t>(RenderUsage::t0)]->GetGPUVirtualAddress());
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t1, preRTV_[static_cast<uint16_t>(RenderUsage::t1)]->GetGPUVirtualAddress());
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t2, preRTV_[static_cast<uint16_t>(RenderUsage::t2)]->GetGPUVirtualAddress());
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_Color, f_GPU_SRV);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_Normal, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Normal)]);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_Emission,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Emission)]);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_Depth,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Depth)]);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_Position,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Position)]);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_t0,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t0)]);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_t1,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t1)]);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_t2,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t2)]);
     }
 
     cmdlist_->RSSetViewports(1, &view_);
@@ -1367,14 +1385,14 @@ void D3d::postEffect()
         cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_TEX, ResourceManager::textures_.data()->tex_.HGPU);
     }
     {
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Color, preRTV_[static_cast<uint16_t>(RenderUsage::Color)]->GetGPUVirtualAddress());
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Normal, preRTV_[static_cast<uint16_t>(RenderUsage::Normal)]->GetGPUVirtualAddress());
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Emission, preRTV_[static_cast<uint16_t>(RenderUsage::Emission)]->GetGPUVirtualAddress());
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Depth, preRTV_[static_cast<uint16_t>(RenderUsage::Depth)]->GetGPUVirtualAddress());
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_Position, preRTV_[static_cast<uint16_t>(RenderUsage::Position)]->GetGPUVirtualAddress());
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t0, preRTV_[static_cast<uint16_t>(RenderUsage::t0)]->GetGPUVirtualAddress());
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t1, preRTV_[static_cast<uint16_t>(RenderUsage::t1)]->GetGPUVirtualAddress());
-        cmdlist_->SetGraphicsRootShaderResourceView(PSOManager::P_R_t2, preRTV_[static_cast<uint16_t>(RenderUsage::t2)]->GetGPUVirtualAddress());
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_Color,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Color)]);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_Normal,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Normal)]);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_Emission,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Emission)]);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_Depth,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Depth)]);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_Position,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Position)]);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_t0,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t0)]);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_t1,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t1)]);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_t2,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t2)]);
     }
 
     cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::ShaderPost::Default)->GetPSO());
@@ -1385,6 +1403,12 @@ void D3d::postEffect()
     cmdlist_->IASetVertexBuffers(0, 1, &quadVBV_);
 
     cmdlist_->DrawInstanced(C_UI::QUAD_VERTEX, 1, 0, 0);
+
+    cmdlist_->Close();
+    ID3D12CommandList* commands[] = { cmdlist_ };
+    cmdque_->ExecuteCommandLists(1, commands);
+
+    waitGPU();
 }
 
 void D3d::finalrender()
