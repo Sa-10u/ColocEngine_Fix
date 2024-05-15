@@ -1107,7 +1107,7 @@ void D3d::write()
         }
     }
     cmdlist_->ClearDepthStencilView(h_ZBV, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-
+    /*
     cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
 
     cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::Shader3D::Default)->GetRTSG());
@@ -1125,7 +1125,7 @@ void D3d::write()
 
     cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     cmdlist_->RSSetViewports(1, &view_);
-    cmdlist_->RSSetScissorRects(1, &rect_);
+    cmdlist_->RSSetScissorRects(1, &rect_);*/
 
     auto MDIND = 0u;
     auto inscnt = 0u; //ResourceManager::CBCOUNT
@@ -1134,9 +1134,9 @@ void D3d::write()
         auto v = 0u;
         for (auto& cnt : itr.Mesh_) {
 
-            cmdlist_->OMSetRenderTargets(static_cast<uint16_t>(RenderUsage::AMOUNT), _handle, FALSE, &h_ZBV);
-
             cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
+
+            cmdlist_->OMSetRenderTargets(static_cast<uint16_t>(RenderUsage::AMOUNT), _handle, FALSE, &h_ZBV);
 
             cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::Shader3D::Default)->GetRTSG());
 
@@ -1155,12 +1155,12 @@ void D3d::write()
             {
 
                 {
-                    // SB_MTL[IND_frame].view[v].alp = itr.Mtr_[v].alp;
-                    // SB_MTL[IND_frame].view[v].dif = itr.Mtr_[v].dif;
-                    // SB_MTL[IND_frame].view[v].emis = itr.Mtr_[v].emis;
-                    // SB_MTL[IND_frame].view[v].shin = itr.Mtr_[v].shin;
-                    // SB_MTL[IND_frame].view[v].spec = itr.Mtr_[v].spec;
-                    // SB_MTL[IND_frame].view[v].emis_str = itr.Mtr_[v].emis_str;
+                     SB_MTL[IND_frame].view[v].alp = itr.Mtr_[v].alp;
+                     SB_MTL[IND_frame].view[v].dif = itr.Mtr_[v].dif;
+                     SB_MTL[IND_frame].view[v].emis = itr.Mtr_[v].emis;
+                     SB_MTL[IND_frame].view[v].shin = itr.Mtr_[v].shin;
+                     SB_MTL[IND_frame].view[v].spec = itr.Mtr_[v].spec;
+                     SB_MTL[IND_frame].view[v].emis_str = itr.Mtr_[v].emis_str;
                 }
 
                 {
