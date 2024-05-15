@@ -1108,6 +1108,7 @@ void D3d::write()
     }
     cmdlist_->ClearDepthStencilView(h_ZBV, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
+    bool isDrew = false;
     auto MDIND = 0u;
     for (auto& itr : ResourceManager::models_) {
 
@@ -1157,6 +1158,8 @@ void D3d::write()
             ID3D12CommandList* commands[] = { cmdlist_ };
             cmdque_->ExecuteCommandLists(1, commands);
 
+            isDrew = true;
+
             waitGPU();
 
             cmdalloc_[IND_frame]->Reset();
@@ -1164,6 +1167,18 @@ void D3d::write()
         }
         S_Draw::Flush(MDIND);
         MDIND++;
+    }
+
+    if (!isDrew)
+    {
+        cmdlist_->Close();
+        ID3D12CommandList* commands[] = { cmdlist_ };
+        cmdque_->ExecuteCommandLists(1, commands);
+
+        waitGPU();
+
+        cmdalloc_[IND_frame]->Reset();
+        cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
     }
 }
 
@@ -1215,6 +1230,7 @@ void D3d::deferredrender()
     cmdlist_->Close();
     cmdalloc_[IND_frame]->Reset();
     cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
+
     {
         brr[0] = {};
         {
@@ -1247,14 +1263,14 @@ void D3d::deferredrender()
 
     cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::D_TEX, ResourceManager::textures_[0].tex_.HGPU);
     {
-        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_Color, f_GPU_SRV);
-        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_Normal, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Normal)]);
-        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_Emission,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Emission)]);
-        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_Depth,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Depth)]);
-        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_Position,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Position)]);
-        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_t0,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t0)]);
-        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_t1,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t1)]);
-        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_t2,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t2)]);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::D_R_Color, f_GPU_SRV);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::D_R_Normal, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Normal)]);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::D_R_Emission,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Emission)]);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::D_R_Depth,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Depth)]);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::D_R_Position,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Position)]);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::D_R_t0,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t0)]);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::D_R_t1,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t1)]);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::D_R_t2,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::t2)]);
     }
 
     cmdlist_->RSSetViewports(1, &view_);
@@ -1266,14 +1282,14 @@ void D3d::deferredrender()
     cmdlist_->DrawInstanced(C_UI::QUAD_VERTEX, 1, 0, 0);
 
     {
-        for (auto i = 0u; i < static_cast<uint16_t>(AMOUNT); i++) {
+        for (auto i = 0u; i < static_cast<uint16_t>(AMOUNT)-1; i++) {
 
             brr[i] = {};
             {
                 brr[i].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
                 brr[i].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 
-                brr[i].Transition.pResource = preRTV_[i];
+                brr[i].Transition.pResource = preRTV_[i+1];
 
                 brr[i].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
@@ -1281,9 +1297,13 @@ void D3d::deferredrender()
                 brr[i].Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
             }
         }
-        cmdlist_->ResourceBarrier(static_cast<uint16_t>(AMOUNT), brr);
+        cmdlist_->ResourceBarrier(static_cast<uint16_t>(AMOUNT)-1, brr);
 
         cmdlist_->Close();
+        ID3D12CommandList* commands[] = { cmdlist_ };
+        cmdque_->ExecuteCommandLists(1, commands);
+
+        waitGPU();
         cmdalloc_[IND_frame]->Reset();
         cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
     }
@@ -1409,6 +1429,9 @@ void D3d::postEffect()
     cmdque_->ExecuteCommandLists(1, commands);
 
     waitGPU();
+
+    cmdalloc_[IND_frame]->Reset();
+    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
 }
 
 void D3d::finalrender()
