@@ -27,7 +27,7 @@ MeshLoader::~MeshLoader()
 {
 }
 
-bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<MATERIAL>& mtr)
+bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<Material>& mtr)
 {
     if (file == nullptr) return false;
     auto path = wtoc(file);
@@ -169,80 +169,80 @@ void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src)
     }
 }
 
-void MeshLoader::ParseMaterial(MATERIAL& mtl, MapBOOL& mpb, const aiMaterial* src)
+void MeshLoader::ParseMaterial(Material& mtl, MapBOOL& mpb, const aiMaterial* src)
 {
     {
-        aiColor3D coltemp(0.5f, 0.5f, 0.5f);
+        aiColor3D coltemp(0.0f, 0.0f, 0.0f);
         auto ResetColor = [&]()
         {
-            coltemp.r = 0.5f;
-            coltemp.g = 0.5f;
-            coltemp.b = 0.5f;
+            coltemp.r = 0.0f;
+            coltemp.g = 0.0f;
+            coltemp.b = 0.0f;
         };
 
         __CREATE("DIFFUSE")
             if (src->Get(AI_MATKEY_COLOR_DIFFUSE, coltemp) == AI_SUCCESS)
             {
-                mtl.dif_.x = coltemp.r;
-                mtl.dif_.y = coltemp.g;
-                mtl.dif_.z = coltemp.b;
+                mtl.dif.x = coltemp.r;
+                mtl.dif.y = coltemp.g;
+                mtl.dif.z = coltemp.b;
             }
             else
             {
                 ResetColor();
-                mtl.dif_.x = coltemp.r;
-                mtl.dif_.y = coltemp.g;
-                mtl.dif_.z = coltemp.b;
+                mtl.dif.x = coltemp.r;
+                mtl.dif.y = coltemp.g;
+                mtl.dif.z = coltemp.b;
             }
 
         __CREATE("SPECULAR")
             if (src->Get(AI_MATKEY_COLOR_SPECULAR, coltemp) == AI_SUCCESS)
             {
-                mtl.spec_.x = coltemp.r;
-                mtl.spec_.y = coltemp.g;
-                mtl.spec_.z = coltemp.b;
+                mtl.spec.x = coltemp.r;
+                mtl.spec.y = coltemp.g;
+                mtl.spec.z = coltemp.b;
             }
             else
             {
                 ResetColor();
-                mtl.spec_.x = coltemp.r;
-                mtl.spec_.y = coltemp.g;
-                mtl.spec_.z = coltemp.b;
+                mtl.spec.x = coltemp.r;
+                mtl.spec.y = coltemp.g;
+                mtl.spec.z = coltemp.b;
             }
 
         __CREATE("SHININESS")   auto val = 0.0f;
         if (src->Get(AI_MATKEY_SHININESS, val) == AI_SUCCESS)
         {
-            mtl.shin_ = val;
+            mtl.shin = val;
         }
         else
         {
-            mtl.shin_ = val;
+            mtl.shin = val;
         }
 
         __CREATE("ALPHA")   val = 1.0f;
         if (src->Get(AI_MATKEY_OPACITY, val) == AI_SUCCESS)
         {
-            mtl.alpha_ = val;
+            mtl.alp = val;
         }
         else
         {
-            mtl.shin_ = val;
+            mtl.shin = val;
         }
 
         __CREATE("EMISSION")
             if (src->Get(AI_MATKEY_EMISSIVE_INTENSITY, coltemp) == AI_SUCCESS)
             {
-                mtl.emis_.x = coltemp.r;
-                mtl.emis_.y = coltemp.g;
-                mtl.emis_.z = coltemp.b;
+                mtl.emis.x = coltemp.r;
+                mtl.emis.y = coltemp.g;
+                mtl.emis.z = coltemp.b;
             }
             else
             {
                 ResetColor();
-                mtl.emis_.x = coltemp.r;
-                mtl.emis_.y = coltemp.g;
-                mtl.emis_.z = coltemp.b;
+                mtl.emis.x = coltemp.r;
+                mtl.emis.y = coltemp.g;
+                mtl.emis.z = coltemp.b;
             }
 
         __CREATE("DIFFUSE_MAP") aiString path = {};
@@ -401,7 +401,7 @@ void MeshLoader::UnReverse(ai_real& val)
 //--------------------------------------------
 
 
-bool LoadMesh(const wchar_t* file, vector<MESH>& mesh, vector<MATERIAL>& material)
+bool LoadMesh(const wchar_t* file, vector<MESH>& mesh, vector<Material>& material)
 {
     MeshLoader ml = {};
 

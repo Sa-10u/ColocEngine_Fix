@@ -1,6 +1,7 @@
 #include "S_Draw.h"
 #include"C_Trans.h"
 #include<cassert>
+#include"BUFFER.h"
 
 //fix draw count , over instance's count then run GPU 
 

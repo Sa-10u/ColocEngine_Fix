@@ -1,6 +1,11 @@
 #pragma once
-#include"Resource.h"
 #include"MACRO.h"
+#include"DirectXMath.h"
+#include<d3d12.h>
+#include <string>
+#include <vector>
+#include<cstdint>
+#include"Resource.h"
 
 namespace ResourceManager
 {

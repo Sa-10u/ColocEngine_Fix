@@ -71,7 +71,7 @@ struct Material
 	float alp;
 
 	float3 emis;
-	float val0;	
+	float emis_str;	
 };
 
 cbuffer CAM	:register(b256)

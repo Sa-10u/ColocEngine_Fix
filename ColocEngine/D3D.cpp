@@ -1108,16 +1108,36 @@ void D3d::write()
     }
     cmdlist_->ClearDepthStencilView(h_ZBV, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-    bool isDrew = false;
+    cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
+
+    cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::Shader3D::Default)->GetRTSG());
+
+    cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_U, CBV_Util[IND_frame].desc.BufferLocation);
+    cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_C, CBV_Cam[IND_frame].desc.BufferLocation);
+
+    cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::TEX, ResourceManager::textures_[0].tex_.HGPU);
+
+    cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_MTL, SB_MTL[IND_frame].HGPU);
+    cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_OI, SB_OI[IND_frame].HGPU);
+    cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_MB, SB_MB[IND_frame].HGPU);
+
+    cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::Shader3D::Default)->GetPSO());
+
+    cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    cmdlist_->RSSetViewports(1, &view_);
+    cmdlist_->RSSetScissorRects(1, &rect_);
+
     auto MDIND = 0u;
+    auto inscnt = 0u; //ResourceManager::CBCOUNT
     for (auto& itr : ResourceManager::models_) {
 
         auto v = 0u;
         for (auto& cnt : itr.Mesh_) {
 
+            cmdlist_->OMSetRenderTargets(static_cast<uint16_t>(RenderUsage::AMOUNT), _handle, FALSE, &h_ZBV);
+
             cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
 
-            cmdlist_->OMSetRenderTargets(static_cast<uint16_t>(RenderUsage::AMOUNT), _handle, FALSE, &h_ZBV);
             cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::Shader3D::Default)->GetRTSG());
 
             cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_U, CBV_Util[IND_frame].desc.BufferLocation);
@@ -1131,55 +1151,52 @@ void D3d::write()
 
             cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::Shader3D::Default)->GetPSO());
 
-            cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-            cmdlist_->RSSetViewports(1, &view_);
-            cmdlist_->RSSetScissorRects(1, &rect_);
-
+            if (inscnt + itr.DrawCount_ < ResourceManager::CBCOUNT)
             {
-                SB_MTL[IND_frame].view[v].alp = itr.Mtr_[v].alpha_;
-                SB_MTL[IND_frame].view[v].dif = itr.Mtr_[v].dif_;
-                SB_MTL[IND_frame].view[v].emis = itr.Mtr_[v].emis_;
-                SB_MTL[IND_frame].view[v].shin = itr.Mtr_[v].shin_;
-                SB_MTL[IND_frame].view[v].spec = itr.Mtr_[v].spec_;
-                SB_MTL[IND_frame].view[v].val0 = 0;
-            }
 
+                {
+                    // SB_MTL[IND_frame].view[v].alp = itr.Mtr_[v].alp;
+                    // SB_MTL[IND_frame].view[v].dif = itr.Mtr_[v].dif;
+                    // SB_MTL[IND_frame].view[v].emis = itr.Mtr_[v].emis;
+                    // SB_MTL[IND_frame].view[v].shin = itr.Mtr_[v].shin;
+                    // SB_MTL[IND_frame].view[v].spec = itr.Mtr_[v].spec;
+                    // SB_MTL[IND_frame].view[v].emis_str = itr.Mtr_[v].emis_str;
+                }
+
+                {
+                    memcpy(&SB_OI[IND_frame].view[inscnt], itr.info.data(), sizeof(SB_OI[IND_frame].view[0]) * itr.DrawCount_);
+                    memcpy(&SB_MB[IND_frame].view[inscnt], itr.Mesh_[v].texIndex_.data(), sizeof(SB_MB[IND_frame].view[0]) * itr.DrawCount_);
+                }
+
+                cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
+                cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
+                cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+                cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_, 0, 0, inscnt);
+
+                inscnt += itr.DrawCount_;
+                v++;
+
+                break;
+            }
+            else
             {
-                memcpy(SB_OI[IND_frame].view, itr.info.data(), sizeof(ObjInfo) * itr.info.size());
-                memcpy(SB_MB[IND_frame].view, itr.Mesh_[v].texIndex_.data(), sizeof(MapBOOL) * itr.Mesh_[v].texIndex_.size());
+
             }
-
-            cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
-            cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
-            cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_, 0, 0, 0);
-
-            v++;
-            cmdlist_->Close();
-            ID3D12CommandList* commands[] = { cmdlist_ };
-            cmdque_->ExecuteCommandLists(1, commands);
-
-            isDrew = true;
-
-            waitGPU();
-
-            cmdalloc_[IND_frame]->Reset();
-            cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
         }
         S_Draw::Flush(MDIND);
         MDIND++;
+
+        break;
     }
 
-    if (!isDrew)
-    {
-        cmdlist_->Close();
-        ID3D12CommandList* commands[] = { cmdlist_ };
-        cmdque_->ExecuteCommandLists(1, commands);
+    cmdlist_->Close();
+    ID3D12CommandList* commands[] = { cmdlist_ };
+    cmdque_->ExecuteCommandLists(1, commands);
 
-        waitGPU();
+    waitGPU();
 
-        cmdalloc_[IND_frame]->Reset();
-        cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
-    }
+    cmdalloc_[IND_frame]->Reset();
+    cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
 }
 
 void D3d::deferredrender()
@@ -1316,8 +1333,8 @@ void D3d::preeffectUI()
     if (cnt)
     {
         {
-            memcpy(SB_MB[IND_frame].view, C_UI::mb.data(), C_UI::mb.size() * sizeof(MapBOOL));
-            memcpy(SB_UI[IND_frame].view, C_UI::data.data(), sizeof(SimpleInfo_UI) * C_UI::data.size());
+            memcpy(SB_MB[IND_frame].view, C_UI::mb.data(), sizeof(SB_MB[IND_frame].view[0]) * C_UI::mb.size() );
+            memcpy(SB_UI[IND_frame].view, C_UI::data.data(), sizeof(SB_UI[IND_frame].view[0]) * C_UI::data.size());
         }
         //---------------------------------
         cmdlist_->OMSetRenderTargets(static_cast<uint16_t>(RenderUsage::AMOUNT), h_preRTV, false, nullptr);

@@ -124,7 +124,7 @@ struct alignas(16) Material
 	float shin;
 
 	XMFLOAT3 emis;
-	float val0;
+	float emis_str;
 };
 
 //--------------------------------for C buufer
@@ -169,27 +169,13 @@ struct Texture
 	D3D12_CPU_DESCRIPTOR_HANDLE HCPU;
 };
 
-template<class t>
+template<class t , size_t arrSize>
 struct StructuredBuffer
 {
 	ID3D12Resource* rsc_ptr = nullptr;
 	D3D12_GPU_DESCRIPTOR_HANDLE HGPU;
 	D3D12_CPU_DESCRIPTOR_HANDLE HCPU;
-	t* view;
-};
-
-struct MATERIAL
-{
-	XMFLOAT3 dif_;
-	float alpha_;
-
-	XMFLOAT3 spec_;
-	float shin_;
-
-	XMFLOAT3 emis_;
-	float val0;
-
-	MATERIAL();
+	t view[arrSize];
 };
 
 struct BONE_INFO
@@ -214,5 +200,5 @@ public:
 	//-----
 };
 
-bool LoadMesh(const wchar_t* file, vector<MESH>& mesh, vector<MATERIAL>& material);
+bool LoadMesh(const wchar_t* file, vector<MESH>& mesh, vector<Material>& material);
 bool LoadMesh(const wchar_t* file, RModel* ptr);

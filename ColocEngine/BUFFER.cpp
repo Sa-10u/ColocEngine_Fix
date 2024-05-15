@@ -12,12 +12,6 @@ MESH::MESH():ID_Material(-1),indexes_(),vtcs_()
 }
 //--------
 
-MATERIAL::MATERIAL():alpha_(0),shin_(0)
-{
-	dif_ = {};
-	spec_ = {};
-}
-
 MapBOOL::MapBOOL():isD(NULL),isS(NULL),isE(NULL),isN(NULL),isESB(NULL),val0(.0f),val1(.0f),val2(.0f)
 {
 }

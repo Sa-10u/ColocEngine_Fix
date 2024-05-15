@@ -36,6 +36,23 @@ void C_Player::Run(float tick)
 
 	S_Draw::Draw(&oi, md, ptr, _countof(ptr));
 
+	trans->scale = { .1f,.1f,.1f };
+	trans->pos = { 0,0,0 };
+
+	oi.wld = trans->WLDGetMTX();
+	S_Draw::Draw(&oi, ResourceManager::ModelLoad(L"Sphere.fbx"), nullptr, NULL);
+
+	trans->scale = { .1f,.1f,.1f };
+	trans->pos = { 1,0,0 };
+
+	oi.wld = trans->WLDGetMTX();
+	S_Draw::Draw(&oi, ResourceManager::ModelLoad(L"Sphere.fbx"), nullptr, NULL);
+
+	trans->scale = { 1,1,1 };
+	trans->pos = { 0,1,0 };
+
+	oi.wld = trans->WLDGetMTX();
+	S_Draw::Draw(&oi, md, nullptr, NULL);
 	
 }
 

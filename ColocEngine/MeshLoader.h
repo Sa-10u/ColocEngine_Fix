@@ -13,13 +13,13 @@ public:
 	MeshLoader();
 	~MeshLoader();
 
-	bool Load(const wchar_t* file,vector<MESH>& mesh,vector<MATERIAL>& mtr);
+	bool Load(const wchar_t* file,vector<MESH>& mesh,vector<Material>& mtr);
 	bool Load(const wchar_t* file, RModel* ptr);
 
 private:
 
 	void ParseMesh(MESH& mesh, const aiMesh* src);
-	void ParseMaterial(MATERIAL& mtl,MapBOOL& mpb ,const aiMaterial* src);
+	void ParseMaterial(Material& mtl,MapBOOL& mpb ,const aiMaterial* src);
 	void ParseBone(BONE_INFO& bns, const aiMesh* src);
 
 	void ParseUV(aiVector3D &uv);
