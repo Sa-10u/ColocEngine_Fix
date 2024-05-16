@@ -97,11 +97,11 @@ private:
 	ID3D12Resource* ZB;
 	Texture			tex;
 
-	StructuredBuffer<ObjInfo,ResourceManager::CBCOUNT>			SB_OI[FrameAmount];
-	StructuredBuffer<MapBOOL, ResourceManager::CBCOUNT>			SB_MB[FrameAmount];
-	StructuredBuffer<Material, ResourceManager::CBCOUNT>			SB_MTL[FrameAmount];
+	StructuredBuffer<ObjInfo>			SB_OI[FrameAmount];
+	StructuredBuffer<MapBOOL>			SB_MB[FrameAmount];
+	StructuredBuffer<Material>			SB_MTL[FrameAmount];
 
-	StructuredBuffer<SimpleInfo_UI, ResourceManager::CBCOUNT>		SB_UI[FrameAmount];
+	StructuredBuffer<SimpleInfo_UI>		SB_UI[FrameAmount];
 	
 	CBUFFERVIEW<Util>					CBV_Util[FrameAmount];
 	CBUFFERVIEW<Cam>					CBV_Cam[FrameAmount];

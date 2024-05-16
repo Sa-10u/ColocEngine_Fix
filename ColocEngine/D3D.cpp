@@ -1091,7 +1091,7 @@ void D3d::write()
             }
         }
         cmdlist_->ResourceBarrier(static_cast<uint16_t>(AMOUNT), brr);
-       
+
     }
 
     cmdlist_->Close();
@@ -1107,9 +1107,10 @@ void D3d::write()
         }
     }
     cmdlist_->ClearDepthStencilView(h_ZBV, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-    /*
+
     cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
 
+    cmdlist_->OMSetRenderTargets(static_cast<uint16_t>(RenderUsage::AMOUNT), _handle, FALSE, &h_ZBV);
     cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::Shader3D::Default)->GetRTSG());
 
     cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_U, CBV_Util[IND_frame].desc.BufferLocation);
@@ -1125,68 +1126,52 @@ void D3d::write()
 
     cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     cmdlist_->RSSetViewports(1, &view_);
-    cmdlist_->RSSetScissorRects(1, &rect_);*/
+    cmdlist_->RSSetScissorRects(1, &rect_);
 
+    size_t _inscnt = 0;
     auto MDIND = 0u;
-    auto inscnt = 0u; //ResourceManager::CBCOUNT
     for (auto& itr : ResourceManager::models_) {
 
         auto v = 0u;
         for (auto& cnt : itr.Mesh_) {
 
-            cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
-
-            cmdlist_->OMSetRenderTargets(static_cast<uint16_t>(RenderUsage::AMOUNT), _handle, FALSE, &h_ZBV);
-
-            cmdlist_->SetGraphicsRootSignature(PSOManager::GetPSO(PSOManager::Shader3D::Default)->GetRTSG());
-
-            cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_U, CBV_Util[IND_frame].desc.BufferLocation);
-            cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_C, CBV_Cam[IND_frame].desc.BufferLocation);
-
-            cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::TEX, ResourceManager::textures_[0].tex_.HGPU);
-
-            cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_MTL, SB_MTL[IND_frame].HGPU);
-            cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_OI, SB_OI[IND_frame].HGPU);
-            cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_MB, SB_MB[IND_frame].HGPU);
-
-            cmdlist_->SetPipelineState(PSOManager::GetPSO(PSOManager::Shader3D::Default)->GetPSO());
-
-            if (inscnt + itr.DrawCount_ < ResourceManager::CBCOUNT)
             {
-
-                {
-                     SB_MTL[IND_frame].view[v].alp = itr.Mtr_[v].alp;
-                     SB_MTL[IND_frame].view[v].dif = itr.Mtr_[v].dif;
-                     SB_MTL[IND_frame].view[v].emis = itr.Mtr_[v].emis;
-                     SB_MTL[IND_frame].view[v].shin = itr.Mtr_[v].shin;
-                     SB_MTL[IND_frame].view[v].spec = itr.Mtr_[v].spec;
-                     SB_MTL[IND_frame].view[v].emis_str = itr.Mtr_[v].emis_str;
-                }
-
-                {
-                    memcpy(&SB_OI[IND_frame].view[inscnt], itr.info.data(), sizeof(SB_OI[IND_frame].view[0]) * itr.DrawCount_);
-                    memcpy(&SB_MB[IND_frame].view[inscnt], itr.Mesh_[v].texIndex_.data(), sizeof(SB_MB[IND_frame].view[0]) * itr.DrawCount_);
-                }
-
-                cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
-                cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
-                cmdlist_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-                cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_, 0, 0, inscnt);
-
-                inscnt += itr.DrawCount_;
-                v++;
-
-                break;
+                SB_MTL[IND_frame].view[v].alp = itr.Mtr_[v].alp;
+                SB_MTL[IND_frame].view[v].dif = itr.Mtr_[v].dif;
+                SB_MTL[IND_frame].view[v].emis = itr.Mtr_[v].emis;
+                SB_MTL[IND_frame].view[v].shin = itr.Mtr_[v].shin;
+                SB_MTL[IND_frame].view[v].spec = itr.Mtr_[v].spec;
+                SB_MTL[IND_frame].view[v].emis_str = 0;
             }
-            else
+
             {
+                auto offset = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
+                auto h_mtl = SB_MTL[IND_frame].HGPU;
+                auto h_oi = SB_OI[IND_frame].HGPU;
+                auto h_mb = SB_MB[IND_frame].HGPU;
+
+                h_mtl.ptr +=offset * _inscnt;
+                h_oi.ptr += offset * _inscnt;
+                h_mb.ptr += offset * _inscnt;
+
+                memcpy(SB_OI[IND_frame].view + (_inscnt * sizeof(SB_OI[0].view)), itr.info.data(), sizeof(ObjInfo)* itr.info.size());
+                memcpy(SB_MB[IND_frame].view + (_inscnt * sizeof(SB_OI[0].view)), itr.Mesh_[v].texIndex_.data(), sizeof(MapBOOL)* itr.Mesh_[v].texIndex_.size());
+
+                cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_MTL, h_mtl);
+                cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_OI, h_oi);
+                cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_MB, h_mb);
             }
+
+            cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
+            cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
+            cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_, 0, 0, 0);
+            _inscnt += itr.DrawCount_;
+
+            v++;
         }
         S_Draw::Flush(MDIND);
         MDIND++;
-
-        break;
     }
 
     cmdlist_->Close();
@@ -1197,6 +1182,7 @@ void D3d::write()
 
     cmdalloc_[IND_frame]->Reset();
     cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
+
 }
 
 void D3d::deferredrender()
