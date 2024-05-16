@@ -1151,12 +1151,16 @@ void D3d::write()
                 auto h_oi = SB_OI[IND_frame].HGPU;
                 auto h_mb = SB_MB[IND_frame].HGPU;
 
-                h_mtl.ptr +=offset * _inscnt;
-                h_oi.ptr += offset * _inscnt;
-                h_mb.ptr += offset * _inscnt;
+                auto a = SB_MTL[1].HGPU.ptr - SB_MTL[0].HGPU.ptr;
 
-                memcpy(SB_OI[IND_frame].view + (_inscnt * sizeof(SB_OI[0].view)), itr.info.data(), sizeof(ObjInfo)* itr.info.size());
-                memcpy(SB_MB[IND_frame].view + (_inscnt * sizeof(SB_OI[0].view)), itr.Mesh_[v].texIndex_.data(), sizeof(MapBOOL)* itr.Mesh_[v].texIndex_.size());
+                h_mtl.ptr += offset * _inscnt;
+                //h_oi.ptr  += offset * _inscnt;
+                h_mb.ptr  += offset * _inscnt;
+
+                auto s = sizeof(ObjInfo*);
+
+                memcpy(SB_OI[IND_frame].view + (_inscnt * 0), itr.info.data(), sizeof(ObjInfo)* itr.DrawCount_);
+                memcpy(SB_MB[IND_frame].view + (_inscnt * sizeof(MapBOOL)), itr.Mesh_[v].texIndex_.data(), sizeof(MapBOOL)* itr.Mesh_[v].texIndex_.size());
 
                 cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_MTL, h_mtl);
                 cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_OI, h_oi);
@@ -1172,6 +1176,8 @@ void D3d::write()
         }
         S_Draw::Flush(MDIND);
         MDIND++;
+
+        break;
     }
 
     cmdlist_->Close();
