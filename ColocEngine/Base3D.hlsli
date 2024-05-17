@@ -11,6 +11,7 @@ struct VSinput
 	uint MID	: MATERIAL_ID;
 	
 	uint ID		: SV_InstanceID;
+    uint VID	: SV_VertexID;
 };
 
 struct VSoutput

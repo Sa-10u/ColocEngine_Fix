@@ -23,5 +23,8 @@ PSoutput main(VSoutput inp)
     colmap[Map[inp.ID].isE].Sample(colsmp, inp.uv) :
     float4(Mtl[inp.MID].emis, Mtl[inp.MID].emis_str));
     
+    if (inp.ID == 0)
+        res.color = 4;
+    
     return res;
 }

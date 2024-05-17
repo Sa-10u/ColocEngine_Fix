@@ -1145,31 +1145,13 @@ void D3d::write()
             }
 
             {
-                auto offset = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-                auto h_mtl = SB_MTL[IND_frame].HGPU;
-                auto h_oi = SB_OI[IND_frame].HGPU;
-                auto h_mb = SB_MB[IND_frame].HGPU;
-
-                auto a = SB_MTL[1].HGPU.ptr - SB_MTL[0].HGPU.ptr;
-
-                h_mtl.ptr += offset * _inscnt;
-                //h_oi.ptr  += offset * _inscnt;
-                h_mb.ptr  += offset * _inscnt;
-
-                auto s = sizeof(ObjInfo*);
-
-                memcpy(SB_OI[IND_frame].view + (_inscnt * 0), itr.info.data(), sizeof(ObjInfo)* itr.DrawCount_);
-                memcpy(SB_MB[IND_frame].view + (_inscnt * sizeof(MapBOOL)), itr.Mesh_[v].texIndex_.data(), sizeof(MapBOOL)* itr.Mesh_[v].texIndex_.size());
-
-                cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_MTL, h_mtl);
-                cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_OI, h_oi);
-                cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_MB, h_mb);
+                memcpy(SB_OI[IND_frame].view + (_inscnt), itr.info.data(), sizeof(ObjInfo)* itr.DrawCount_);
+                memcpy(SB_MB[IND_frame].view + (_inscnt), itr.Mesh_[v].texIndex_.data(), sizeof(MapBOOL)* itr.DrawCount_);
             }
 
             cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
             cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
-            cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_, 0, 0, 0);
+            cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_ , 0, 0, _inscnt);
             _inscnt += itr.DrawCount_;
 
             v++;
@@ -1177,7 +1159,7 @@ void D3d::write()
         S_Draw::Flush(MDIND);
         MDIND++;
 
-        break;
+       
     }
 
     cmdlist_->Close();
