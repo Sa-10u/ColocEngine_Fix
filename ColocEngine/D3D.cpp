@@ -1158,8 +1158,6 @@ void D3d::write()
         }
         S_Draw::Flush(MDIND);
         MDIND++;
-
-       
     }
 
     cmdlist_->Close();

@@ -147,6 +147,9 @@
     <ClCompile Include="C_Player.cpp">
       <Filter>Components\YourComponents\source</Filter>
     </ClCompile>
+    <ClCompile Include="DefaultColliders.cpp">
+      <Filter>System\source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinView.h">
@@ -209,9 +212,6 @@
     <ClInclude Include="PSOManager.h">
       <Filter>System\header</Filter>
     </ClInclude>
-    <ClInclude Include="PSOs.h">
-      <Filter>Head</Filter>
-    </ClInclude>
     <ClInclude Include="C_Quad.h">
       <Filter>Components\ColocEngine\header</Filter>
     </ClInclude>
@@ -226,6 +226,12 @@
     </ClInclude>
     <ClInclude Include="C_Text.h">
       <Filter>Components\ColocEngine\header</Filter>
+    </ClInclude>
+    <ClInclude Include="ColliderManager.h">
+      <Filter>System\header</Filter>
+    </ClInclude>
+    <ClInclude Include="DefaultColliders.h">
+      <Filter>System\header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

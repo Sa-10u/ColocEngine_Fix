@@ -29,9 +29,9 @@ inline void SAFE_RELEASE(tgt*& p)
 constexpr double _PI = 3.141592;
 
 
-typedef DirectX::XMFLOAT2 fl2;
-typedef DirectX::XMFLOAT3 fl3;
-typedef DirectX::XMFLOAT4 fl4;
+typedef DirectX::XMFLOAT2 float2;
+typedef DirectX::XMFLOAT3 float3;
+typedef DirectX::XMFLOAT4 float4;
 
 typedef DirectX::XMMATRIX Mat;
 typedef DirectX::XMVECTOR Vec;
