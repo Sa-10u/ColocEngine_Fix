@@ -53,7 +53,6 @@ void C_Player::Run(float tick)
 
 	oi.wld = trans->WLDGetMTX();
 	S_Draw::Draw(&oi, md, nullptr, NULL);
-	
 }
 
 void C_Player::release()

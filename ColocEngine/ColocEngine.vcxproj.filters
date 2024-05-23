@@ -144,11 +144,14 @@
     <ClCompile Include="C_Text.cpp">
       <Filter>Components\ColocEngine\source</Filter>
     </ClCompile>
+    <ClCompile Include="DefaultColliders.cpp">
+      <Filter>System\source</Filter>
+    </ClCompile>
     <ClCompile Include="C_Player.cpp">
       <Filter>Components\YourComponents\source</Filter>
     </ClCompile>
-    <ClCompile Include="DefaultColliders.cpp">
-      <Filter>System\source</Filter>
+    <ClCompile Include="ColliderManager.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

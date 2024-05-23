@@ -5,5 +5,6 @@
 
 namespace ColliderManager
 {
-
+	void Init();
+	void Term();
 }
