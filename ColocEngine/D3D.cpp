@@ -1,3 +1,6 @@
+extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 611; }
+extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = u8".\\D3D12\\"; }
+
 #include "D3D.h"
 #include<cassert>
 #include"ResourceUploadBatch.h"
@@ -1133,7 +1136,7 @@ void D3d::write()
     for (auto& itr : ResourceManager::models_) {
 
         auto v = 0u;
-        for (auto& cnt : itr.Mesh_) {
+        for (auto& mesh : itr.Mesh_) {
 
             {
                 SB_MTL[IND_frame].view[v].alp = itr.Mtr_[v].alp;
@@ -1151,7 +1154,7 @@ void D3d::write()
 
             cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
             cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
-            cmdlist_->DrawIndexedInstanced(cnt.indexes_.size(), itr.DrawCount_ , 0, 0, _inscnt);
+            cmdlist_->DrawIndexedInstanced(mesh.indexes_.size(), itr.DrawCount_ , 0, 0, _inscnt);
             _inscnt += itr.DrawCount_;
 
             v++;

@@ -6,7 +6,7 @@ bool SphereCol::isHit(Collider* tgt)
 	
 	switch (typeid(*tgt).hash_code())
 	{
-	case Spherecol_ID :
+	//case Spherecol_ID :
 	
 	
 	default:	return false;

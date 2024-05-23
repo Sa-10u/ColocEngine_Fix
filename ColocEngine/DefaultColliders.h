@@ -42,7 +42,7 @@ private:
 
 //-----------------
 
-static constexpr size_t Spherecol_ID = typeid(SphereCol).hash_code();
-static constexpr size_t Boxcol_ID = typeid(BoxCol).hash_code();
+//static constexpr size_t Spherecol_ID = typeid(SphereCol).hash_code();
+//static constexpr size_t Boxcol_ID = typeid(BoxCol).hash_code();
 
 static bool SandS(float3 c_pos,float c_rad , float3 t_pos , float t_rad);
