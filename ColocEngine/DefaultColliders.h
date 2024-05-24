@@ -42,7 +42,27 @@ private:
 
 //-----------------
 
-//static constexpr size_t Spherecol_ID = typeid(SphereCol).hash_code();
-//static constexpr size_t Boxcol_ID = typeid(BoxCol).hash_code();
+enum class ColliderType
+{
+	Sphere =0,
+	Box,
+	Capsule,
+	Triangle,
+	Plane,
+
+};
 
 static bool SandS(float3 c_pos,float c_rad , float3 t_pos , float t_rad);
+
+//-----------------
+template<typename t>
+uint8_t ColType(t collider)
+{
+	return -1;
+}
+
+template<>
+uint8_t ColType<SphereCol>(SphereCol collider)
+{
+	return static_cast<uint8_t>(ColliderType::Sphere);
+}
