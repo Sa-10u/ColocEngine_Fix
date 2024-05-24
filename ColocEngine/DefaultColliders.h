@@ -56,13 +56,13 @@ static bool SandS(float3 c_pos,float c_rad , float3 t_pos , float t_rad);
 
 //-----------------
 template<typename t>
-uint8_t ColType(t collider)
+uint8_t ColType()
 {
 	return -1;
 }
 
 template<>
-uint8_t ColType<SphereCol>(SphereCol collider)
+uint8_t ColType<SphereCol>()
 {
 	return static_cast<uint8_t>(ColliderType::Sphere);
 }

@@ -1,10 +1,10 @@
 struct VSinput
 {
-    float3 pos : POSITION;
+    float3 pos: POSITION;
     float2 uv : TEXCOORD;
 
-    uint ID : SV_InstanceID;
-    uint VID : SV_VertexID;
+    uint ID   : SV_InstanceID;
+    uint VID  : SV_VertexID;
 };
 
 struct VSoutput
