@@ -1,11 +1,8 @@
-#include "Base3D.hlsli"
-#include "Functions.hlsli"
-#include "Keyword.hlsli"
-//-----------
+﻿#include "Base3D.hlsli"
 
 PSoutput main(VSoutput inp)
 {
-	PSoutput res�@= (PSoutput)0;
+	PSoutput res　= (PSoutput)0;
 
     res.normal = float4(Map[inp.ID].isN ? 
     colmap[Map[inp.ID].isN].Sample(colsmp, inp.uv).xyz :
@@ -16,7 +13,7 @@ PSoutput main(VSoutput inp)
     res.depth = inp.Ppos;
     
     res.color = float4(Map[inp.ID].isD ?
-    colmap[Map[inp.ID].isD].Sample(colsmp,inp.uv).xyz :
+    colmap[Map[inp.ID].isD].Sample(colsmp,inp.uv).xyz:
     Mtl[inp.MID].dif, 1);
     
     res.emission = float4(Map[inp.ID].isE ?

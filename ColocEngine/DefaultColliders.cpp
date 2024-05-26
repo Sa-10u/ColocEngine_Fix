@@ -1,4 +1,5 @@
 #include "DefaultColliders.h"
+#include<cmath>
 
 bool SphereCol::isHit(Collider* tgt)
 {
@@ -26,7 +27,22 @@ SphereCol::SphereCol(float3 pos, float r, Mat* p):pos_{pos}, radius_{ r }, paren
 {
 }
 
-bool SandS()
+bool SandS(float3 c_pos, float c_rad, float3 t_pos, float t_rad)
 {
-	return false;
+	auto getlenP = [](float3 s, float3 e) {return std::sqrt(pow(e.x - s.x, 2)+ pow(e.y - s.y, 2)+ pow(e.z - s.z, 2)); };
+
+	return getlenP(c_pos, t_pos) < c_rad + t_rad;
+}
+
+template<>
+uint8_t ColType<SphereCol>()
+{
+	return static_cast<uint8_t>(ColliderType::Sphere);
+}
+
+template<>
+uint8_t ColType<BoxCol>()
+{
+	return static_cast<uint8_t>(ColliderType::Box);
+
 }

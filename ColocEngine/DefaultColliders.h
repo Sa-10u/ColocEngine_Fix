@@ -62,7 +62,6 @@ uint8_t ColType()
 }
 
 template<>
-uint8_t ColType<SphereCol>()
-{
-	return static_cast<uint8_t>(ColliderType::Sphere);
-}
+uint8_t ColType<SphereCol>();
+template<>
+uint8_t ColType<BoxCol>();
