@@ -151,7 +151,7 @@
       <Filter>Components\YourComponents\source</Filter>
     </ClCompile>
     <ClCompile Include="ColliderManager.cpp">
-      <Filter>Source</Filter>
+      <Filter>System\source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

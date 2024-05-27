@@ -17,7 +17,6 @@ public:
 	SphereCol(float3 p, float r);
 	SphereCol(float3 pos, float r, Mat* p);
 
-private:
 
 	float3 pos_;
 	float radius_;
@@ -32,13 +31,12 @@ public:
 	BoxCol(float3 pos,float3 len);
 	BoxCol(float3 pos, float3 len , Mat* p);
 
-private:
+
 	float3 pos_;
-	float3 radius_;
+	float3 len_;
 
 	Mat* parent_;
 };
-
 
 //-----------------
 
@@ -53,6 +51,8 @@ enum class ColliderType
 };
 
 static bool SandS(float3 c_pos,float c_rad , float3 t_pos , float t_rad);
+static bool BandS(float3 bpos, float3 blen,float3 spos , float srad);
+static bool BandB(float3 c_pos,float3 c_len, float3 t_pos, float3 t_len);
 
 //-----------------
 template<typename t>
