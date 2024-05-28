@@ -43,7 +43,7 @@ BoxCol::BoxCol()
 {
 }
 
-BoxCol::BoxCol(float3 pos, float3 len) :pos_{ pos }, len_{ len };
+BoxCol::BoxCol(float3 pos, float3 len) :pos_{ pos }, len_{ len }
 {
 }
 

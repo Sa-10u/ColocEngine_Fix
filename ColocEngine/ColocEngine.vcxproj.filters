@@ -153,6 +153,9 @@
     <ClCompile Include="ColliderManager.cpp">
       <Filter>System\source</Filter>
     </ClCompile>
+    <ClCompile Include="ShaderCompiler.cpp">
+      <Filter>System\source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinView.h">
@@ -234,6 +237,9 @@
       <Filter>System\header</Filter>
     </ClInclude>
     <ClInclude Include="DefaultColliders.h">
+      <Filter>System\header</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderCompiler.h">
       <Filter>System\header</Filter>
     </ClInclude>
   </ItemGroup>
