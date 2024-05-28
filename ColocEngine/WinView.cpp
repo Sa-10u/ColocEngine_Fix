@@ -5,6 +5,7 @@
 #include<thread>
 #include"ResourceManager.h"
 #include"PSOManager.h"
+#include"ShaderCompiler.h"
 
 using namespace std::chrono;
 
@@ -52,6 +53,7 @@ bool WinView::setup()
             DataManager::Init();
             WorldManager::Init();
             Input_KB::Init();
+            ShaderModel6_8::Init();
 
             return true;
         }
