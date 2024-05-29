@@ -10,7 +10,7 @@ namespace ShaderModel6_8
 {
 	bool Init();
 
-	bool Compile(std::string file,IDxcBlobEncoding *blob);
+	bool Compile(std::wstring file,ID3DBlob* &blob);
 
 	extern IDxcUtils* util_;
 	extern IDxcCompiler3* dxc_;

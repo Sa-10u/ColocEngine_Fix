@@ -1,5 +1,6 @@
 #include "PSO.h"
 #include"D3D.h"
+#include"ShaderCompiler.h"
 
 PSO::PSO():ptr(nullptr),rtsg(nullptr)
 {
@@ -110,8 +111,8 @@ bool Def3D::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sample
 	//----------------------
 
 	ID3DBlob* VSblob = nullptr;
-	res = D3DReadFileToBlob(SHADER_FILENAME::DefVS, &VSblob);
-	if (FAILED(res))     return 0;
+	res = ShaderModel6_8::Compile(L"DefVS.hlsl", VSblob);
+	if (!(res))	return false;
 
 	ID3DBlob* PSblob = nullptr;
 	res = D3DReadFileToBlob(SHADER_FILENAME::DefPS, &PSblob);

@@ -53,7 +53,6 @@ bool WinView::setup()
             DataManager::Init();
             WorldManager::Init();
             Input_KB::Init();
-            ShaderModel6_8::Init();
 
             return true;
         }

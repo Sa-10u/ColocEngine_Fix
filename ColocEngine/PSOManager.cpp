@@ -1,5 +1,6 @@
 #include "PSOManager.h"
 #include"ResourceManager.h"
+#include"ShaderCompiler.h"
 
 namespace PSOManager
 {
@@ -11,6 +12,8 @@ namespace PSOManager
 
 bool PSOManager::Init()
 {
+    ShaderModel6_8::Init();
+
     constexpr size_t SigmaBufferRegisterSize = D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT;
     {
         D3D12_ROOT_PARAMETER r_param[D_Amount] = {};
