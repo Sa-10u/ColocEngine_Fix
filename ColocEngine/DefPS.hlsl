@@ -8,7 +8,7 @@ PSoutput main(VSoutput inp)
     colmap[Map[inp.ID].isN].Sample(colsmp, inp.uv).xyz :
     normalize(inp.norm).xyz,1);
     
-    res.position = float4(inp.Wpos,1);
+    res.position = inp.Wpos;
     
     res.depth = inp.Ppos;
     

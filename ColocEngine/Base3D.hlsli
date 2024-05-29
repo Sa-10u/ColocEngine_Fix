@@ -17,7 +17,7 @@ struct VSinput
 struct VSoutput
 {
 	float4 Ppos	: SV_POSITION;
-	float3 Wpos	: POSITION;
+	float4 Wpos	: POSITION;
 	float2 uv	: TEXCOORD;
 	float3 tan  : TANGENT;
 	float3 norm : NORMAL;
@@ -86,9 +86,9 @@ cbuffer Util : register(b0)
     float4x4 View : packoffset(c0);
     float4x4 Projection : packoffset(c4);
     float Time : packoffset(c8);
-    uint PL_CNT;
-    uint DL_CNT;
-    uint AL_CNT;
+    uint PL_CNT : packoffset(c12);
+    uint DL_CNT : packoffset(c16);
+    uint AL_CNT : packoffset(c20);
 };
 
 StructuredBuffer<PerInstance> Data	: register(t0);

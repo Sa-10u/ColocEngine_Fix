@@ -24,5 +24,4 @@ VSoutput main(VSinput inp)
 	result.ID = inp.ID;
 
 	return result;
-
 }

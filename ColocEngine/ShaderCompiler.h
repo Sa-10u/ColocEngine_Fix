@@ -14,4 +14,5 @@ namespace ShaderModel6_8
 
 	extern IDxcUtils* util_;
 	extern IDxcCompiler3* dxc_;
+	extern IDxcIncludeHandler* inc_;
 }

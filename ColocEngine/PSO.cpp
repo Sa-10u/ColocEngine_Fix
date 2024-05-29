@@ -147,7 +147,7 @@ bool Def3D::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sample
 		IID_PPV_ARGS(&ptr)
 	);
 	if (FAILED(res))return false;
-
+	
 	return true;
 }
 

@@ -61,7 +61,7 @@ bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
     res = D3D12CreateDevice
     (
         nullptr,
-        D3D_FEATURE_LEVEL_11_0,
+        D3D_FEATURE_LEVEL_12_1,
         IID_PPV_ARGS((&device_))
     );
     if (FAILED(res))               return FAIL;
