@@ -24,7 +24,7 @@ VSoutput main(VSinput inp)
 	
 	res.uv = arrUV[inp.pos.x];
 	res.ID = inp.ID;
-	res.VID = inp.pos;
+	res.VID = inp.pos.x;
 	
 	return res;
 }

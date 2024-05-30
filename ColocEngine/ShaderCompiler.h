@@ -6,11 +6,17 @@
 
 #pragma comment(lib,"dxcompiler.lib")
 
+enum class ShaderCompileType
+{
+	Vertex,
+	Pixel
+};
+
 namespace ShaderModel6_8
 {
 	bool Init();
 
-	bool Compile(std::wstring file,ID3DBlob* &blob);
+	bool Compile(std::wstring file,ID3DBlob* &blob , ShaderCompileType sct);
 
 	extern IDxcUtils* util_;
 	extern IDxcCompiler3* dxc_;

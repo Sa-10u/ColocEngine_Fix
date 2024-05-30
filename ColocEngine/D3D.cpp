@@ -19,7 +19,7 @@ constexpr UINT UI_HPSIZE = 1;
 
 bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
 {
-#if 1
+#if _DebugCUI
     {
         ID3D12Debug* dbg = {};
 
@@ -1157,7 +1157,7 @@ void D3d::write()
             cmdlist_->DrawIndexedInstanced(mesh.indexes_.size(), itr.DrawCount_ , 0, 0, _inscnt);
             _inscnt += itr.DrawCount_;
 
-            v++;
+            v++; 
         }
         S_Draw::Flush(MDIND);
         MDIND++;

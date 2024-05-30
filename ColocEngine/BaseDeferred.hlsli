@@ -74,9 +74,9 @@ cbuffer Util : register(b0)
     float4x4 View : packoffset(c0);
     float4x4 Projection : packoffset(c4);
     float Time : packoffset(c8);
-    uint PL_CNT;
-    uint DL_CNT;
-    uint AL_CNT;
+    uint PL_CNT : packoffset(c12);
+    uint DL_CNT : packoffset(c16);
+    uint AL_CNT : packoffset(c20);
 };
 
 

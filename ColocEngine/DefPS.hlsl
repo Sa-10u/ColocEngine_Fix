@@ -2,7 +2,7 @@
 
 PSoutput main(VSoutput inp)
 {
-	PSoutput res　= (PSoutput)0;
+	PSoutput res = (PSoutput)0;
 
     res.normal = float4(Map[inp.ID].isN ? 
     colmap[Map[inp.ID].isN].Sample(colsmp, inp.uv).xyz :
@@ -18,10 +18,7 @@ PSoutput main(VSoutput inp)
     
     res.emission = float4(Map[inp.ID].isE ?
     colmap[Map[inp.ID].isE].Sample(colsmp, inp.uv) :
-    float4(Mtl[inp.MID].emis, Mtl[inp.MID].emis_str));
-    
-    if (inp.ID == 0)
-        res.color = 4;
+    float4(Mtl[inp.MID].emis, Mtl[inp.MID].emis_str));   
     
     return res;
 }

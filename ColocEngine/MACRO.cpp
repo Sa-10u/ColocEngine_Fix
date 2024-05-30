@@ -15,17 +15,17 @@ namespace SEMANTICS_STR
 
 namespace SHADER_FILENAME
 {
-	LPCWSTR DefDeferredVS = s_path"Deferred_Def_VS.cso";
-	LPCWSTR DefDeferredPS = s_path"Deferred_Def_PS.cso";
+	LPCWSTR DefDeferredVS = L"Deferred_Def_VS.hlsl";
+	LPCWSTR DefDeferredPS = L"Deferred_Def_PS.hlsl";
 
-	LPCWSTR DefVS = s_path "DefVS.cso";
-	LPCWSTR DefPS = s_path "DefPS.cso";
+	LPCWSTR DefVS = L"DefVS.hlsl";
+	LPCWSTR DefPS = L"DefPS.hlsl";
 
-	LPCWSTR DefPostVS = s_path "PostEffect_Default_VS.cso";
-	LPCWSTR DefPostPS = s_path "PostEffect_Default_PS.cso";
+	LPCWSTR DefPostVS = L"PostEffect_Default_VS.hlsl";
+	LPCWSTR DefPostPS = L"PostEffect_Default_PS.hlsl";
 
-	LPCWSTR UI_VS = s_path"UI_VS.cso";
-	LPCWSTR UI_PS = s_path"UI_PS.cso";
+	LPCWSTR UI_VS = L"UI_VS.hlsl";
+	LPCWSTR UI_PS = L"UI_PS.hlsl";
 }
 
 char* wtoc(const wchar_t* str)
