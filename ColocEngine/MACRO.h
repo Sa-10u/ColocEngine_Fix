@@ -27,7 +27,7 @@ inline void SAFE_RELEASE(tgt*& p)
 #define __guidof __uuidof
 
 constexpr double _PI = 3.141592;
-
+#define _DebugCUI true;
 
 typedef DirectX::XMFLOAT2 float2;
 typedef DirectX::XMFLOAT3 float3;

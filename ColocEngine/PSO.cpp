@@ -111,12 +111,12 @@ bool Def3D::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sample
 	//----------------------
 
 	ID3DBlob* VSblob = nullptr;
-	res = ShaderModel6_8::Compile(L"DefVS.hlsl", VSblob);
+	res = ShaderModel6_8::Compile(SHADER_FILENAME::DefVS, VSblob,ShaderCompileType::Vertex);
 	if (!(res))	return false;
 
 	ID3DBlob* PSblob = nullptr;
-	res = D3DReadFileToBlob(SHADER_FILENAME::DefPS, &PSblob);
-	if (FAILED(res))     return 0;
+	res = ShaderModel6_8::Compile(SHADER_FILENAME::DefPS, PSblob, ShaderCompileType::Pixel);
+	if (!(res))	return false;
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc = {};
 	{
@@ -235,12 +235,12 @@ bool DefPost::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* samp
 	//----------------------
 
 	ID3DBlob* VSblob = nullptr;
-	res = D3DReadFileToBlob(SHADER_FILENAME::DefPostVS , &VSblob);
-	if (FAILED(res))     return 0;
+	res = ShaderModel6_8::Compile(SHADER_FILENAME::DefPostVS , VSblob, ShaderCompileType::Vertex);
+	if (!(res))	return false;
 
 	ID3DBlob* PSblob = nullptr;
-	res = D3DReadFileToBlob(SHADER_FILENAME::DefPostPS, &PSblob);
-	if (FAILED(res))     return 0;
+	res = ShaderModel6_8::Compile(SHADER_FILENAME::DefPostPS, PSblob, ShaderCompileType::Pixel);
+	if (!(res))	return false;
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc = {};
 	{
@@ -336,14 +336,15 @@ bool DefUI::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sample
 			dss_desc.StencilEnable = false;
 		}
 
-		ID3DBlob* VSBlob = nullptr;
-		ID3DBlob* PSBlob = nullptr;
+		ID3DBlob* VSblob = nullptr;
+		ID3DBlob* PbBlob = nullptr;
 
-		res = D3DReadFileToBlob(SHADER_FILENAME::UI_PS, &PSBlob);
-		if (FAILED(res))		return false;
+		res = ShaderModel6_8::Compile(SHADER_FILENAME::UI_VS, VSblob, ShaderCompileType::Vertex);
+		if (!(res))	return false;
 
-		res = D3DReadFileToBlob(SHADER_FILENAME::UI_VS, &VSBlob);
-		if (FAILED(res))			return false;
+		ID3DBlob* PSblob = nullptr;
+		res = ShaderModel6_8::Compile(SHADER_FILENAME::UI_PS, PSblob, ShaderCompileType::Pixel);
+		if (!(res))	return false;
 
 		D3D12_RASTERIZER_DESC rs_desc = {};
 		{
@@ -366,10 +367,10 @@ bool DefUI::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sample
 			gps_desc.BlendState = bld_desc;
 			gps_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 			gps_desc.RasterizerState = rs_desc;
-			gps_desc.PS.BytecodeLength = PSBlob->GetBufferSize();
-			gps_desc.PS.pShaderBytecode = PSBlob->GetBufferPointer();
-			gps_desc.VS.BytecodeLength = VSBlob->GetBufferSize();
-			gps_desc.VS.pShaderBytecode = VSBlob->GetBufferPointer();
+			gps_desc.PS.BytecodeLength = PSblob->GetBufferSize();
+			gps_desc.PS.pShaderBytecode = PSblob->GetBufferPointer();
+			gps_desc.VS.BytecodeLength = VSblob->GetBufferSize();
+			gps_desc.VS.pShaderBytecode = VSblob->GetBufferPointer();
 			gps_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 			gps_desc.SampleMask = UINT_MAX;
 			gps_desc.SampleDesc.Count = 1;
@@ -479,12 +480,12 @@ bool DefDeferred::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* 
 	//----------------------
 
 	ID3DBlob* VSblob = nullptr;
-	res = D3DReadFileToBlob(SHADER_FILENAME::DefDeferredVS, &VSblob);
-	if (FAILED(res))     return 0;
+	res = ShaderModel6_8::Compile(SHADER_FILENAME::DefDeferredVS, VSblob, ShaderCompileType::Vertex);
+	if (!(res))	return false;
 
 	ID3DBlob* PSblob = nullptr;
-	res = D3DReadFileToBlob(SHADER_FILENAME::DefDeferredPS, &PSblob);
-	if (FAILED(res))     return 0;
+	res = ShaderModel6_8::Compile(SHADER_FILENAME::DefDeferredPS, PSblob, ShaderCompileType::Pixel);
+	if (!(res))	return false;
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc = {};
 	{
