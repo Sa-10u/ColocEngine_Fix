@@ -48,7 +48,7 @@ bool ShaderModel6_8::Compile(std::wstring file, ID3DBlob* &blob)
 	args.push_back(L"-E");
 	args.push_back(L"main");
 	args.push_back(L"-T");
-	args.push_back(L"vs_6_7");
+	args.push_back(L"vs_6_8");
 	//args.push_back(L"-enable-16bit-types");
 
 	res = ShaderModel6_8::dxc_->Compile(&buf,args.data(), static_cast<UINT32>(args.size()),inc_,IID_PPV_ARGS(&dres));

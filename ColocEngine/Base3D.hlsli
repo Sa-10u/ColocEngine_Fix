@@ -12,6 +12,7 @@ struct VSinput
 	
 	uint ID		: SV_InstanceID;
     uint VID	: SV_VertexID;
+	uint offset : SV_StartInstanceLocation;
 };
 
 struct VSoutput
