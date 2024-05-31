@@ -300,6 +300,14 @@ bool D3d::InitGBO()
 {
     HRESULT&& res = FALSE;
 
+#if _DebugCUI
+
+    D3D12_FEATURE_DATA_SHADER_MODEL sm = { D3D_SHADER_MODEL_6_9 };
+
+    device_->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &sm, sizeof(sm));
+
+#endif
+    
     //----------------------------
     {
         {
