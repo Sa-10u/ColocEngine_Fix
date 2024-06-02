@@ -2,9 +2,9 @@
 
 PSoutput main(VSoutput inp)
 {
-	PSoutput res　= (PSoutput)0;
+	PSoutput res = (PSoutput)0;
 
-    res.normal = float4(Map[inp.ID].isN ? 
+    res.normal = float4(Map[inp.ID].isN != -1 ? 
     colmap[Map[inp.ID].isN].Sample(colsmp, inp.uv).xyz :
     normalize(inp.norm).xyz,1);
     
@@ -12,11 +12,11 @@ PSoutput main(VSoutput inp)
     
     res.depth = inp.Ppos;
     
-    res.color = float4(Map[inp.ID].isD ?
+    res.color = float4(Map[inp.ID].isD != -1 ?
     colmap[Map[inp.ID].isD].Sample(colsmp,inp.uv).xyz:
     Mtl[inp.MID].dif, 1);
     
-    res.emission = float4(Map[inp.ID].isE ?
+    res.emission = float4(Map[inp.ID].isE != -1 ?
     colmap[Map[inp.ID].isE].Sample(colsmp, inp.uv) :
     float4(Mtl[inp.MID].emis, Mtl[inp.MID].emis_str));
     

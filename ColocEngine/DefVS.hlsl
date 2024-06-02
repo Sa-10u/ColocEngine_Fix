@@ -21,7 +21,7 @@ VSoutput main(VSinput inp)
 	result.norm = inp.norm;
 	result.bitan = inp.bitan;
 	result.MID = inp.MID;
-	result.ID = inp.ID;
+	result.ID = inp.ID + inp.offset;
 
 	return result;
 }

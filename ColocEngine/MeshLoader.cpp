@@ -245,6 +245,9 @@ void MeshLoader::ParseMaterial(Material& mtl, MapBOOL& mpb, const aiMaterial* sr
                 mtl.emis.z = coltemp.b;
             }
 
+        auto FixTexIndex = [](int ind) {if (ind == NULL)   return -1; return ind; };
+        auto nullTex = -1;
+
         __CREATE("DIFFUSE_MAP") aiString path = {};
         if (src->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS)
         {
@@ -252,11 +255,11 @@ void MeshLoader::ParseMaterial(Material& mtl, MapBOOL& mpb, const aiMaterial* sr
             str = FileNormalization(&str);
 
             auto wstr = ctow(str.c_str());
-            mpb.isD = ResourceManager::TexLoad(wstr);
+            mpb.isD = FixTexIndex(ResourceManager::TexLoad(wstr));
         }
         else
         {
-            mpb.isD = NULL;
+            mpb.isD = nullTex;
         }
 
         __CREATE("EMISSION_MAP")
@@ -266,11 +269,11 @@ void MeshLoader::ParseMaterial(Material& mtl, MapBOOL& mpb, const aiMaterial* sr
                 str = FileNormalization(&str);
 
                 auto wstr = ctow(str.c_str());
-                mpb.isE = ResourceManager::TexLoad(wstr);
+                mpb.isE = FixTexIndex(ResourceManager::TexLoad(wstr));
             }
             else
             {
-                mpb.isE = NULL;
+                mpb.isE = nullTex;
             }
 
         __CREATE("NORMAL_MAP")
@@ -280,11 +283,11 @@ void MeshLoader::ParseMaterial(Material& mtl, MapBOOL& mpb, const aiMaterial* sr
                 str = FileNormalization(&str);
 
                 auto wstr = ctow(str.c_str());
-                mpb.isN = ResourceManager::TexLoad(wstr);
+                mpb.isN = FixTexIndex(ResourceManager::TexLoad(wstr));
             }
             else
             {
-                mpb.isN = NULL;
+                mpb.isN = nullTex;
             }
 
         __CREATE("SPECULAR_MAP")
@@ -294,11 +297,11 @@ void MeshLoader::ParseMaterial(Material& mtl, MapBOOL& mpb, const aiMaterial* sr
                 str = FileNormalization(&str);
 
                 auto wstr = ctow(str.c_str());
-                mpb.isS = ResourceManager::TexLoad(wstr);
+                mpb.isS = FixTexIndex(ResourceManager::TexLoad(wstr));
             }
             else
             {
-                mpb.isS = NULL;
+                mpb.isS = nullTex;
             }
 
         __CREATE("ALPHA_MAP")
@@ -308,11 +311,11 @@ void MeshLoader::ParseMaterial(Material& mtl, MapBOOL& mpb, const aiMaterial* sr
                 str = FileNormalization(&str);
 
                 auto wstr = ctow(str.c_str());
-                mpb.isESB = ResourceManager::TexLoad(wstr);
+                mpb.isESB = FixTexIndex(ResourceManager::TexLoad(wstr));
             }
             else
             {
-                mpb.isESB = NULL;
+                mpb.isESB = nullTex;
             }
 
         __CREATE("SHININESS_MAP")
@@ -323,7 +326,7 @@ void MeshLoader::ParseMaterial(Material& mtl, MapBOOL& mpb, const aiMaterial* sr
                 str = FileNormalization(&str);
 
                 auto wstr = ctow(str.c_str());
-                mpb.isESB = ResourceManager::TexLoad(wstr);
+                mpb.isESB = FixTexIndex(ResourceManager::TexLoad(wstr));
             }
         }
 

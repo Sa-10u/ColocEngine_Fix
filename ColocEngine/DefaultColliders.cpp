@@ -9,29 +9,52 @@ bool SphereCol::isHit(Collider* tgt)
 	{
 	case static_cast<uint8_t>(ColliderType::Sphere)	:	return SandS(this->pos_,this->radius_,dynamic_cast<SphereCol*>(tgt)->pos_, dynamic_cast<SphereCol*>(tgt)->radius_);
 	
-	case static_cast<uint8_t>(ColliderType::Box)	:	return BandS(dynamic_cast<BoxCol*>(tgt)->pos_, dynamic_cast<BoxCol*>(tgt)->len_,this->pos_,this->radius_);
+	case static_cast<uint8_t>(ColliderType::Box)	:	return BandS(dynamic_cast<BoxCol*>(tgt)->GetPosition(), dynamic_cast<BoxCol*>(tgt)->GetLength(), this->pos_, this->radius_);
 
 	default:	return false;
 	}
 }
 
-SphereCol::SphereCol():pos_{0,0,0},radius_{0},parent_(nullptr)
+SphereCol::SphereCol() :pos_{0,0,0}, radius_{1}, mat_{ 1,0,0,0,  0,1,0,0,  0,0,1,0,  0,0,0,1 }
 {
 }
 
-SphereCol::SphereCol(float3 p, float r) :pos_{p}, radius_{ r }, parent_(nullptr)
+SphereCol::SphereCol(float3 p, float r) :pos_{ p }, radius_{r}, mat_{ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }
 {
 }
 
-SphereCol::SphereCol(float3 pos, float r, Mat* p):pos_{pos}, radius_{ r }, parent_(p)
+void SphereCol::SetPosition(float3 p)
 {
+	this->pos_ = p;
 }
+
+void SphereCol::SetMatrix(Mat m)
+{
+	mat_ = m;
+}
+
+void SphereCol::SetRadius(float r)
+{
+	radius_ = r;
+}
+
+float3 SphereCol::GetPosition()
+{
+	return pos_;
+}
+
+float SphereCol::GetRadius()
+{
+	return radius_;
+}
+
+
 
 bool BoxCol::isHit(Collider* tgt)
 {
 	switch (typeid(*tgt).hash_code())
 	{
-	case static_cast<uint8_t>(ColliderType::Sphere):	return BandS(this->pos_, this->len_, dynamic_cast<SphereCol*>(tgt)->pos_, dynamic_cast<SphereCol*>(tgt)->radius_);
+	case static_cast<uint8_t>(ColliderType::Sphere):	return BandS(this->pos_, this->len_, dynamic_cast<SphereCol*>(tgt)->GetPosition(), dynamic_cast<SphereCol*>(tgt)->GetRadius());
 
 	case static_cast<uint8_t>(ColliderType::Box)	:	return BandB(this->pos_, this->len_, dynamic_cast<BoxCol*>(tgt)->pos_, dynamic_cast<BoxCol*>(tgt)->len_);
 
@@ -39,17 +62,56 @@ bool BoxCol::isHit(Collider* tgt)
 	}
 }
 
-BoxCol::BoxCol()
+BoxCol::BoxCol() :len_{ 1,1,1 }, pos_{0,0,0},mat_{1,0,0,0,  0,1,0,0,  0,0,1,0,  0,0,0,1}
+{
+	
+}
+
+BoxCol::BoxCol(float3 pos, float3 len) :pos_{ pos }, len_{ len }, mat_{ 1,0,0,0,  0,1,0,0,  0,0,1,0,  0,0,0,1 }
 {
 }
 
-BoxCol::BoxCol(float3 pos, float3 len) :pos_{ pos }, len_{ len }
+void BoxCol::SetPosition(float3 p)
 {
+	pos_ = p;
 }
 
-BoxCol::BoxCol(float3 pos, float3 len, Mat* p) :pos_{ pos }, len_{ len }, parent_{ p }
+void BoxCol::SetMatrix(Mat m)
 {
+	mat_ = m;
 }
+
+void BoxCol::SetLength(float3 l)
+{
+	len_ = l;
+}
+
+void BoxCol::SetLengthX(float l)
+{
+	len_.x = l;
+}
+
+void BoxCol::SetLengthY(float l)
+{
+	len_.y = l;
+}
+
+void BoxCol::SetLengthZ(float l)
+{
+	len_.z = l;
+}
+
+float3 BoxCol::GetPosition()
+{
+	return pos_;
+}
+
+float3 BoxCol::GetLength()
+{
+	return len_;
+}
+
+
 
 //-----------------------------------
 template<>

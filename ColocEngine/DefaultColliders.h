@@ -15,12 +15,17 @@ public:
 
 	SphereCol();
 	SphereCol(float3 p, float r);
-	SphereCol(float3 pos, float r, Mat* p);
+	void SetPosition(float3 p);
+	void SetMatrix(Mat m);
+	void SetRadius(float r);
 
+	float3 GetPosition();
+	float GetRadius();
 
+private:
 	float3 pos_;
 	float radius_;
-	Mat* parent_;
+	Mat mat_;
 };
 
 class BoxCol : public Collider
@@ -29,13 +34,21 @@ public:
 	bool isHit(Collider* col) override;
 	BoxCol();
 	BoxCol(float3 pos,float3 len);
-	BoxCol(float3 pos, float3 len , Mat* p);
 
+	void SetPosition(float3 p);
+	void SetMatrix(Mat m);
+	void SetLength(float3 l);
+	void SetLengthX(float l);
+	void SetLengthY(float l);
+	void SetLengthZ(float l);
 
+	float3 GetPosition();
+	float3 GetLength();
+
+private:
 	float3 pos_;
 	float3 len_;
-
-	Mat* parent_;
+	Mat mat_;
 };
 
 //-----------------
