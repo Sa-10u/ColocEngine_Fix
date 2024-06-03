@@ -19,10 +19,10 @@ public:
 	void SetMatrix(Mat m);
 	void SetRadius(float r);
 
-	float3 GetPosition();
-	float GetRadius();
-	float3 GetCalcPosition();
-	float GetCalcRadius();
+	float3 GetPositionLCL();
+	float GetRadiusLCL();
+	float3 GetPositionWLD();
+	float GetRadiusWLD();
 
 private:
 	float3 pos_;
@@ -44,10 +44,10 @@ public:
 	void SetLengthY(float l);
 	void SetLengthZ(float l);
 
-	float3 GetPosition();
-	float3 GetLength();
-	float3 GetCalcPosition();
-	float3 GetCalcLength();
+	float3 GetPositionLCL();
+	float3 GetLengthLCL();
+	float3 GetPositionWLD();
+	float3 GetLengthWLD();
 
 private:
 	float3 pos_;

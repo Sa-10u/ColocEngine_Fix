@@ -1,18 +1,22 @@
 #include "DefaultColliders.h"
-#include<cmath>
+#include<algorithm>
 #include<DirectXMath.h>
+#include<cmath>
 
 using namespace DirectX;
 
 bool SphereCol::isHit(Collider* tgt)
 {
 	if (radius_ <= .0f)	return false;
+
+	auto wldPos = this->GetPositionWLD();
+	auto wldRad = this->GetRadiusWLD();
 	
 	switch (typeid(*tgt).hash_code())
 	{
-	case static_cast<uint8_t>(ColliderType::Sphere)	:	return SandS(this->pos_,this->radius_,dynamic_cast<SphereCol*>(tgt)->pos_, dynamic_cast<SphereCol*>(tgt)->radius_);
+	case static_cast<uint8_t>(ColliderType::Sphere)	:	return SandS(wldPos, wldRad, dynamic_cast<SphereCol*>(tgt)->GetPositionWLD(), dynamic_cast<SphereCol*>(tgt)->GetRadiusWLD());
 	
-	case static_cast<uint8_t>(ColliderType::Box)	:	return BandS(dynamic_cast<BoxCol*>(tgt)->GetPosition(), dynamic_cast<BoxCol*>(tgt)->GetLength(), this->pos_, this->radius_);
+	case static_cast<uint8_t>(ColliderType::Box)	:	return BandS(dynamic_cast<BoxCol*>(tgt)->GetPositionWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthWLD(), wldPos, wldRad);
 
 	default:	return false;
 	}
@@ -41,44 +45,46 @@ void SphereCol::SetRadius(float r)
 	radius_ = r;
 }
 
-float3 SphereCol::GetPosition()
+float3 SphereCol::GetPositionLCL()
 {
 	return pos_;
 }
 
-float SphereCol::GetRadius()
+float SphereCol::GetRadiusLCL()
 {
 	return radius_;
 }
 
-float3 SphereCol::GetCalcPosition()
+float3 SphereCol::GetPositionWLD()
 {
 	float3 res = {};
 	XMStoreFloat3(&res, XMVector3Transform(XMLoadFloat3(&pos_), mat_));
 }
 
-float SphereCol::GetCalcRadius()
+float SphereCol::GetRadiusWLD()
 {
-	std::max<float>(std::max<float>(XMVectorGetX(mat_.r[0]) , XMVectorGetY(mat_.r[1]) , XMVectorGetZ(mat_.r[3])));
+	return radius_ * (std::max)((std::max)(XMVectorGetX(mat_.r[0]) , XMVectorGetY(mat_.r[1])) , XMVectorGetZ(mat_.r[2]));
 }
 
 
 
 bool BoxCol::isHit(Collider* tgt)
 {
+	auto wldPos = this->GetPositionWLD();
+	auto wldLen = this->GetLengthWLD();
+
 	switch (typeid(*tgt).hash_code())
 	{
-	case static_cast<uint8_t>(ColliderType::Sphere):	return BandS(this->pos_, this->len_, dynamic_cast<SphereCol*>(tgt)->GetPosition(), dynamic_cast<SphereCol*>(tgt)->GetRadius());
+	case static_cast<uint8_t>(ColliderType::Sphere):	return BandS(wldPos, wldLen, dynamic_cast<SphereCol*>(tgt)->GetPositionWLD(), dynamic_cast<SphereCol*>(tgt)->GetRadiusWLD());
 
-	case static_cast<uint8_t>(ColliderType::Box)	:	return BandB(this->pos_, this->len_, dynamic_cast<BoxCol*>(tgt)->pos_, dynamic_cast<BoxCol*>(tgt)->len_);
+	case static_cast<uint8_t>(ColliderType::Box)	:	return BandB(wldPos, wldLen, dynamic_cast<BoxCol*>(tgt)->GetPositionWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthWLD());
 
 	default:	return false;
 	}
 }
 
-BoxCol::BoxCol() :len_{ 1,1,1 }, pos_{0,0,0},mat_{1,0,0,0,  0,1,0,0,  0,0,1,0,  0,0,0,1}
+BoxCol::BoxCol() :len_{ .5f,.5f,.5f }, pos_{0,0,0},mat_{1,0,0,0,  0,1,0,0,  0,0,1,0,  0,0,0,1}
 {
-	
 }
 
 BoxCol::BoxCol(float3 pos, float3 len) :pos_{ pos }, len_{ len }, mat_{ 1,0,0,0,  0,1,0,0,  0,0,1,0,  0,0,0,1 }
@@ -115,24 +121,26 @@ void BoxCol::SetLengthZ(float l)
 	len_.z = l;
 }
 
-float3 BoxCol::GetPosition()
+float3 BoxCol::GetPositionLCL()
 {
 	return pos_;
 }
 
-float3 BoxCol::GetLength()
+float3 BoxCol::GetLengthLCL()
 {
 	return len_;
 }
 
-float3 BoxCol::GetCalcPosition()
+float3 BoxCol::GetPositionWLD()
 {
-	return float3();
+	float3 res = {};
+	XMStoreFloat3(&res, XMVector3Transform(XMLoadFloat3(&pos_), mat_));
 }
 
-float3 BoxCol::GetCalcLength()
+float3 BoxCol::GetLengthWLD()
 {
-	return float3();
+	float3 res = {};
+	XMStoreFloat3(&res, XMVector3Transform(XMLoadFloat3(&len_), mat_));
 }
 
 
