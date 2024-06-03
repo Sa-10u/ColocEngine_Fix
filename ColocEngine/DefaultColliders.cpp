@@ -1,5 +1,8 @@
 #include "DefaultColliders.h"
 #include<cmath>
+#include<DirectXMath.h>
+
+using namespace DirectX;
 
 bool SphereCol::isHit(Collider* tgt)
 {
@@ -46,6 +49,17 @@ float3 SphereCol::GetPosition()
 float SphereCol::GetRadius()
 {
 	return radius_;
+}
+
+float3 SphereCol::GetCalcPosition()
+{
+	float3 res = {};
+	XMStoreFloat3(&res, XMVector3Transform(XMLoadFloat3(&pos_), mat_));
+}
+
+float SphereCol::GetCalcRadius()
+{
+	std::max<float>(std::max<float>(XMVectorGetX(mat_.r[0]) , XMVectorGetY(mat_.r[1]) , XMVectorGetZ(mat_.r[3])));
 }
 
 
@@ -109,6 +123,16 @@ float3 BoxCol::GetPosition()
 float3 BoxCol::GetLength()
 {
 	return len_;
+}
+
+float3 BoxCol::GetCalcPosition()
+{
+	return float3();
+}
+
+float3 BoxCol::GetCalcLength()
+{
+	return float3();
 }
 
 

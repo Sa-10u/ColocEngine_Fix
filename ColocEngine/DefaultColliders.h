@@ -21,6 +21,8 @@ public:
 
 	float3 GetPosition();
 	float GetRadius();
+	float3 GetCalcPosition();
+	float GetCalcRadius();
 
 private:
 	float3 pos_;
@@ -44,6 +46,8 @@ public:
 
 	float3 GetPosition();
 	float3 GetLength();
+	float3 GetCalcPosition();
+	float3 GetCalcLength();
 
 private:
 	float3 pos_;
