@@ -16,7 +16,7 @@ bool SphereCol::isHit(Collider* tgt)
 	{
 	case static_cast<uint8_t>(ColliderType::Sphere)	:	return SandS(wldPos, wldRad, dynamic_cast<SphereCol*>(tgt)->GetPositionWLD(), dynamic_cast<SphereCol*>(tgt)->GetRadiusWLD());
 	
-	case static_cast<uint8_t>(ColliderType::Box)	:	return BandS(dynamic_cast<BoxCol*>(tgt)->GetPositionWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthWLD(), wldPos, wldRad);
+	case static_cast<uint8_t>(ColliderType::Box)	:	return BandS(dynamic_cast<BoxCol*>(tgt)->GetPositionWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthXWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthYWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthZWLD(),wldPos, wldRad);
 
 	default:	return false;
 	}
@@ -71,23 +71,25 @@ float SphereCol::GetRadiusWLD()
 bool BoxCol::isHit(Collider* tgt)
 {
 	auto wldPos = this->GetPositionWLD();
-	auto wldLen = this->GetLengthWLD();
+	auto wldVecX = this->GetLengthXWLD();
+	auto wldVecY = this->GetLengthYWLD();
+	auto wldVecZ = this->GetLengthZWLD();
 
 	switch (typeid(*tgt).hash_code())
 	{
-	case static_cast<uint8_t>(ColliderType::Sphere):	return BandS(wldPos, wldLen, dynamic_cast<SphereCol*>(tgt)->GetPositionWLD(), dynamic_cast<SphereCol*>(tgt)->GetRadiusWLD());
+	case static_cast<uint8_t>(ColliderType::Sphere):	return BandS(wldPos, wldVecX,wldVecY,wldVecZ ,dynamic_cast<SphereCol*>(tgt)->GetPositionWLD(), dynamic_cast<SphereCol*>(tgt)->GetRadiusWLD());
 
-	case static_cast<uint8_t>(ColliderType::Box)	:	return BandB(wldPos, wldLen, dynamic_cast<BoxCol*>(tgt)->GetPositionWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthWLD());
+	case static_cast<uint8_t>(ColliderType::Box)	:	return BandB(wldPos, wldVecX,wldVecY,wldVecZ, dynamic_cast<BoxCol*>(tgt)->GetPositionWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthXWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthYWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthZWLD());
 
 	default:	return false;
 	}
 }
 
-BoxCol::BoxCol() :len_{ .5f,.5f,.5f }, pos_{0,0,0},mat_{1,0,0,0,  0,1,0,0,  0,0,1,0,  0,0,0,1}
+BoxCol::BoxCol() : pos_{ 0,0,0 }, mat_{ 1,0,0,0,  0,1,0,0,  0,0,1,0,  0,0,0,1 }, vecX_{ .5,0,0 }, vecY_{ 0,.5,0 }, vecZ_{ 0,0,.5 }
 {
 }
 
-BoxCol::BoxCol(float3 pos, float3 len) :pos_{ pos }, len_{ len }, mat_{ 1,0,0,0,  0,1,0,0,  0,0,1,0,  0,0,0,1 }
+BoxCol::BoxCol(float3 pos, float3 len) :pos_{ pos }, mat_{ 1,0,0,0,  0,1,0,0,  0,0,1,0,  0,0,0,1 }, vecX_{ len.x,0,0 }, vecY_{ 0,len.y,0 }, vecZ_{ 0,0,len.z }
 {
 }
 
@@ -103,22 +105,24 @@ void BoxCol::SetMatrix(Mat m)
 
 void BoxCol::SetLength(float3 l)
 {
-	len_ = l;
+	vecX_.x = l.x;
+	vecY_.y = l.y;
+	vecZ_.z = l.z;
 }
 
 void BoxCol::SetLengthX(float l)
 {
-	len_.x = l;
+	vecX_.x = l;
 }
 
 void BoxCol::SetLengthY(float l)
 {
-	len_.y = l;
+	vecY_.y = l;
 }
 
 void BoxCol::SetLengthZ(float l)
 {
-	len_.z = l;
+	vecZ_.z = l;
 }
 
 float3 BoxCol::GetPositionLCL()
@@ -126,10 +130,21 @@ float3 BoxCol::GetPositionLCL()
 	return pos_;
 }
 
-float3 BoxCol::GetLengthLCL()
+float3 BoxCol::GetLengthXLCL()
 {
-	return len_;
+	return vecX_;
 }
+
+float3 BoxCol::GetLengthYLCL()
+{
+	return vecY_;
+}
+
+float3 BoxCol::GetLengthZLCL()
+{
+	return vecZ_;
+}
+
 
 float3 BoxCol::GetPositionWLD()
 {
@@ -137,10 +152,22 @@ float3 BoxCol::GetPositionWLD()
 	XMStoreFloat3(&res, XMVector3Transform(XMLoadFloat3(&pos_), mat_));
 }
 
-float3 BoxCol::GetLengthWLD()
+float3 BoxCol::GetLengthXWLD()
 {
 	float3 res = {};
-	XMStoreFloat3(&res, XMVector3Transform(XMLoadFloat3(&len_), mat_));
+	XMStoreFloat3(&res, XMVector3Transform(XMLoadFloat3(&vecX_), mat_));
+}
+
+float3 BoxCol::GetLengthYWLD()
+{
+	float3 res = {};
+	XMStoreFloat3(&res, XMVector3Transform(XMLoadFloat3(&vecY_), mat_));
+}
+
+float3 BoxCol::GetLengthZWLD()
+{
+	float3 res = {};
+	XMStoreFloat3(&res, XMVector3Transform(XMLoadFloat3(&vecZ_), mat_));
 }
 
 
@@ -166,12 +193,56 @@ bool SandS(float3 c_pos, float c_rad, float3 t_pos, float t_rad)
 	return getlen(c_pos, t_pos) < c_rad + t_rad;
 }
 
-bool BandS(float3 bpos, float3 blen, float3 spos, float srad)
+bool BandS(float3 bpos, float3 bx, float3 by, float3 bz, float3 spos, float srad)
 {
 	return false;
 }
 
-bool BandB(float3 c_pos, float3 c_len, float3 t_pos, float3 t_len)
+bool BandB(float3 c_pos, float3 cx, float3 cy, float3 cz, float3 t_pos, float3 tx, float3 ty, float3 tz)
 {
-	return false;
+	float3 bbvec = t_pos - c_pos;
+	float bblenS = GetLengthSquared(bbvec);
+
+	{
+		auto getMax = [](float3 fl) {return (std::max)((std::max)(fl.x, fl.y), fl.z); };
+
+		float cmax = getMax(float3(GetLengthSquared(cx),GetLengthSquared(cy),GetLengthSquared(cz)));
+		float tmax = getMax(float3(GetLengthSquared(tx), GetLengthSquared(ty), GetLengthSquared(tz)));
+
+		if (bblenS > (cmax + tmax))	return false;
+	}
+
+	constexpr uint8_t calcTime_vecC = 3;
+	constexpr uint8_t calcTime_vecT = 3;
+	constexpr uint8_t calcTime_cross = 9;
+
+	{
+
+		float3 base[] =
+		{
+			cx,
+			cy,
+			cz
+		};
+
+		for (auto i = 0; i < calcTime_vecC; i++) {
+
+			if (Dot(bbvec, base[i]) > GetLength(base[i]) + (Dot(tx, base[i]) + Dot(ty, base[i]) + Dot(tz, base[i])))	return false;
+		}
+	}
+	{
+		float3 base[] =
+		{
+			tx,
+			ty,
+			tz
+		};
+
+		for (auto i = 0; i < calcTime_vecT; i++) {
+
+			if (Dot(bbvec, base[i]) > GetLength(base[i]) + (Dot(cx, base[i]) + Dot(cy, base[i]) + Dot(cz, base[i])))	return false;
+		}
+	}
+	
+
 }

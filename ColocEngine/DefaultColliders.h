@@ -45,13 +45,20 @@ public:
 	void SetLengthZ(float l);
 
 	float3 GetPositionLCL();
-	float3 GetLengthLCL();
+	float3 GetLengthXLCL();
+	float3 GetLengthYLCL();
+	float3 GetLengthZLCL();
 	float3 GetPositionWLD();
-	float3 GetLengthWLD();
+	float3 GetLengthXWLD();
+	float3 GetLengthYWLD();
+	float3 GetLengthZWLD();
 
 private:
 	float3 pos_;
-	float3 len_;
+	float3 vecX_;
+	float3 vecY_;
+	float3 vecZ_;
+
 	Mat mat_;
 };
 
@@ -68,8 +75,8 @@ enum class ColliderType
 };
 
 static bool SandS(float3 c_pos,float c_rad , float3 t_pos , float t_rad);
-static bool BandS(float3 bpos, float3 blen,float3 spos , float srad);
-static bool BandB(float3 c_pos,float3 c_len, float3 t_pos, float3 t_len);
+static bool BandS(float3 bpos, float3 bx,float3 by ,float3 bz,float3 spos , float srad);
+static bool BandB(float3 c_pos,float3 cx, float3 cy, float3 cz, float3 t_pos, float3 tx, float3 ty, float3 tz);
 
 //-----------------
 template<typename t>

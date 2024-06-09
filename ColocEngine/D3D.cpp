@@ -1154,7 +1154,7 @@ void D3d::write()
                 SB_MTL[IND_frame].view[v].spec = itr.Mtr_[v].spec;
                 SB_MTL[IND_frame].view[v].emis_str = 0;
             }
-
+            int i = 0;
             {
                 memcpy(SB_OI[IND_frame].view + (_inscnt), itr.info.data(), sizeof(ObjInfo)* itr.DrawCount_);
                 memcpy(SB_MB[IND_frame].view + (_inscnt), itr.Mesh_[v].texIndex_.data(), sizeof(MapBOOL)* itr.DrawCount_);

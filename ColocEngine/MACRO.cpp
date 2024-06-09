@@ -1,5 +1,5 @@
 #include"MACRO.h"
-
+#include<cmath>
 #define s_path L"Resource/Shader/"
 
 namespace SEMANTICS_STR
@@ -84,4 +84,182 @@ void DH::ResetIncre(UINT incre)
 DH::~DH()
 {
 	(*ppHeap_)->Release();
+}
+
+//---------------------------------------------------
+
+using std::fmod;
+float3 operator+(const float3& f0, const float3& f1)
+{
+	return float3(f0.x + f1.x, f0.y + f1.y, f0.z + f1.z);
+}
+float3 operator-(const float3& f0, const float3& f1)
+{
+	return float3(f0.x - f1.x, f0.y - f1.y, f0.z - f1.z);
+}
+float3 operator*(const float3& f0, const float3& f1)
+{
+	return float3(f0.x * f1.x, f0.y * f1.y, f0.z * f1.z);
+}
+float3 operator/(const float3& f0, const float3& f1)
+{
+	return float3(f0.x / f1.x, f0.y / f1.y, f0.z / f1.z);
+}
+
+float3 operator%(const float3& f0, const float3& f1)
+{
+	return float3(fmod(f0.x, f1.x), fmod(f0.y, f1.y), fmod(f0.z, f1.z));
+}
+
+bool operator==(const float3& f0, const float3& f1)
+{
+	return f0.x == f1.x && f0.y == f1.y && f0.z == f1.z;
+}
+
+bool operator!=(const float3& f0, const float3& f1)
+{
+	return f0.x != f1.x && f0.y != f1.y && f0.z != f1.z;
+}
+
+float3 operator++(float3& f0)
+{
+	f0 = float3(f0.x + 1.0f, f0.y + 1.0f, f0.z + 1.0f);
+	return f0;
+}
+
+float3 operator++(float3& f0, int dummy)
+{
+	float3 temp = f0;
+	f0 = float3(f0.x + 1.0f, f0.y + 1.0f, f0.z + 1.0f);
+	return temp;
+}
+
+float3 operator--(float3& f0)
+{
+	f0 = float3(f0.x - 1.0f, f0.y - 1.0f, f0.z - 1.0f);
+	return f0;
+}
+
+float3 operator--(float3& f0, int dummy)
+{
+	float3 temp = f0;
+	f0 = float3(f0.x - 1.0f, f0.y - 1.0f, f0.z - 1.0f);
+	return temp;
+}
+
+void operator+=(float3& f0, const float3& f1)
+{
+	f0 = float3(f0.x + f1.x, f0.y + f1.y, f0.z + f1.z);
+}
+
+void operator-=(float3& f0, const float3& f1)
+{
+	f0 = float3(f0.x - f1.x, f0.y - f1.y, f0.z - f1.z);
+}
+
+void operator*=(float3& f0, const float3& f1)
+{
+	f0 = float3(f0.x * f1.x, f0.y * f1.y, f0.z * f1.z);
+}
+
+void operator/=(float3& f0, const float3& f1)
+{
+	f0 = float3(f0.x / f1.x, f0.y / f1.y, f0.z / f1.z);
+}
+
+void operator%=(float3& f0, const float3& f1)
+{
+	f0 = float3(fmod(f0.x, f1.x), fmod(f0.y, f1.y), fmod(f0.z, f1.z));
+}
+
+float3 operator+(const float3& f0, const float& f1)
+{
+	return float3(f0.x + f1, f0.y + f1, f0.z + f1);
+}
+
+float3 operator-(const float3& f0, const float& f1)
+{
+	return float3(f0.x - f1, f0.y - f1, f0.z - f1);
+}
+
+float3 operator*(const float3& f0, const float& f1)
+{
+	return float3(f0.x * f1, f0.y * f1, f0.z * f1);
+}
+
+float3 operator/(const float3& f0, const float& f1)
+{
+	return float3(f0.x / f1, f0.y / f1, f0.z / f1);
+}
+
+float3 operator%(const float3& f0, const float& f1)
+{
+	return float3(fmod(f0.x,f1), fmod(f0.y,f1), fmod(f0.z,f1));
+}
+
+float3 operator==(const float3& f0, const float& f1)
+{
+	return float3(f0.x == f1, f0.y == f1, f0.z == f1);
+}
+
+float3 operator!=(const float3& f0, const float& f1)
+{
+	return float3(f0.x != f1, f0.y != f1, f0.z != f1);
+}
+
+void operator+=(float3& f0, const float& f1)
+{
+	f0 = float3(f0.x + f1, f0.y + f1, f0.z + f1);
+}
+
+void operator-=(float3& f0, const float& f1)
+{
+	f0 = float3(f0.x - f1, f0.y - f1, f0.z - f1);
+}
+
+void operator*=(float3& f0, const float& f1)
+{
+	f0 = float3(f0.x * f1, f0.y * f1, f0.z * f1);
+}
+
+void operator/=(float3& f0, const float& f1)
+{
+	f0 = float3(f0.x / f1, f0.y / f1, f0.z / f1);
+}
+
+void operator%=(float3& f0, const float& f1)
+{
+	f0 = float3(fmod(f0.x, f1), fmod(f0.y, f1), fmod(f0.z, f1));
+}
+
+float GetLength(const float3& fl)
+{
+	return std::sqrt(pow(fl.x, 2) + pow(fl.y, 2) + pow(fl.z, 2));
+}
+
+float GetLengthSquared(const float3& fl)
+{
+	return pow(fl.x, 2) + pow(fl.y, 2) + pow(fl.z, 2);
+}
+
+float3 fl3Normalize(const float3& fl)
+{
+	float len = GetLength(fl);
+
+	return float3(fl.x / len, fl.y / len, fl.z / len);
+}
+
+float Dot(const float3& f0, const float3& f1)
+{
+	return (f0.x * f1.x, f0.y * f1.y, f0.z * f1.z);
+}
+
+float3 Cross(const float3& f0, const float3& f1)
+{
+	return float3
+	(
+		(f0.y * f1.z) - (f1.z * f0.y),
+		(f0.z * f1.x) - (f1.x * f0.z),
+		(f0.x * f1.y) - (f1.y * f0.x)
+	);
 }

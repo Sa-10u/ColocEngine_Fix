@@ -89,5 +89,39 @@ private:
 
 };
 
+float3 operator+(const float3& f0, const float3& f1);
+float3 operator-(const float3& f0, const float3& f1);
+float3 operator*(const float3& f0, const float3& f1);
+float3 operator/(const float3& f0, const float3& f1);
+float3 operator%(const float3& f0, const float3& f1);
+bool operator==(const float3& f0, const float3& f1);
+bool operator!=(const float3& f0, const float3& f1);
+float3 operator++(float3& f0);
+float3 operator++(float3& f0 ,int dummy);
+float3 operator--(float3& f0);
+float3 operator--(float3& f0, int dummy);
+void operator+=(float3& f0, const float3& f1);
+void operator-=(float3& f0, const float3& f1);
+void operator*=(float3& f0, const float3& f1);
+void operator/=(float3& f0, const float3& f1);
+void operator%=(float3& f0, const float3& f1);
+
+float3 operator+(const float3& f0, const float& f1);
+float3 operator-(const float3& f0, const float& f1);
+float3 operator*(const float3& f0, const float& f1);
+float3 operator/(const float3& f0, const float& f1);
+float3 operator%(const float3& f0, const float& f1);
+float3 operator==(const float3& f0, const float& f1);
+float3 operator!=(const float3& f0, const float& f1);
+void operator+=(float3& f0, const float& f1);
+void operator-=(float3& f0, const float& f1);
+void operator*=(float3& f0, const float& f1);
+void operator/=(float3& f0, const float& f1);
+void operator%=(float3& f0, const float& f1);
+float GetLength(const float3& fl);
+float GetLengthSquared(const float3& fl);
+float3 fl3Normalize(const float3& fl);
+float Dot(const float3& f0, const float3& f1);
+float3 Cross(const float3& f0, const float3& f1);
 
 #define __CREATE(LPCSTR)	{};
