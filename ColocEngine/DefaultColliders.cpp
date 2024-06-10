@@ -197,17 +197,20 @@ bool BandS(float3 bpos, float3 bx, float3 by, float3 bz, float3 spos, float srad
 
 	auto pos = spos - bpos;
 	
-	{
-		auto way = fl3Normalize(bx);
-		auto len = GetLength(bx);
+	float3 vecs[] = { bx,by,bz };
+
+	for(auto i = 0u; i< _countof(vecs);i++){
+
+		auto way = fl3Normalize(vecs[i]);
+		auto len = GetLength(vecs[i]);
 
 		auto scale = Dot(pos, way) / len;
 
-
+		scale = 1 >= scale >= -1 ? scale : scale > 1 ? 1 : -1;
+		nearest += vecs[i] * scale;
 	}
 
-
-	return true;
+	return (GetLength(nearest) + srad) >= GetLength(pos) ? false : true;
 }
 
 bool BandB(float3 c_pos, float3 cx, float3 cy, float3 cz, float3 t_pos, float3 tx, float3 ty, float3 tz)
