@@ -188,14 +188,26 @@ uint8_t ColType<BoxCol>()
 
 bool SandS(float3 c_pos, float c_rad, float3 t_pos, float t_rad)
 {
-	auto getlen = [](float3 s, float3 e) {return std::sqrt(pow(e.x - s.x, 2) + pow(e.y - s.y, 2) + pow(e.z - s.z, 2)); };
-
-	return getlen(c_pos, t_pos) < c_rad + t_rad;
+	return GetLength(c_pos - t_pos) < c_rad + t_rad;
 }
 
 bool BandS(float3 bpos, float3 bx, float3 by, float3 bz, float3 spos, float srad)
 {
-	return false;
+	float3 nearest = {};//scale for nearest
+
+	auto pos = spos - bpos;
+	
+	{
+		auto way = fl3Normalize(bx);
+		auto len = GetLength(bx);
+
+		auto scale = Dot(pos, way) / len;
+
+
+	}
+
+
+	return true;
 }
 
 bool BandB(float3 c_pos, float3 cx, float3 cy, float3 cz, float3 t_pos, float3 tx, float3 ty, float3 tz)
@@ -218,7 +230,7 @@ bool BandB(float3 c_pos, float3 cx, float3 cy, float3 cz, float3 t_pos, float3 t
 
 	{
 
-		float3 base[] =
+		float3 base_c[] =
 		{
 			cx,
 			cy,
@@ -227,11 +239,10 @@ bool BandB(float3 c_pos, float3 cx, float3 cy, float3 cz, float3 t_pos, float3 t
 
 		for (auto i = 0; i < calcTime_vecC; i++) {
 
-			if (Dot(bbvec, base[i]) > GetLength(base[i]) + (Dot(tx, base[i]) + Dot(ty, base[i]) + Dot(tz, base[i])))	return false;
+			if (Dot(bbvec, base_c[i]) > GetLength(base_c[i]) + (Dot(tx, base_c[i]) + Dot(ty, base_c[i]) + Dot(tz, base_c[i])))	return false;
 		}
-	}
-	{
-		float3 base[] =
+	
+		float3 base_t[] =
 		{
 			tx,
 			ty,
@@ -240,9 +251,23 @@ bool BandB(float3 c_pos, float3 cx, float3 cy, float3 cz, float3 t_pos, float3 t
 
 		for (auto i = 0; i < calcTime_vecT; i++) {
 
-			if (Dot(bbvec, base[i]) > GetLength(base[i]) + (Dot(cx, base[i]) + Dot(cy, base[i]) + Dot(cz, base[i])))	return false;
+			if (Dot(bbvec, base_t[i]) > GetLength(base_t[i]) + (Dot(cx, base_t[i]) + Dot(cy, base_t[i]) + Dot(cz, base_t[i])))	return false;
+		}
+
+		for (auto i = 0; i < calcTime_vecT; i++) {
+			for (auto j = 0; j < calcTime_vecC; i++) {
+
+				auto axisVec = Cross(base_c[j], base_t[i]);
+
+				auto getLen = [&](float3& x, float3& y, float3& z)
+					{
+						return Dot(axisVec, x) + Dot(axisVec, y) + Dot(axisVec, z);
+					};
+
+				if (Dot(bbvec, axisVec) > getLen(cx,cy,cz) + getLen(tx,ty,tz))	return false;
+			}
 		}
 	}
-	
 
+	return true;
 }
