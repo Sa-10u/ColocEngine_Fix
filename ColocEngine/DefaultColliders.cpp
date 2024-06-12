@@ -201,10 +201,7 @@ bool SandS(float3 c_pos, float c_rad, float3 t_pos, float t_rad , float3* getlen
 	float&& StoS = GetLength(c_pos - t_pos);
 	float&& rads = c_rad + t_rad;
 
-	bool res =StoS < rads;
-
-	if (res) *getlen = fl3Normalize(c_pos - t_pos) * (rads - StoS);
-	return res;
+	return StoS < rads ? (*getlen = fl3Normalize(c_pos - t_pos) * (rads - StoS), true) : false;
 }
 
 bool BandS(float3 bpos, float3 bx, float3 by, float3 bz, float3 spos, float srad , float3* getlen)
@@ -226,7 +223,10 @@ bool BandS(float3 bpos, float3 bx, float3 by, float3 bz, float3 spos, float srad
 		nearest += vecs[i] * scale;
 	}
 
-	return (GetLength(nearest) + srad) >= GetLength(pos) ? false : true;
+	float&& BtoS = GetLength(pos);
+	float&& rads = (GetLength(nearest) + srad);
+
+	return BtoS < rads  ? (*getlen = fl3Normalize(pos) * (rads - BtoS), true) : false ;
 }
 
 bool BandB(float3 c_pos, float3 cx, float3 cy, float3 cz, float3 t_pos, float3 tx, float3 ty, float3 tz , float3* getlen)

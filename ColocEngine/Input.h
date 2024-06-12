@@ -17,5 +17,13 @@ namespace Input_KB
 
 namespace Input_CR
 {
+	HRESULT Init();
+	void Update();
+	void Release();
 
+	bool Down(int code);
+	bool Free(int code);
+
+	bool Push(int code);
+	bool Up(int code);
 };
