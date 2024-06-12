@@ -156,6 +156,9 @@
     <ClCompile Include="ShaderCompiler.cpp">
       <Filter>System\source</Filter>
     </ClCompile>
+    <ClCompile Include="C_Billboard.cpp">
+      <Filter>Components\ColocEngine\source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinView.h">
@@ -241,6 +244,9 @@
     </ClInclude>
     <ClInclude Include="ShaderCompiler.h">
       <Filter>System\header</Filter>
+    </ClInclude>
+    <ClInclude Include="C_Billboard.h">
+      <Filter>Components\ColocEngine\header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

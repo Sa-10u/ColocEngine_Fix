@@ -9,11 +9,8 @@
 	};
 	uint16_t C_UI::index = 0;
 
-	std::array<SimpleInfo_UI, ResourceManager::CBCOUNT> C_UI::data = {};
+	std::array<SimpleQuad, ResourceManager::CBCOUNT> C_UI::data = {};
 	std::array<MapBOOL, ResourceManager::CBCOUNT> C_UI::mb = {};
-
-SimpleInfo_UI::SimpleInfo_UI():tick(0),val0(0),val1(0),val2(0)
-{}
 
 void C_UI::initialize()
 {
@@ -33,7 +30,7 @@ C_UI::C_UI(string tag):C_Quad(tag)
 	info = {};
 }
 
-C_UI::C_UI(string tag, SimpleInfo_UI rect):C_Quad(tag)
+C_UI::C_UI(string tag, SimpleQuad rect):C_Quad(tag)
 {
 }
 
@@ -42,12 +39,12 @@ bool C_UI::IsInside(float x, float y)
 	return  (info.rect.lx < x && x < info.rect.rx) && (info.rect.by < y && y < info.rect.ty) ? true : false;
 }
 
-SimpleInfo_UI C_UI::GetInfo()
+SimpleQuad C_UI::GetInfo()
 {
-	return SimpleInfo_UI();
+	return SimpleQuad();
 }
 
-void C_UI::SetInfo(SimpleInfo_UI rec)
+void C_UI::SetInfo(SimpleQuad rec)
 {
 	this->info = rec;
 }

@@ -705,7 +705,7 @@ bool D3d::InitGBO()
                 rc_desc.MipLevels = 1;
                 rc_desc.DepthOrArraySize = 1;
                 rc_desc.Height = 1;
-                rc_desc.Width = sizeof(SimpleInfo_UI) * ResourceManager::CBCOUNT;
+                rc_desc.Width = sizeof(SimpleQuad) * ResourceManager::CBCOUNT;
                 rc_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
                 rc_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
                 rc_desc.SampleDesc.Count = 1;
@@ -724,7 +724,7 @@ bool D3d::InitGBO()
                 if (FAILED(res)) return 0;
 
                 res = SB_UI[i].rsc_ptr->Map(0, nullptr, reinterpret_cast<void**>(&SB_UI[i].view));
-                memset(SB_UI[i].view, 0, ResourceManager::CBCOUNT * sizeof(SimpleInfo_UI));
+                memset(SB_UI[i].view, 0, ResourceManager::CBCOUNT * sizeof(SimpleQuad));
 
                 D3D12_SHADER_RESOURCE_VIEW_DESC srv = {};
                 {
@@ -733,7 +733,7 @@ bool D3d::InitGBO()
                     srv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
                     srv.Buffer.FirstElement = 0;
                     srv.Buffer.NumElements = ResourceManager::CBCOUNT;
-                    srv.Buffer.StructureByteStride = sizeof(SimpleInfo_UI);
+                    srv.Buffer.StructureByteStride = sizeof(SimpleQuad);
                     srv.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
                 }
 

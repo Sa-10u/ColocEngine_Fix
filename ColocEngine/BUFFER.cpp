@@ -56,3 +56,6 @@ Rect2D::Rect2D(float lx, float ty, float rx, float by):lx(lx),ty(ty),rx(rx),by(b
 Rect2D::Rect2D():lx(0),ty(0),rx(1),by(1)
 {
 }
+
+SimpleQuad::SimpleQuad() :tick(0), val0(0), val1(0), val2(0)
+{}

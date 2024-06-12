@@ -5,7 +5,7 @@
 
 using namespace DirectX;
 
-bool SphereCol::isHit(Collider* tgt)
+bool SphereCol::isHit(Collider* tgt, float3* getlen)
 {
 	if (radius_ <= .0f)	return false;
 
@@ -14,9 +14,9 @@ bool SphereCol::isHit(Collider* tgt)
 	
 	switch (typeid(*tgt).hash_code())
 	{
-	case static_cast<uint8_t>(ColliderType::Sphere)	:	return SandS(wldPos, wldRad, dynamic_cast<SphereCol*>(tgt)->GetPositionWLD(), dynamic_cast<SphereCol*>(tgt)->GetRadiusWLD());
+	case static_cast<uint8_t>(ColliderType::Sphere)	:	return SandS(wldPos, wldRad, dynamic_cast<SphereCol*>(tgt)->GetPositionWLD(), dynamic_cast<SphereCol*>(tgt)->GetRadiusWLD(), getlen);
 	
-	case static_cast<uint8_t>(ColliderType::Box)	:	return BandS(dynamic_cast<BoxCol*>(tgt)->GetPositionWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthXWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthYWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthZWLD(),wldPos, wldRad);
+	case static_cast<uint8_t>(ColliderType::Box)	:	return BandS(dynamic_cast<BoxCol*>(tgt)->GetPositionWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthXWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthYWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthZWLD(),wldPos, wldRad, getlen);
 
 	default:	return false;
 	}
@@ -59,6 +59,8 @@ float3 SphereCol::GetPositionWLD()
 {
 	float3 res = {};
 	XMStoreFloat3(&res, XMVector3Transform(XMLoadFloat3(&pos_), mat_));
+
+	return res;
 }
 
 float SphereCol::GetRadiusWLD()
@@ -68,7 +70,7 @@ float SphereCol::GetRadiusWLD()
 
 
 
-bool BoxCol::isHit(Collider* tgt)
+bool BoxCol::isHit(Collider* tgt, float3* getlen)
 {
 	auto wldPos = this->GetPositionWLD();
 	auto wldVecX = this->GetLengthXWLD();
@@ -77,9 +79,9 @@ bool BoxCol::isHit(Collider* tgt)
 
 	switch (typeid(*tgt).hash_code())
 	{
-	case static_cast<uint8_t>(ColliderType::Sphere):	return BandS(wldPos, wldVecX,wldVecY,wldVecZ ,dynamic_cast<SphereCol*>(tgt)->GetPositionWLD(), dynamic_cast<SphereCol*>(tgt)->GetRadiusWLD());
+	case static_cast<uint8_t>(ColliderType::Sphere):	return BandS(wldPos, wldVecX,wldVecY,wldVecZ ,dynamic_cast<SphereCol*>(tgt)->GetPositionWLD(), dynamic_cast<SphereCol*>(tgt)->GetRadiusWLD(), getlen);
 
-	case static_cast<uint8_t>(ColliderType::Box)	:	return BandB(wldPos, wldVecX,wldVecY,wldVecZ, dynamic_cast<BoxCol*>(tgt)->GetPositionWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthXWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthYWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthZWLD());
+	case static_cast<uint8_t>(ColliderType::Box)	:	return BandB(wldPos, wldVecX,wldVecY,wldVecZ, dynamic_cast<BoxCol*>(tgt)->GetPositionWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthXWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthYWLD(), dynamic_cast<BoxCol*>(tgt)->GetLengthZWLD(),getlen);
 
 	default:	return false;
 	}
@@ -150,24 +152,32 @@ float3 BoxCol::GetPositionWLD()
 {
 	float3 res = {};
 	XMStoreFloat3(&res, XMVector3Transform(XMLoadFloat3(&pos_), mat_));
+
+	return res;
 }
 
 float3 BoxCol::GetLengthXWLD()
 {
 	float3 res = {};
 	XMStoreFloat3(&res, XMVector3Transform(XMLoadFloat3(&vecX_), mat_));
+
+	return res;
 }
 
 float3 BoxCol::GetLengthYWLD()
 {
 	float3 res = {};
 	XMStoreFloat3(&res, XMVector3Transform(XMLoadFloat3(&vecY_), mat_));
+
+	return res;
 }
 
 float3 BoxCol::GetLengthZWLD()
 {
 	float3 res = {};
 	XMStoreFloat3(&res, XMVector3Transform(XMLoadFloat3(&vecZ_), mat_));
+
+	return res;
 }
 
 
@@ -186,12 +196,18 @@ uint8_t ColType<BoxCol>()
 
 }
 
-bool SandS(float3 c_pos, float c_rad, float3 t_pos, float t_rad)
+bool SandS(float3 c_pos, float c_rad, float3 t_pos, float t_rad , float3* getlen)
 {
-	return GetLength(c_pos - t_pos) < c_rad + t_rad;
+	float&& StoS = GetLength(c_pos - t_pos);
+	float&& rads = c_rad + t_rad;
+
+	bool res =StoS < rads;
+
+	if (res) *getlen = fl3Normalize(c_pos - t_pos) * (rads - StoS);
+	return res;
 }
 
-bool BandS(float3 bpos, float3 bx, float3 by, float3 bz, float3 spos, float srad)
+bool BandS(float3 bpos, float3 bx, float3 by, float3 bz, float3 spos, float srad , float3* getlen)
 {
 	float3 nearest = {};//scale for nearest
 
@@ -213,7 +229,7 @@ bool BandS(float3 bpos, float3 bx, float3 by, float3 bz, float3 spos, float srad
 	return (GetLength(nearest) + srad) >= GetLength(pos) ? false : true;
 }
 
-bool BandB(float3 c_pos, float3 cx, float3 cy, float3 cz, float3 t_pos, float3 tx, float3 ty, float3 tz)
+bool BandB(float3 c_pos, float3 cx, float3 cy, float3 cz, float3 t_pos, float3 tx, float3 ty, float3 tz , float3* getlen)
 {
 	float3 bbvec = t_pos - c_pos;
 	float bblenS = GetLengthSquared(bbvec);

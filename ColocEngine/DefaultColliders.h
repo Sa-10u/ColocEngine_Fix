@@ -5,13 +5,13 @@
 class Collider
 {
 public:
-	virtual bool isHit(Collider* col) = 0;
+	virtual bool isHit(Collider* col ,float3* getlen) = 0;
 };
 
 class SphereCol : public Collider
 {
 public:
-	bool isHit(Collider* tgt) override;
+	bool isHit(Collider* tgt, float3* getlen) override;
 
 	SphereCol();
 	SphereCol(float3 p, float r);
@@ -33,7 +33,7 @@ private:
 class BoxCol : public Collider
 {
 public:
-	bool isHit(Collider* col) override;
+	bool isHit(Collider* col, float3* getlen) override;
 	BoxCol();
 	BoxCol(float3 pos,float3 len);
 
@@ -74,9 +74,9 @@ enum class ColliderType
 
 };
 
-static bool SandS(float3 c_pos,float c_rad , float3 t_pos , float t_rad);
-static bool BandS(float3 bpos, float3 bx,float3 by ,float3 bz,float3 spos , float srad);
-static bool BandB(float3 c_pos,float3 cx, float3 cy, float3 cz, float3 t_pos, float3 tx, float3 ty, float3 tz);
+static bool SandS(float3 c_pos,float c_rad , float3 t_pos , float t_rad ,float3* getlen);
+static bool BandS(float3 bpos, float3 bx,float3 by ,float3 bz,float3 spos , float srad , float3* getlen);
+static bool BandB(float3 c_pos,float3 cx, float3 cy, float3 cz, float3 t_pos, float3 tx, float3 ty, float3 tz ,float3* getlen);
 
 //-----------------
 template<typename t>

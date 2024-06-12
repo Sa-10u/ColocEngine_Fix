@@ -3,17 +3,16 @@
 #include "ResourceManager.h"
 #include<array>
 
-class C_UI : public C_Quad
+class C_Billboard : public C_Quad
 {
 public:
 	void initialize() override;
 	void release() override;
 	void Run(float tick) override;
 
-	C_UI(string tag);
-	C_UI(string tag , SimpleQuad rect);
+	C_Billboard(string tag);
+	C_Billboard(string tag, SimpleQuad rect);
 
-	bool IsInside(float x, float y);
 	SimpleQuad GetInfo();
 	void SetInfo(SimpleQuad rec);
 	void SetTexture(MapBOOL mb);
@@ -27,7 +26,6 @@ public:
 
 	static uint16_t GetDrawCount();
 	static SIMPLEVERTEX vxcs[C_Quad::QUAD_VERTEX];
-
 
 public:
 	static std::array<SimpleQuad, ResourceManager::CBCOUNT> data;

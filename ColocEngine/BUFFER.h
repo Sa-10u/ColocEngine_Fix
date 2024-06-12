@@ -202,3 +202,17 @@ public:
 
 bool LoadMesh(const wchar_t* file, vector<MESH>& mesh, vector<Material>& material);
 bool LoadMesh(const wchar_t* file, RModel* ptr);
+
+//--------------------------------------
+
+struct alignas(16) SimpleQuad
+{
+	Rect2D rect;
+	Rect2D cutUV;
+
+	float tick;
+
+	float val0, val1, val2;
+
+	SimpleQuad();
+};

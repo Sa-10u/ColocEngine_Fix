@@ -102,7 +102,7 @@ private:
 	StructuredBuffer<MapBOOL>			SB_MB[FrameAmount];
 	StructuredBuffer<Material>			SB_MTL[FrameAmount];
 
-	StructuredBuffer<SimpleInfo_UI>		SB_UI[FrameAmount];
+	StructuredBuffer<SimpleQuad>		SB_UI[FrameAmount];
 	
 	CBUFFERVIEW<Util>					CBV_Util[FrameAmount];
 	CBUFFERVIEW<Cam>					CBV_Cam[FrameAmount];
