@@ -4,7 +4,7 @@
 
 using namespace std::filesystem;
 
-bool FileLoad(const char* str ,std::string* ptr)
+bool isResourceFile(const char* str ,std::string* ptr)
 {
 	if (str == nullptr)	return false;
 
@@ -37,7 +37,7 @@ bool FileLoad(const char* str ,std::string* ptr)
 	return false;
 }
 
-bool FileLoad(const wchar_t* str , std::wstring* ptr)
+bool isResourceFile(const wchar_t* str , std::wstring* ptr)
 {
 	if (str == nullptr)	return false;
 

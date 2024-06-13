@@ -1,6 +1,6 @@
 #include "Input.h"
 #include "WinView.h"
-
+#pragma warning(disable : 4995)
 LPDIRECTINPUT8   DInput = nullptr;
 
 namespace Input_KB
@@ -100,14 +100,18 @@ namespace Input_KB
 
 namespace Input_CR
 {
-    constexpr uint8_t MAX_Amount = 1;
-    uint8_t Using_Amount = 0;
-    LPDIRECTINPUTDEVICE8 CTR[MAX_Amount] = {};
-    DIJOYSTATE2 state[MAX_Amount];
-    DIJOYSTATE2 prev_state[MAX_Amount];
+   constexpr uint8_t MAX_Amount = 4;
+   // uint8_t Using_Amount = 0;
+   // LPDIRECTINPUTDEVICE8 CTR[MAX_Amount] = {};
+   // DIJOYSTATE2 state_[MAX_Amount];
+   // DIJOYSTATE2 prev_state[MAX_Amount];
+
+   XINPUT_STATE state_[MAX_Amount];
+   XINPUT_STATE before_[MAX_Amount];
 
     HRESULT Init()
     {
+        /*
         HRESULT res;
 
         //------------------------------
@@ -157,15 +161,33 @@ namespace Input_CR
             NULL,
             DIEDFL_FORCEFEEDBACK
         );
+        */
+
+        XInputEnable(true);
+        for (auto i = 0u; i < MAX_Amount; ++i) {
+
+            memset(&state_[i], 0, sizeof(XINPUT_STATE));
+        }
+
+        return S_OK;
     }
 
     void Update()
     {
+        /*
         for (auto i = 0u; i < Using_Amount; i++) {
             
             memcpy(&prev_state[i], &state[i], sizeof(state[i]));
             CTR[i]->Acquire();
             CTR[i]->GetDeviceState(sizeof(CTR[i]), &CTR[i]);
+        }
+        */
+
+        memcpy(&before_, &state_, sizeof(XINPUT_STATE) * MAX_Amount);
+
+        for (auto i = 0u; i < MAX_Amount; ++i) {
+
+            XInputGetState(i, &state_[i]);
         }
     }
 
@@ -176,7 +198,7 @@ namespace Input_CR
             DInput->Release();
             DInput = nullptr;
         }
-
+        /*
         for (auto i = 0u; i < MAX_Amount; ++i) {
             if (CTR[i] != nullptr)
             {
@@ -185,22 +207,73 @@ namespace Input_CR
                 CTR[i]= nullptr;
             }
         }
+        */
+        XInputEnable(false);
     }
 
-    bool Down(int code)
+    bool Down(int index, int code)
+    {
+        return state_[index].Gamepad.wButtons & code;
+    }
+
+    bool Free(int index, int code)
+    {
+        return !(state_[index].Gamepad.wButtons & code);
+    }
+
+    bool Push(int index, int code)
     {
         return false;
     }
-    bool Free(int code)
+
+    bool Up(int index, int code)
     {
         return false;
     }
-    bool Push(int code)
+
+    float2 GetStick_Left(int index)
     {
-        return false;
+        //-32768 to 32767
+        auto&& x = state_[index].Gamepad.sThumbLX;
+        auto&& y = state_[index].Gamepad.sThumbLY;
+
+        return float2
+        {
+            x > 0 ? x / 32767.0f : x / 32768.0f,
+            y > 0 ? y / 32767.0f : y / 32768.0f
+        };
     }
-    bool Up(int code)
+
+    float2 GetStick_Right(int index)
     {
-        return false;
+        //32768 - 32767
+        auto&& x = state_[index].Gamepad.sThumbRX;
+        auto&& y = state_[index].Gamepad.sThumbRY;
+
+        return float2
+        {
+            x > 0 ? x / 32767.0f : x / 32768.0f,
+            y > 0 ? y / 32767.0f : y / 32768.0f
+        };
+    }
+
+    bool isTrigger_Left(int index, float th)
+    {
+        return state_[index].Gamepad.bLeftTrigger > th * 0xff;
+    }
+
+    bool isTrigger_Right(int index, float th)
+    {
+        return state_[index].Gamepad.bRightTrigger > th * 0xff;
+    }
+
+    void SetVib(int index, float left, float right)
+    {
+        float l = (std::min)(left, 100.0f);
+        float r = (std::min)(right, 100.0f);
+
+        XINPUT_VIBRATION v = { (l * UINT16_MAX),(r * UINT16_MAX) }; 
+
+        XInputSetState(index, &v);
     }
 }

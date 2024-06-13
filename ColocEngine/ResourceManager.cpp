@@ -140,7 +140,7 @@ void ResourceManager::MakeErrorTex(Texture* tex)
 UINT ResourceManager::ModelLoad(std::wstring str)
 {
     std::wstring path;
-    if(!FileLoad(str.c_str(), &path))    return 0;
+    if(!isResourceFile(str.c_str(), &path))    return 0;
 
     for (int v = 0; v < models_.size();v++) {
 		if (models_[v].Name_ == path)	return v;
@@ -279,7 +279,7 @@ UINT ResourceManager::ModelLoad(std::wstring str)
 UINT ResourceManager::TexLoad(std::wstring str)
 {
     std::wstring path;
-    if (!FileLoad(str.c_str(), &path))    return 0;
+    if (!isResourceFile(str.c_str(), &path))    return 0;
 
     ID3D12Device* device_ = PTR_D3D::ptr->GetDevice();
 

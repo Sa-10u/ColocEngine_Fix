@@ -33,7 +33,7 @@ bool ShaderModel6_8::Init()
 bool ShaderModel6_8::Compile(std::wstring file, ID3DBlob*& blob, ShaderCompileType sct)
 {
 	std::wstring str;
-	if (!FileLoad(file.c_str(), &str))	return false;
+	if (!isResourceFile(file.c_str(), &str))	return false;
 
 	std::ifstream filecode(str, std::ios::binary);
 	std::string code = std::string(std::istreambuf_iterator<char>(filecode), std::istreambuf_iterator<char>());

@@ -1,36 +1,64 @@
 #include "S_Sound.h"
-#include"D3D.h"
 
 namespace S_Sound
 {
-	IDirectSound8* ds;
-	IDirectSoundBuffer* buff;
-	IDirectSoundBuffer8* buff8;
-
-//--------------------
-
+	IXAudio2* audio_ = {};
+	IXAudio2MasteringVoice* master_ = {};
+	IXAudio2SourceVoice* SEs_[SE_Amount] = {};
+	IXAudio2SourceVoice* BGMs_[SE_Amount] = {};
 
 	bool Init()
 	{
-		HRESULT res = DirectSoundCreate8(nullptr, &ds, nullptr);
+		auto&& res = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 		if (FAILED(res))	return false;
 
-		res =ds->SetCooperativeLevel(*PTR_WND::ptr, DSSCL_NORMAL);
+		res = XAudio2Create(&audio_, 0);
 		if (FAILED(res))	return false;
 
-		DSBUFFERDESC desc = {};
-		{
-			
-		}
-		res = ds->CreateSoundBuffer(&desc, &buff, nullptr);
-		if (FAILED(res))	return false;
+		return false;
 
-		res = buff->QueryInterface(IID_IDirectSoundBuffer8, reinterpret_cast<void**>(&buff8));
+		res = audio_->CreateMasteringVoice(&master_);
 		if (FAILED(res))	return false;
-
 	}
 
 	void Run()
 	{
 	}
+
+	void Term()
+	{
+		master_->DestroyVoice();
+		audio_->Release();
+
+		CoUninitialize();
+	}
+
+	bool LoadWave_wav(std::wstring* str, WaveData* wd)
+	{
+		std::wstring file = {};
+		if (!isResourceFile(str->c_str(), &file))	return false;
+
+		if (wd == nullptr)	return false;
+		delete[] wd->pBuf_;
+
+		HMMIO h_mmio = {};
+		MMCKINFO info_mmchunk = {};
+		MMCKINFO riff_chunk;
+
+		h_mmio = mmioOpen
+		(
+			file.data(),
+			nullptr,
+			MMIO_READ
+		);
+		if (h_mmio == nullptr)	return false;
+
+		riff_chunk.fccType = mmioFOURCC('W','A','V','E');
+	}
+}
+
+WaveData::~WaveData()
+{
+	//free(pBuf_);
+	delete[] pBuf_;
 }
