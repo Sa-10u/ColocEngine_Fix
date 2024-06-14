@@ -6,10 +6,15 @@ namespace S_Sound
 	IXAudio2MasteringVoice* master_ = {};
 	IXAudio2SourceVoice* SEs_[SE_Amount] = {};
 	IXAudio2SourceVoice* BGMs_[SE_Amount] = {};
+	
+	IMFMediaType* type_ = {};
 
 	bool Init()
 	{
 		auto&& res = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+		if (FAILED(res))	return false;
+
+		res = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
 		if (FAILED(res))	return false;
 
 		res = XAudio2Create(&audio_, 0);
@@ -19,6 +24,9 @@ namespace S_Sound
 
 		res = audio_->CreateMasteringVoice(&master_);
 		if (FAILED(res))	return false;
+
+		MFCreateMediaType(&type_);
+		type_->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
 	}
 
 	void Run()
@@ -30,17 +38,19 @@ namespace S_Sound
 		master_->DestroyVoice();
 		audio_->Release();
 
+		MFShutdown();
+
 		CoUninitialize();
 	}
 
-	bool LoadWave_wav(std::wstring* str, WaveData* wd)
+	bool LoadWave_wav(std::wstring* str, AudioData* ad)
 	{
 		std::wstring file = {};
 		if (!isResourceFile(str->c_str(), &file))	return false;
 
-		if (wd == nullptr)	return false;
-		delete[] wd->pBuf_;
-
+		if (ad == nullptr)	return false;
+		delete[] ad->pBuf_;
+		/*
 		HMMIO h_mmio = {};
 		MMCKINFO info_mmchunk = {};
 		MMCKINFO riff_chunk;
@@ -54,10 +64,54 @@ namespace S_Sound
 		if (h_mmio == nullptr)	return false;
 
 		riff_chunk.fccType = mmioFOURCC('W','A','V','E');
-	}
+	*/
+		type_->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
+
+		IMFSourceReader* srcreader_ = {};
+		auto&& res = MFCreateSourceReaderFromURL(file.c_str(), NULL, &srcreader_);
+		if (FAILED(res))	return false;
+
+		res = srcreader_->SetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM, nullptr, type_);
+		if (FAILED(res))	return false;
+
+		{
+			IMFMediaType* defType = {};
+
+			res = srcreader_->GetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM, &defType);
+			if (FAILED(res))	return false;
+
+			WAVEFORMATEXTENSIBLE* temp_ = {};
+
+			res = MFCreateWaveFormatExFromMFMediaType(
+				defType,
+				reinterpret_cast<WAVEFORMATEX**>(&temp_),
+				nullptr,
+				MFWaveFormatExConvertFlag_ForceExtensible
+			);
+			if (FAILED(res))	return false;
+
+			ad->format_ = *temp_;
+			CoTaskMemFree(temp_);
+
+			defType->Release();
+		}
+
+		IMFSample* sample = nullptr;
+		uint32_t flag = {};
+		uint32_t cnt_buf = {};
+
+		srcreader_->ReadSample
+		(
+			MF_SOURCE_READER_FIRST_AUDIO_STREAM,
+			NULL,
+			nullptr,
+			reinterpret_cast<unsigned long*>(&flag),
+			
+		);
+	}	
 }
 
-WaveData::~WaveData()
+AudioData::~AudioData()
 {
 	//free(pBuf_);
 	delete[] pBuf_;

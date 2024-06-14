@@ -2,19 +2,23 @@
 #include <xaudio2.h>
 #include<cstdint>
 #include<mmsystem.h>
+#include<mfapi.h>
+#include<mfidl.h>
+#include<mfreadwrite.h>
 
 #pragma comment(lib,"winmm.lib")
 #pragma comment(lib,"xaudio2.lib")
+#pragma comment(lib,"mfplat.lib")
 
 #include"FileLoader.h"
 
-struct WaveData
+struct AudioData
 {
-	WAVEFORMATEX format_;
+	WAVEFORMATEXTENSIBLE format_;
 	void* pBuf_;
 	uint32_t size_;
 
-	~WaveData();
+	~AudioData();
 };
 
 namespace S_Sound
@@ -26,6 +30,6 @@ namespace S_Sound
 	void Run();
 	void Term();
 
-	bool LoadWave_wav(std::wstring* str , WaveData* wd);
+	bool LoadWave_wav(std::wstring* str , AudioData* ad);
 };
 
