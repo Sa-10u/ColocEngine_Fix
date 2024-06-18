@@ -96,18 +96,31 @@ namespace S_Sound
 			defType->Release();
 		}
 
-		IMFSample* sample = nullptr;
-		uint32_t flag = {};
-		uint32_t cnt_buf = {};
+		while (true) {
+			IMFSample* sample = nullptr;
+			uint32_t flag = {};
+			uint32_t cnt_buf = {};
 
-		srcreader_->ReadSample
-		(
-			MF_SOURCE_READER_FIRST_AUDIO_STREAM,
-			NULL,
-			nullptr,
-			reinterpret_cast<unsigned long*>(&flag),
+			srcreader_->ReadSample
+			(
+				MF_SOURCE_READER_FIRST_AUDIO_STREAM,
+				NULL,
+				nullptr,
+				reinterpret_cast<unsigned long*>(&flag),
+				nullptr,
+				&sample
+			);
+			if (flag & MF_SOURCE_READERF_ENDOFSTREAM)break;;
+
+			IMFMediaBuffer* buf_media = nullptr;
+
+			sample->ConvertToContiguousBuffer(&buf_media);
+
+			u_char* buf = nullptr;
+			uint32_t length = {};
 			
-		);
+			buf_media->Lock(&buf, nullptr, &length);
+		}
 	}	
 }
 
