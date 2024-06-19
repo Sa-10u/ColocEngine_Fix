@@ -1,12 +1,20 @@
 #include "S_Sound.h"
+#include<vector>
+#include<queue>
 
 namespace S_Sound
 {
 	IXAudio2* audio_ = {};
 	IXAudio2MasteringVoice* master_ = {};
 	IXAudio2SourceVoice* SEs_[SE_Amount] = {};
-	IXAudio2SourceVoice* BGMs_[SE_Amount] = {};
+	IXAudio2SourceVoice* BGMs_[BGM_Amount] = {};
+
+	std::queue<IXAudio2SourceVoice*> useSE = {};
+	std::queue<IXAudio2SourceVoice*> idleSE = {};
 	
+	std::queue<IXAudio2SourceVoice*> useBGM = {};
+	std::queue<IXAudio2SourceVoice*> idleBGM = {};
+
 	IMFMediaType* type_ = {};
 
 	bool Init()
@@ -27,6 +35,13 @@ namespace S_Sound
 
 		MFCreateMediaType(&type_);
 		type_->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
+
+		for (auto i = 0u; i < SE_Amount; ++i) {
+			idleSE.push(SEs_[i]);
+		}
+		for (auto i = 0u; i < BGM_Amount; ++i) {
+			idleBGM.push(BGMs_[i]);
+		}
 	}
 
 	void Run()
@@ -96,32 +111,87 @@ namespace S_Sound
 			defType->Release();
 		}
 
-		IMFSample* sample = nullptr;
-		uint32_t flag = {};
-		u_long cnt_buf = {};
-		
-		srcreader_->ReadSample
-		(
-			MF_SOURCE_READER_FIRST_AUDIO_STREAM,
-			NULL,
-			nullptr,
-			reinterpret_cast<unsigned long*>(&flag),
-			nullptr,
-			&sample
-		);
-		if (sample == nullptr || FAILED(sample->GetBufferCount(&cnt_buf)) || cnt_buf <= 0)	return false;
+		//auto changeVecLen = [](std::vector<unsigned long>& vec, int size)->int {vec.resize(size); return 0; };
 
-		IMFMediaBuffer* buf_media = nullptr;
-		res = sample->ConvertToContiguousBuffer(&buf_media);
-		if (FAILED(res))return false;
+		std::vector<unsigned long> Data = {};
+		unsigned long pos = {};
 
-		uint8_t* lbuf = nullptr;
-		unsigned long maxLen = {};
-		unsigned long curLen = {};
+		{
+			{
+				IMFSample* sample = nullptr;
+				uint32_t flag = {};
+				u_long cnt_buf = {};
 
-		res = buf_media->Lock(&lbuf, &maxLen, &curLen);
-		if (FAILED(res))	return false;
-		buf_media->Unlock();
+				srcreader_->ReadSample
+				(
+					MF_SOURCE_READER_FIRST_AUDIO_STREAM,
+					NULL,
+					nullptr,
+					reinterpret_cast<unsigned long*>(&flag),
+					nullptr,
+					&sample
+				);
+				if (flag & MF_SOURCE_READERF_ENDOFSTREAM)	return false;;
+				if (sample == nullptr || FAILED(sample->GetBufferCount(&cnt_buf)) || cnt_buf <= 0)	return false;
+
+				IMFMediaBuffer* buf_media = nullptr;
+				res = sample->ConvertToContiguousBuffer(&buf_media);
+				if (FAILED(res))return false;
+
+				uint8_t* lbuf = nullptr;
+				unsigned long curLen = {};
+				unsigned long curMax = {};
+
+				res = buf_media->Lock(&lbuf, &curMax, &curLen);
+				if (FAILED(res))	return false;
+				buf_media->Unlock();
+				buf_media->Release();
+				sample->Release();
+
+				Data.resize(curMax);
+				memcpy(Data.data(), lbuf, curLen);
+
+				pos += curLen;
+			}
+			while (true) {
+
+				IMFSample* sample = nullptr;
+				uint32_t flag = {};
+				u_long cnt_buf = {};
+
+				srcreader_->ReadSample
+				(
+					MF_SOURCE_READER_FIRST_AUDIO_STREAM,
+					NULL,
+					nullptr,
+					reinterpret_cast<unsigned long*>(&flag),
+					nullptr,
+					&sample
+				);
+				if (flag & MF_SOURCE_READERF_ENDOFSTREAM)	break;;
+				if (sample == nullptr || FAILED(sample->GetBufferCount(&cnt_buf)) || cnt_buf <= 0)	return false;
+
+				IMFMediaBuffer* buf_media = nullptr;
+				res = sample->ConvertToContiguousBuffer(&buf_media);
+				if (FAILED(res))return false;
+
+				uint8_t* lbuf = nullptr;
+				unsigned long curLen = {};
+
+				res = buf_media->Lock(&lbuf, nullptr, &curLen);
+				if (FAILED(res))	return false;
+				buf_media->Unlock();
+				buf_media->Release();
+				sample->Release();
+
+				memcpy(Data.data() + pos, lbuf, curLen);
+				pos += curLen;
+
+				//static int a = (0, changeVecLen(Data, maxLen));//unuse
+			}
+
+			
+		}
 	}
 
 
