@@ -1,5 +1,4 @@
 #include "S_Sound.h"
-#include<vector>
 
 namespace S_Sound
 {
@@ -97,34 +96,35 @@ namespace S_Sound
 			defType->Release();
 		}
 
-		std::vector<unsigned char> Data = {};
-		{
-			IMFSample* sample = nullptr;
-			uint32_t flag = {};
-			uint32_t cnt_buf = {};
+		IMFSample* sample = nullptr;
+		uint32_t flag = {};
+		u_long cnt_buf = {};
+		
+		srcreader_->ReadSample
+		(
+			MF_SOURCE_READER_FIRST_AUDIO_STREAM,
+			NULL,
+			nullptr,
+			reinterpret_cast<unsigned long*>(&flag),
+			nullptr,
+			&sample
+		);
+		if (sample == nullptr || FAILED(sample->GetBufferCount(&cnt_buf)) || cnt_buf <= 0)	return false;
 
-			srcreader_->ReadSample
-			(
-				MF_SOURCE_READER_FIRST_AUDIO_STREAM,
-				NULL,
-				nullptr,
-				reinterpret_cast<unsigned long*>(&flag),
-				nullptr,
-				&sample
-			);
-			if ((sample == nullptr) || (FAILED(sample->GetCount(&cnt_buf)) || (cnt_buf <=0)))return false;
+		IMFMediaBuffer* buf_media = nullptr;
+		res = sample->ConvertToContiguousBuffer(&buf_media);
+		if (FAILED(res))return false;
 
-			IMFMediaBuffer* buf_media = nullptr;
+		uint8_t* lbuf = nullptr;
+		unsigned long maxLen = {};
+		unsigned long curLen = {};
 
-			res = sample->ConvertToContiguousBuffer(&buf_media);
-			if (FAILED(res))	return false;
+		res = buf_media->Lock(&lbuf, &maxLen, &curLen);
+		if (FAILED(res))	return false;
+		buf_media->Unlock();
+	}
 
-			u_char* buf = nullptr;
-			uint32_t length = {};
-			
-			buf_media->Lock(&buf, nullptr, reinterpret_cast<unsigned long*>(& length));
-		}
-	}	
+
 }
 
 AudioData::~AudioData()
