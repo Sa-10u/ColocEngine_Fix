@@ -1,4 +1,5 @@
 #include "S_Sound.h"
+#include<vector>
 
 namespace S_Sound
 {
@@ -96,7 +97,8 @@ namespace S_Sound
 			defType->Release();
 		}
 
-		while (true) {
+		std::vector<unsigned char> Data = {};
+		{
 			IMFSample* sample = nullptr;
 			uint32_t flag = {};
 			uint32_t cnt_buf = {};
@@ -110,16 +112,17 @@ namespace S_Sound
 				nullptr,
 				&sample
 			);
-			if (flag & MF_SOURCE_READERF_ENDOFSTREAM)break;;
+			if ((sample == nullptr) || (FAILED(sample->GetCount(&cnt_buf)) || (cnt_buf <=0)))return false;
 
 			IMFMediaBuffer* buf_media = nullptr;
 
-			sample->ConvertToContiguousBuffer(&buf_media);
+			res = sample->ConvertToContiguousBuffer(&buf_media);
+			if (FAILED(res))	return false;
 
 			u_char* buf = nullptr;
 			uint32_t length = {};
 			
-			buf_media->Lock(&buf, nullptr, &length);
+			buf_media->Lock(&buf, nullptr, reinterpret_cast<unsigned long*>(& length));
 		}
 	}	
 }
