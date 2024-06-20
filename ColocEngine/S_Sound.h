@@ -5,6 +5,8 @@
 #include<mfapi.h>
 #include<mfidl.h>
 #include<mfreadwrite.h>
+#include<vector>
+#include<string>
 
 #pragma comment(lib,"winmm.lib")
 #pragma comment(lib,"xaudio2.lib")
@@ -15,8 +17,8 @@
 struct AudioData
 {
 	WAVEFORMATEXTENSIBLE format_;
-	void* pBuf_;
-	uint32_t size_;
+	std::vector<byte> pBuf_;
+	std::wstring name_;
 
 	~AudioData();
 };

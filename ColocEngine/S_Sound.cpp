@@ -1,5 +1,4 @@
 #include "S_Sound.h"
-#include<vector>
 #include<queue>
 
 namespace S_Sound
@@ -64,7 +63,7 @@ namespace S_Sound
 		if (!isResourceFile(str->c_str(), &file))	return false;
 
 		if (ad == nullptr)	return false;
-		delete[] ad->pBuf_;
+		ad->pBuf_.clear();
 		/*
 		HMMIO h_mmio = {};
 		MMCKINFO info_mmchunk = {};
@@ -113,9 +112,8 @@ namespace S_Sound
 
 		//auto changeVecLen = [](std::vector<unsigned long>& vec, int size)->int {vec.resize(size); return 0; };
 
-		std::vector<unsigned long> Data = {};
 		unsigned long pos = {};
-
+		
 		{
 			{
 				IMFSample* sample = nullptr;
@@ -138,7 +136,7 @@ namespace S_Sound
 				res = sample->ConvertToContiguousBuffer(&buf_media);
 				if (FAILED(res))return false;
 
-				uint8_t* lbuf = nullptr;
+				byte* lbuf = nullptr;
 				unsigned long curLen = {};
 				unsigned long curMax = {};
 
@@ -148,8 +146,8 @@ namespace S_Sound
 				buf_media->Release();
 				sample->Release();
 
-				Data.resize(curMax);
-				memcpy(Data.data(), lbuf, curLen);
+				ad->pBuf_.resize(curMax);
+				memcpy(ad->pBuf_.data(), lbuf, curLen);
 
 				pos += curLen;
 			}
@@ -175,7 +173,7 @@ namespace S_Sound
 				res = sample->ConvertToContiguousBuffer(&buf_media);
 				if (FAILED(res))return false;
 
-				uint8_t* lbuf = nullptr;
+				byte* lbuf = nullptr;
 				unsigned long curLen = {};
 
 				res = buf_media->Lock(&lbuf, nullptr, &curLen);
@@ -184,21 +182,21 @@ namespace S_Sound
 				buf_media->Release();
 				sample->Release();
 
-				memcpy(Data.data() + pos, lbuf, curLen);
+				memcpy(ad->pBuf_.data() + pos, lbuf, curLen);
 				pos += curLen;
 
 				//static int a = (0, changeVecLen(Data, maxLen));//unuse
 			}
-
-			
 		}
-	}
 
+		ad->name_ = *str;
+	}
+	
 
 }
 
 AudioData::~AudioData()
 {
 	//free(pBuf_);
-	delete[] pBuf_;
+	pBuf_.clear();
 }
