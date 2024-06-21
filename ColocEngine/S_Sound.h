@@ -31,6 +31,19 @@ namespace S_Sound
 	bool Init();
 	void Run();
 	void Term();
+	bool CreateSE(const AudioData* data,bool isLoop);
+	bool CreateBGM(const AudioData* data);
+	bool Starts(bool isSE ,bool isBGM);
+	bool Stops(bool isSE, bool isBGM);
+	bool Destroys(bool isSE,bool isBGM);
+
+	bool StartSE(IXAudio2SourceVoice* ptr);
+	bool StartBGM(IXAudio2SourceVoice* ptr);
+	bool StopSE(IXAudio2SourceVoice* ptr);
+	bool StopBGM(IXAudio2SourceVoice* ptr);
+	bool DestroySE(IXAudio2SourceVoice* ptr);
+	bool DestroyBGM(IXAudio2SourceVoice* ptr);
+
 
 	bool LoadWave_wav(std::wstring* str , AudioData* ad);
 };
