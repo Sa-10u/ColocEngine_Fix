@@ -1049,11 +1049,15 @@ void D3d::Update()
 
         XMStoreFloat3(&CBV_Cam[IND_frame].ptr->pos, CAM::Pos);
         XMStoreFloat3(&CBV_Cam[IND_frame].ptr->tgt, CAM::Tgt);
+        CBV_Cam[IND_frame].ptr->resol_x = Width;
+        CBV_Cam[IND_frame].ptr->resol_y = Height;
         
         memcpy(&CBV_LGT[IND_frame].ptr->pl, P_Light::pLight(), P_Light::GetSize());
         memcpy(&CBV_LGT[IND_frame].ptr->dl, D_Light::pLight(), D_Light::GetSize());
         memcpy(&CBV_LGT[IND_frame].ptr->al, A_Light::pLight(), A_Light::GetSize());
     }
+
+    
 
     CAM::Run();
 }

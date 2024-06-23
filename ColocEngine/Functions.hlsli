@@ -26,3 +26,19 @@ float3 LineNoise(float val, float am, float f)
     return float3(1, 1, 1);
 }
 
+float4 Dithering(float2 spos, float4 col,uint2 pix)
+{
+    static const float4x4 bayer = 
+        {
+            0/16,   8/16,   2/16,    10/16,
+            12/16,  4/16,   14/16,   6/16,
+            3/16,   11/16,  1/16,    9/16,
+            15/16,  7/16,   13/16,   5/16
+        };
+
+    uint2 index = ((uint2)(spos.xy * pix))%4;
+    clip(bayer[index.y][index.x] <col.a ? -1 : 1);
+    
+    return float4(col.rgb,1);
+}
+

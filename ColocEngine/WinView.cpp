@@ -128,7 +128,6 @@ bool WinView::initialize()
     UpdateWindow(h_wnd);
     SetFocus(h_wnd);
 
-
     return true;
 }
 
