@@ -30,7 +30,7 @@ void C_Player::Run(float tick)
 	oi.wld = trans->WLDGetMTX();
 
 	MapBOOL mb = {};
-	mb.isD = ResourceManager::TexLoad(L"MK_tex1.png");
+	mb.isD = ResourceManager::TexLoad(L"test.png");
 
 	MapBOOL* ptr[1] = { &mb };
 

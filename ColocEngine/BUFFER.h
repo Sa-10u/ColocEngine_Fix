@@ -141,9 +141,9 @@ struct alignas(256) Util
 struct alignas(256) Cam
 {
 	XMFLOAT3 pos;
+	uint32_t resol_x;
 	XMFLOAT3 tgt;
-	uint16_t resol_x;
-	uint16_t resol_y;
+	uint32_t resol_y;
 };
 
 struct alignas(256) Lights

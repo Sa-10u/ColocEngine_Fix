@@ -83,9 +83,9 @@ cbuffer Util : register(b0)
 cbuffer CAM : register(b256)
 {
     float3 Cpos;
-    float3 Ctgt;
     uint resol_x;
-	uint resol_y;
+    float3 Ctgt;
+    uint resol_y;
 };
 
 static const uint MAX_LIGHT = 256;

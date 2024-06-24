@@ -12,7 +12,7 @@ struct VSinput
 	
 	uint ID		: SV_InstanceID;
     uint VID	: SV_VertexID;
-	uint offset : SV_StartInstanceLocation;
+	//uint offset : SV_StartInstanceLocation;
 };
 
 struct VSoutput
@@ -67,10 +67,10 @@ struct MapBOOL
 struct Material
 {
 	float3 dif;
-	float shin;
-
-	float3 spec;
 	float alp;
+	
+	float3 spec;
+	float shin;
 
 	float3 emis;
 	float emis_str;	
@@ -79,8 +79,8 @@ struct Material
 cbuffer CAM	:register(b256)
 {
 	float3 Cpos;
+    uint resol_x;
 	float3 Ctgt;
-	uint resol_x;
 	uint resol_y;
 };
 

@@ -36,9 +36,9 @@ float4 Dithering(float2 spos, float4 col,uint2 pix)
             15/16,  7/16,   13/16,   5/16
         };
 
-    uint2 index = ((uint2)(spos.xy * pix))%4;
-    clip(bayer[index.y][index.x] <col.a ? -1 : 1);
-    
+    uint2 index = ((uint2)(spos.xy))%4;
+    clip(bayer[index.y][index.x] <= col.a ? 1 : -1);
+    return float4(0, bayer[index.y][index.x],0, 1);
     return float4(col.rgb,1);
 }
 
