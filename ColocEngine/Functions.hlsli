@@ -30,15 +30,15 @@ float4 Dithering(float2 spos, float4 col,uint2 pix)
 {
     static const float4x4 bayer = 
         {
-            0/16,   8/16,   2/16,    10/16,
-            12/16,  4/16,   14/16,   6/16,
-            3/16,   11/16,  1/16,    9/16,
-            15/16,  7/16,   13/16,   5/16
+            0/16.0,   8/16.0,   2/16.0,    10/16.0,
+            12/16.0,  4/16.0,   14/16.0,   6/16.0,
+            3/16.0,   11/16.0,  1/16.0,    9/16.0,
+            15/16.0,  7/16.0,   13/16.0,   5/16.0
         };
 
     uint2 index = ((uint2)(spos.xy))%4;
-    clip(bayer[index.y][index.x] <= col.a ? 1 : -1);
-    return float4(0, bayer[index.y][index.x],0, 1);
+    clip(bayer[index.y][index.x] < col.a ? 1 : -1);
+    //return float4(0, bayer[index.y][index.x],0, 1);
     return float4(col.rgb,1);
 }
 

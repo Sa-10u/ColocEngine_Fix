@@ -1035,6 +1035,12 @@ void D3d::Run(int interval)
 void D3d::Update()
 {
     {
+        if (PTR_D3D::ptr != this)
+        {
+            auto b = 0;
+        }
+        CAM::Run();
+
         static float time_ = 0.0f;
         constexpr float incre = 1.0f / 60.0f;
 
@@ -1057,9 +1063,11 @@ void D3d::Update()
         memcpy(&CBV_LGT[IND_frame].ptr->al, A_Light::pLight(), A_Light::GetSize());
     }
 
-    
+    if (this == nullptr)
+    {
+        auto i = 0;
+    }
 
-    CAM::Run();
 }
 
 void D3d::write()

@@ -161,7 +161,6 @@ void WinView::loop()
     auto ed = system_clock::now();
     float tick = .0f;
 
-
     while (msg.message != WM_QUIT) {
 
         if (PeekMessage(&msg, _ALL, 0, 0, PM_REMOVE))

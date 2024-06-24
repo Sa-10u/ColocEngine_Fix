@@ -94,10 +94,7 @@ void P_Light::release()
 
 void P_Light::Run(float tick)
 {
-	this->index_ = cnt_;
-	cnt_++;
 
-	comp[index_] = this->datnum;
 }
 
 D_Light::D_Light()
@@ -174,10 +171,7 @@ void D_Light::release()
 
 void D_Light::Run(float tick)
 {
-	index_ = cnt_;
-	cnt_++;
 
-	comp[index_] = datnum;
 }
 
 A_Light::A_Light()
@@ -242,10 +236,7 @@ void A_Light::release()
 
 void A_Light::Run(float tick)
 {
-	index_ = cnt_;
-	cnt_++;
 
-	comp[index_] = datnum;
 }
 
 //--------------------------
