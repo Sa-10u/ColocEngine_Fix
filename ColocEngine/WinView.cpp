@@ -6,6 +6,7 @@
 #include"ResourceManager.h"
 #include"PSOManager.h"
 #include"ShaderCompiler.h"
+#include"S_Sound.h"
 
 using namespace std::chrono;
 
@@ -47,12 +48,14 @@ bool WinView::setup()
     {
         if (D3D->Initialize(h_wnd,h_,w_))
         {
+
             ResourceManager::Init();
             CAM::Init();
             GameMain::Init();
             DataManager::Init();
             WorldManager::Init();
             Input_KB::Init();
+            S_Sound::Init();
 
             return true;
         }
@@ -151,6 +154,7 @@ void WinView::termination()
     
     PSOManager::Term();
     ResourceManager::Term();
+    S_Sound::Term();
 }
 
 void WinView::loop()

@@ -48,6 +48,6 @@ namespace S_Sound
 	bool DestroyBGM(IXAudio2SourceVoice* ptr);
 
 
-	bool LoadWave_wav(std::wstring* str , AudioData* ad);
+	bool LoadWave_wav(std::wstring str , AudioData* ad);
 };
 

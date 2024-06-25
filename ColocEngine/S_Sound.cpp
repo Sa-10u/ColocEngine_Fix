@@ -29,8 +29,6 @@ namespace S_Sound
 		res = XAudio2Create(&audio_, 0);
 		if (FAILED(res))	return false;
 
-		return false;
-
 		res = audio_->CreateMasteringVoice(&master_);
 		if (FAILED(res))	return false;
 
@@ -75,7 +73,7 @@ namespace S_Sound
 		auto fmt = data->format_.Format;
 		fmt.wBitsPerSample = data->format_.Format.nBlockAlign * 8 / data->format_.Format.nChannels;
 
-		auto res = audio_->CreateSourceVoice
+		auto&& res = audio_->CreateSourceVoice
 		(
 			&buf,
 			reinterpret_cast<WAVEFORMATEX*>(&fmt)
@@ -93,7 +91,7 @@ namespace S_Sound
 			if (FAILED(res))	return false;
 		}
 		standbySE.push_back(buf);
-
+		
 		return true;
 	}
 
@@ -240,10 +238,10 @@ namespace S_Sound
 	}
 
 
-	bool LoadWave_wav(std::wstring* str, AudioData* ad)
+	bool LoadWave_wav(std::wstring str, AudioData* ad)
 	{
 		std::wstring file = {};
-		if (!isResourceFile(str->c_str(), &file))	return false;
+		if (!isResourceFile(str.c_str(), &file))	return false;
 
 		if (ad == nullptr)	return false;
 		ad->pBuf_.clear();
@@ -365,14 +363,16 @@ namespace S_Sound
 				buf_media->Release();
 				sample->Release();
 
-				memcpy(ad->pBuf_.data() + pos, lbuf, curLen);
+				memcpy(ad->pBuf_.data() , lbuf, curLen);
 				pos += curLen;
+
+				break;
 
 				//static int a = (0, changeVecLen(Data, maxLen));//unuse
 			}
 		}
 
-		ad->name_ = *str;
+		ad->name_ = str;
 	}
 	
 

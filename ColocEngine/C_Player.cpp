@@ -20,6 +20,9 @@ void C_Player::initialize()
 	mb.isD = 1;
 
 	ui->SetTexture(mb);
+
+	S_Sound::LoadWave_wav(L"loop1.wav", &ad);
+	S_Sound::CreateSE(&ad, true);
 }
 
 void C_Player::Run(float tick)
