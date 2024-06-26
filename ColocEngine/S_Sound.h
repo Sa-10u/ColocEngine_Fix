@@ -19,7 +19,7 @@
 
 struct AudioData
 {
-	WAVEFORMATEXTENSIBLE format_;
+	WAVEFORMATEX format_;
 	std::vector<byte> pBuf_;
 	std::wstring name_;
 
@@ -47,6 +47,7 @@ namespace S_Sound
 	bool DestroySE(IXAudio2SourceVoice* ptr);
 	bool DestroyBGM(IXAudio2SourceVoice* ptr);
 
+	size_t GetAudioFileData(std::wstring file ,IMFMediaType* t);
 
 	bool LoadWave_wav(std::wstring str , AudioData* ad);
 };

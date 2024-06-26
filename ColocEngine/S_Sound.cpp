@@ -70,14 +70,10 @@ namespace S_Sound
 		auto buf = idleSE.front();
 		idleSE.pop_front();
 
-		auto fmt = data->format_.Format;
-		fmt.wBitsPerSample = data->format_.Format.nBlockAlign * 8 / data->format_.Format.nChannels;
-		fmt.nBlockAlign = 
-
 		auto&& res = audio_->CreateSourceVoice
 		(
 			buf,
-			reinterpret_cast<WAVEFORMATEX*>(&fmt)
+			&data->format_
 		);
 		if (FAILED(res))	return false;
 
@@ -238,6 +234,56 @@ namespace S_Sound
 		return l_destroy(ptr, standbyBGM, idleBGM);
 	}
 
+	size_t GetAudioFileData(std::wstring file, IMFMediaType* t)
+	{
+		size_t size = NULL;
+
+		IMFSourceReader* rd = {};
+
+		auto&& res = MFCreateSourceReaderFromURL(file.c_str(), nullptr, &rd);
+		if (FAILED(res))	return NULL;
+
+		res = rd->SetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM, nullptr, t);
+		if (FAILED(res))	return NULL;
+
+		while (true) {
+
+			IMFSample* sample = nullptr;
+			uint32_t flag = {};
+			u_long cnt_buf = {};
+
+			rd->ReadSample
+			(
+				MF_SOURCE_READER_FIRST_AUDIO_STREAM,
+				NULL,
+				nullptr,
+				reinterpret_cast<unsigned long*>(&flag),
+				nullptr,
+				&sample
+			);
+			if (flag & MF_SOURCE_READERF_ENDOFSTREAM)	break;
+			if (sample == nullptr || FAILED(sample->GetBufferCount(&cnt_buf)) || cnt_buf < 0)	return NULL;
+
+			IMFMediaBuffer* buf_media = nullptr;
+			res = sample->ConvertToContiguousBuffer(&buf_media);
+			if (FAILED(res))return NULL;
+
+			u_long s = NULL;
+
+			u_char *empty = nullptr;
+
+			res = buf_media->Lock(&empty, nullptr, &s);
+			if (FAILED(res))	return NULL;
+
+			size += s;
+			
+			buf_media->Unlock();
+			buf_media->Release();
+			sample->Release();
+		}
+
+		return size;
+	}
 
 	bool LoadWave_wav(std::wstring str, AudioData* ad)
 	{
@@ -264,7 +310,7 @@ namespace S_Sound
 		type_->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
 
 		IMFSourceReader* srcreader_ = {};
-		auto&& res = MFCreateSourceReaderFromURL(file.c_str(), NULL, &srcreader_);
+		auto&& res = MFCreateSourceReaderFromURL(file.c_str(), nullptr, &srcreader_);
 		if (FAILED(res))	return false;
 
 		res = srcreader_->SetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM, nullptr, type_);
@@ -276,13 +322,13 @@ namespace S_Sound
 			res = srcreader_->GetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM, &defType);
 			if (FAILED(res))	return false;
 
-			WAVEFORMATEXTENSIBLE* temp_ = {};
+			WAVEFORMATEX* temp_ = {};
 
 			res = MFCreateWaveFormatExFromMFMediaType(
 				defType,
 				reinterpret_cast<WAVEFORMATEX**>(&temp_),
 				nullptr,
-				MFWaveFormatExConvertFlag_ForceExtensible
+				MFWaveFormatExConvertFlag_Normal
 			);
 			if (FAILED(res))	return false;
 
@@ -293,44 +339,11 @@ namespace S_Sound
 		}
 
 		//auto changeVecLen = [](std::vector<unsigned long>& vec, int size)->int {vec.resize(size); return 0; };
-		
+		size_t s = GetAudioFileData(file.c_str(), type_);
+
 		{
 			unsigned long curLen = {};
-			unsigned long curMax = {};
-			{
-				IMFSample* sample = nullptr;
-				uint32_t flag = {};
-				u_long cnt_buf = {};
-
-				srcreader_->ReadSample
-				(
-					MF_SOURCE_READER_FIRST_AUDIO_STREAM,
-					NULL,
-					nullptr,
-					reinterpret_cast<unsigned long*>(&flag),
-					nullptr,
-					&sample
-				);
-				if (flag & MF_SOURCE_READERF_ENDOFSTREAM)	return false;;
-				if (sample == nullptr || FAILED(sample->GetBufferCount(&cnt_buf)) || cnt_buf <= 0)	return false;
-
-				IMFMediaBuffer* buf_media = nullptr;
-				res = sample->ConvertToContiguousBuffer(&buf_media);
-				if (FAILED(res))return false;
-
-				byte* lbuf = nullptr;
-
-				res = buf_media->Lock(&lbuf, &curMax, &curLen);
-				if (FAILED(res))	return false;
-				buf_media->Unlock();
-				buf_media->Release();
-				sample->Release();
-
-				ad->pBuf_.resize(curMax);
-
-				size_t pos = curMax - curLen;
-				memcpy(ad->pBuf_.data() + pos, lbuf, curLen);
-			}
+			
 			while (true) {
 
 				IMFSample* sample = nullptr;
@@ -355,19 +368,22 @@ namespace S_Sound
 
 				byte* lbuf = nullptr;
 
-				res = buf_media->Lock(&lbuf,&curMax, &curLen);
+				res = buf_media->Lock(&lbuf,nullptr, &curLen);
 				if (FAILED(res))	return false;
 
-				size_t pos = curMax - curLen;
-				memcpy(ad->pBuf_.data() + pos , lbuf, curLen);
+				size_t size = ad->pBuf_.size() + curLen;
+
+				ad->pBuf_.resize(size);
+				memcpy(ad->pBuf_.data() + size - curLen , lbuf, curLen);
 
 				buf_media->Unlock();
 				buf_media->Release();
 				sample->Release();
+
 				//static int a = (0, changeVecLen(Data, maxLen));//unuse
 			}
-		}
 
+		}
 		ad->name_ = str;
 		return true;
 	}

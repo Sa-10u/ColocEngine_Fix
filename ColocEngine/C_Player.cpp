@@ -21,12 +21,16 @@ void C_Player::initialize()
 
 	ui->SetTexture(mb);
 
-	S_Sound::LoadWave_wav(L"loop1.wav", &ad);
+	S_Sound::LoadWave_wav(L"menuettm.mp3", &ad);
 	S_Sound::CreateSE(&ad, true);
+
+	S_Sound::Starts(1, 1);
 }
 
 void C_Player::Run(float tick)
 {
+	static int cnt = 0;
+	cnt++;
 	trans->scale = {1,1,1};
 	trans->pos = {-1,0,0};
 
@@ -56,6 +60,16 @@ void C_Player::Run(float tick)
 
 	oi.wld = trans->WLDGetMTX();
 	S_Draw::Draw(&oi, md, nullptr, NULL);
+
+	if (cnt == 100)
+	{
+		S_Sound::Stops(1, 1);
+	}
+
+	if (cnt == 300)
+	{
+		S_Sound::Starts(1, 1);
+	}
 }
 
 void C_Player::release()
