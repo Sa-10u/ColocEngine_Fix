@@ -19,4 +19,7 @@ private:
 	ObjInfo oi;
 	uint16_t md;
 	AudioData ad;
+	AudioData a;
+
+	Sounder* sd;
 };

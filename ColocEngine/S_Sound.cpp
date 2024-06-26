@@ -16,6 +16,10 @@ namespace S_Sound
 	std::list<IXAudio2SourceVoice**> idleBGM = {};
 	std::list<IXAudio2SourceVoice**> standbyBGM = {};
 
+	float BaseVol_SE = 1.0f;
+	float BaseVol_BGM = 1.0f;
+	float BaseVol_Master = 1.0f;
+
 	IMFMediaType* type_ = {};
 
 	bool Init()
@@ -60,12 +64,12 @@ namespace S_Sound
 		CoUninitialize();
 	}
 
-	bool CreateBGM(const AudioData* data)
+	bool CreateBGM(const AudioData* data, Sounder** s)
 	{
 		return false;
 	}
 
-	bool CreateSE(const AudioData* data ,bool isLoop)
+	bool CreateSE(const AudioData* data ,bool isLoop, Sounder** s)
 	{
 		auto buf = idleSE.front();
 		idleSE.pop_front();
@@ -83,13 +87,15 @@ namespace S_Sound
 			temp.Flags = XAUDIO2_END_OF_STREAM;
 			temp.AudioBytes = data->pBuf_.size() * sizeof(data->pBuf_[0]);
 			temp.LoopCount = isLoop ? XAUDIO2_LOOP_INFINITE : false;
-
+			
 			res = (*buf)->SubmitSourceBuffer(&temp);
 			if (FAILED(res))	return false;
 		}
 		standbySE.push_back(buf);
 		
+		if(s != nullptr)	*s = new Sounder(*buf, true);
 		return true;
+
 	}
 
 	bool Starts(bool isSE,bool isBGM)//when stop or end,call back of self push to list
@@ -204,34 +210,34 @@ namespace S_Sound
 			return false;
 		};
 
-	bool StartSE(IXAudio2SourceVoice* ptr)
+	bool StartSE(Sounder* ptr)
 	{
-		return l_start(ptr, standbySE, useSE);
+		return l_start((ptr->GetPointer()), standbySE, useSE);
 	}
 
-	bool StartBGM(IXAudio2SourceVoice* ptr)
+	bool StartBGM(Sounder* ptr)
 	{
-		return  l_start(ptr, standbyBGM, useBGM);
+		return  l_start((ptr->GetPointer()), standbyBGM, useBGM);
 	}
 
-	bool StopSE(IXAudio2SourceVoice* ptr)
+	bool StopSE(Sounder* ptr)
 	{
-		return l_stop(ptr, useSE, standbySE);
+		return l_stop((ptr->GetPointer()), useSE, standbySE);
 	}
 
-	bool StopBGM(IXAudio2SourceVoice* ptr)
+	bool StopBGM(Sounder* ptr)
 	{
-		return l_stop(ptr, useBGM, standbyBGM);
+		return l_stop((ptr->GetPointer()), useBGM, standbyBGM);
 	}
 
-	bool DestroySE(IXAudio2SourceVoice* ptr)
+	bool DestroySE(Sounder* ptr)
 	{
-		return l_destroy(ptr, standbySE, idleSE);
+		return l_destroy((ptr->GetPointer()), standbySE, idleSE);
 	}
 
-	bool DestroyBGM(IXAudio2SourceVoice* ptr)
+	bool DestroyBGM(Sounder* ptr)
 	{
-		return l_destroy(ptr, standbyBGM, idleBGM);
+		return l_destroy((ptr->GetPointer()), standbyBGM, idleBGM);
 	}
 
 	size_t GetAudioFileData(std::wstring file, IMFMediaType* t)
@@ -340,6 +346,9 @@ namespace S_Sound
 
 		//auto changeVecLen = [](std::vector<unsigned long>& vec, int size)->int {vec.resize(size); return 0; };
 		size_t s = GetAudioFileData(file.c_str(), type_);
+		ad->pBuf_.resize(s);
+
+		auto size = 0u;
 
 		{
 			unsigned long curLen = {};
@@ -371,10 +380,8 @@ namespace S_Sound
 				res = buf_media->Lock(&lbuf,nullptr, &curLen);
 				if (FAILED(res))	return false;
 
-				size_t size = ad->pBuf_.size() + curLen;
-
-				ad->pBuf_.resize(size);
-				memcpy(ad->pBuf_.data() + size - curLen , lbuf, curLen);
+				memcpy(ad->pBuf_.data() + size , lbuf, curLen);
+				size += curLen;
 
 				buf_media->Unlock();
 				buf_media->Release();
@@ -387,12 +394,60 @@ namespace S_Sound
 		ad->name_ = str;
 		return true;
 	}
+
+	void SetVol_BGM(float v)
+	{
+		BaseVol_BGM = v;
+	}
+
+	void SetVol_SE(float v)
+	{
+		BaseVol_SE = v;
+	}
+
+	void SetVol_Master(float v)
+	{
+		BaseVol_Master = v;
+	}
 	
 	
+}
+//----------------------------------
+void AudioData::Release()
+{
+	this->pBuf_.clear();
+	this->name_.clear();
+	this->format_ = {};
 }
 
 AudioData::~AudioData()
 {
 	//free(pBuf_);
+	Release();
 	pBuf_.clear();
+}
+//------------------------------------
+void Sounder::SetVolume(float v)
+{
+	vol_ = v;
+	(src_)->SetVolume(vol_ * S_Sound::BaseVol_Master * (isSE_ ? S_Sound::BaseVol_SE : S_Sound::BaseVol_BGM));
+}
+
+float Sounder::GetVolume()
+{
+	return vol_;
+}
+
+
+Sounder::Sounder(IXAudio2SourceVoice* ad,bool isSE) :pos_{}, isSE_(isSE), vol_(1.0f), src_(ad)
+{
+}
+
+Sounder::~Sounder()
+{
+}
+
+IXAudio2SourceVoice* Sounder::GetPointer()
+{
+	return src_;
 }

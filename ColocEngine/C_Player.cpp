@@ -21,8 +21,12 @@ void C_Player::initialize()
 
 	ui->SetTexture(mb);
 
+	S_Sound::LoadWave_wav(L"loop1.wav", &a);
+	S_Sound::CreateSE(&a, false, nullptr);
+
 	S_Sound::LoadWave_wav(L"menuettm.mp3", &ad);
-	S_Sound::CreateSE(&ad, true);
+	S_Sound::CreateSE(&ad, true,&sd);
+
 
 	S_Sound::Starts(1, 1);
 }
@@ -63,13 +67,16 @@ void C_Player::Run(float tick)
 
 	if (cnt == 100)
 	{
-		S_Sound::Stops(1, 1);
+		//sd->SetVolume(0.1);
 	}
 
 	if (cnt == 300)
 	{
-		S_Sound::Starts(1, 1);
+		//sd->SetVolume(1.5);
 	}
+
+
+	S_Sound::Starts(1, 1);
 }
 
 void C_Player::release()

@@ -7,6 +7,7 @@
 #include<mfreadwrite.h>
 #include<vector>
 #include<string>
+#include"MACRO.h"
 
 #pragma comment(lib,"winmm.lib")
 #pragma comment(lib,"xaudio2.lib")
@@ -23,7 +24,31 @@ struct AudioData
 	std::vector<byte> pBuf_;
 	std::wstring name_;
 
+	void Release();
+
 	~AudioData();
+};
+
+class Sounder
+{
+public:
+
+public:
+	void SetVolume(float v);
+	float GetVolume();
+	
+	Sounder(IXAudio2SourceVoice* ad ,bool isSE_);
+
+	~Sounder();
+
+	IXAudio2SourceVoice* GetPointer();
+
+private:
+	IXAudio2SourceVoice* src_;
+	float vol_;
+	float3 pos_;
+	bool isSE_;
+
 };
 
 namespace S_Sound
@@ -34,21 +59,25 @@ namespace S_Sound
 	bool Init();
 	void Run();
 	void Term();
-	bool CreateSE(const AudioData* data,bool isLoop);
-	bool CreateBGM(const AudioData* data);
+	bool CreateSE(const AudioData* data,bool isLoop,Sounder** s);//sounder
+	bool CreateBGM(const AudioData* data,Sounder** s);
 	bool Starts(bool isSE ,bool isBGM);
 	bool Stops(bool isSE, bool isBGM);
 	bool Destroys(bool isSE,bool isBGM);
 
-	bool StartSE(IXAudio2SourceVoice* ptr);
-	bool StartBGM(IXAudio2SourceVoice* ptr);
-	bool StopSE(IXAudio2SourceVoice* ptr);
-	bool StopBGM(IXAudio2SourceVoice* ptr);
-	bool DestroySE(IXAudio2SourceVoice* ptr);
-	bool DestroyBGM(IXAudio2SourceVoice* ptr);
+	bool StartSE(Sounder* ptr);
+	bool StartBGM(Sounder* ptr);
+	bool StopSE(Sounder* ptr);
+	bool StopBGM(Sounder* ptr);
+	bool DestroySE(Sounder* ptr);
+	bool DestroyBGM(Sounder* ptr);
 
 	size_t GetAudioFileData(std::wstring file ,IMFMediaType* t);
 
 	bool LoadWave_wav(std::wstring str , AudioData* ad);
+
+	void SetVol_BGM(float v);
+	void SetVol_SE(float v);
+	void SetVol_Master(float v);
 };
 
