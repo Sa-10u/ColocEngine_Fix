@@ -8,13 +8,13 @@ namespace S_Sound
 	IXAudio2SourceVoice* SEs_[SE_Amount] = {};
 	IXAudio2SourceVoice* BGMs_[BGM_Amount] = {};
 
-	std::list<IXAudio2SourceVoice*> useSE = {};
-	std::list<IXAudio2SourceVoice*> idleSE = {};
-	std::list<IXAudio2SourceVoice*> standbySE = {};
+	std::list<IXAudio2SourceVoice**> useSE = {};
+	std::list<IXAudio2SourceVoice**> idleSE = {};
+	std::list<IXAudio2SourceVoice**> standbySE = {};
 	
-	std::list<IXAudio2SourceVoice*> useBGM = {};
-	std::list<IXAudio2SourceVoice*> idleBGM = {};
-	std::list<IXAudio2SourceVoice*> standbyBGM = {};
+	std::list<IXAudio2SourceVoice**> useBGM = {};
+	std::list<IXAudio2SourceVoice**> idleBGM = {};
+	std::list<IXAudio2SourceVoice**> standbyBGM = {};
 
 	IMFMediaType* type_ = {};
 
@@ -23,7 +23,7 @@ namespace S_Sound
 		auto&& res = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 		if (FAILED(res))	return false;
 
-		res = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
+		res = MFStartup(MF_VERSION,0);
 		if (FAILED(res))	return false;
 
 		res = XAudio2Create(&audio_, 0);
@@ -36,10 +36,10 @@ namespace S_Sound
 		type_->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
 
 		for (auto i = 0u; i < SE_Amount; ++i) {
-			idleSE.push_back(SEs_[i]);
+			idleSE.push_back(&SEs_[i]);
 		}
 		for (auto i = 0u; i < BGM_Amount; ++i) {
-			idleBGM.push_back(BGMs_[i]);
+			idleBGM.push_back(&BGMs_[i]);
 		}
 	}
 
@@ -72,10 +72,11 @@ namespace S_Sound
 
 		auto fmt = data->format_.Format;
 		fmt.wBitsPerSample = data->format_.Format.nBlockAlign * 8 / data->format_.Format.nChannels;
+		fmt.nBlockAlign = 
 
 		auto&& res = audio_->CreateSourceVoice
 		(
-			&buf,
+			buf,
 			reinterpret_cast<WAVEFORMATEX*>(&fmt)
 		);
 		if (FAILED(res))	return false;
@@ -87,7 +88,7 @@ namespace S_Sound
 			temp.AudioBytes = data->pBuf_.size() * sizeof(data->pBuf_[0]);
 			temp.LoopCount = isLoop ? XAUDIO2_LOOP_INFINITE : false;
 
-			res = buf->SubmitSourceBuffer(&temp);
+			res = (*buf)->SubmitSourceBuffer(&temp);
 			if (FAILED(res))	return false;
 		}
 		standbySE.push_back(buf);
@@ -103,7 +104,7 @@ namespace S_Sound
 		{
 			for (auto itr = sli.begin(); itr != sli.end();) {
 
-				(*itr)->Start();
+				(**itr)->Start();
 				rli.push_back(*itr);
 
 				itr = sli.erase(itr);
@@ -123,7 +124,7 @@ namespace S_Sound
 			{
 				for (auto itr = sli.begin(); itr != sli.end();) {
 
-					(*itr)->Stop();
+					(**itr)->Stop();
 					rli.push_back(*itr);
 
 					itr = sli.erase(itr);
@@ -143,7 +144,7 @@ namespace S_Sound
 			{
 				for (auto itr = sli.begin(); itr != sli.end();) {
 
-					(*itr)->DestroyVoice();
+					(**itr)->DestroyVoice();
 					rli.push_back(*itr);
 
 					itr = sli.erase(itr);
@@ -161,10 +162,10 @@ namespace S_Sound
 		{
 			for (auto itr = sli.begin(); itr != sli.end();) {
 
-				if ((*itr) != ptr)	itr++; continue;
+				if ((**itr) != ptr)	itr++; continue;
 
 
-				(*itr)->Start();
+				(**itr)->Start();
 				rli.push_back(*itr);
 				sli.erase(itr);
 
@@ -178,10 +179,10 @@ namespace S_Sound
 		{
 			for (auto itr = sli.begin(); itr != sli.end();) {
 
-				if ((*itr) != ptr)	itr++; continue;
+				if ((**itr) != ptr)	itr++; continue;
 
 
-				(*itr)->Stop();
+				(**itr)->Stop();
 				rli.push_back(*itr);
 				sli.erase(itr);
 
@@ -195,9 +196,9 @@ namespace S_Sound
 		{
 			for (auto itr = sli.begin(); itr != sli.end();) {
 
-				if ((*itr) != ptr)	itr++; continue;
+				if ((**itr) != ptr)	itr++; continue;
 
-				(*itr)->DestroyVoice();
+				(**itr)->DestroyVoice();
 				rli.push_back(*itr);
 				sli.erase(itr);
 
@@ -292,10 +293,10 @@ namespace S_Sound
 		}
 
 		//auto changeVecLen = [](std::vector<unsigned long>& vec, int size)->int {vec.resize(size); return 0; };
-
-		unsigned long pos = {};
 		
 		{
+			unsigned long curLen = {};
+			unsigned long curMax = {};
 			{
 				IMFSample* sample = nullptr;
 				uint32_t flag = {};
@@ -318,8 +319,6 @@ namespace S_Sound
 				if (FAILED(res))return false;
 
 				byte* lbuf = nullptr;
-				unsigned long curLen = {};
-				unsigned long curMax = {};
 
 				res = buf_media->Lock(&lbuf, &curMax, &curLen);
 				if (FAILED(res))	return false;
@@ -328,9 +327,9 @@ namespace S_Sound
 				sample->Release();
 
 				ad->pBuf_.resize(curMax);
-				memcpy(ad->pBuf_.data(), lbuf, curLen);
 
-				pos += curLen;
+				size_t pos = curMax - curLen;
+				memcpy(ad->pBuf_.data() + pos, lbuf, curLen);
 			}
 			while (true) {
 
@@ -347,35 +346,33 @@ namespace S_Sound
 					nullptr,
 					&sample
 				);
-				if (flag & MF_SOURCE_READERF_ENDOFSTREAM)	break;;
-				if (sample == nullptr || FAILED(sample->GetBufferCount(&cnt_buf)) || cnt_buf <= 0)	return false;
+				if (flag & MF_SOURCE_READERF_ENDOFSTREAM)	break;
+				if (sample == nullptr || FAILED(sample->GetBufferCount(&cnt_buf)) || cnt_buf < 0)	return false;
 
 				IMFMediaBuffer* buf_media = nullptr;
 				res = sample->ConvertToContiguousBuffer(&buf_media);
 				if (FAILED(res))return false;
 
 				byte* lbuf = nullptr;
-				unsigned long curLen = {};
 
-				res = buf_media->Lock(&lbuf, nullptr, &curLen);
+				res = buf_media->Lock(&lbuf,&curMax, &curLen);
 				if (FAILED(res))	return false;
+
+				size_t pos = curMax - curLen;
+				memcpy(ad->pBuf_.data() + pos , lbuf, curLen);
+
 				buf_media->Unlock();
 				buf_media->Release();
 				sample->Release();
-
-				memcpy(ad->pBuf_.data() , lbuf, curLen);
-				pos += curLen;
-
-				break;
-
 				//static int a = (0, changeVecLen(Data, maxLen));//unuse
 			}
 		}
 
 		ad->name_ = str;
+		return true;
 	}
 	
-
+	
 }
 
 AudioData::~AudioData()
