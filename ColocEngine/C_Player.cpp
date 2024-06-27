@@ -27,7 +27,7 @@ void C_Player::initialize()
 	S_Sound::LoadWave_wav(L"loop1.wav", &ad);
 
 	Conductor::Sounder* ptr;
-	S_Sound::CreateSE(&ad, S_Sound::FLAG::Loop,&ptr);
+	S_Sound::CreateSE(&ad, S_Sound::FLAG::ManualRelease,&ptr);
 
 	c.SetSounder(ptr);
 
@@ -76,7 +76,7 @@ void C_Player::Run(float tick)
 	if (cnt == 20)
 	{
 		//c.SetVolume(1.5);
-		S_Sound::ReStartSE(&c);
+		//S_Sound::ReSetSE(&c);
 	}
 }
 

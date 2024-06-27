@@ -91,8 +91,8 @@ namespace S_Sound
 	bool Init();
 	void Run();
 	void Term();
-	bool CreateSE(const AudioData* data,FLAG flag,Conductor::Sounder** s);//sounder
-	bool CreateBGM(const AudioData* data,Conductor::Sounder** s);
+	bool CreateSE(AudioData* data,FLAG flag,Conductor::Sounder** s);//sounder
+	bool CreateBGM(AudioData* data,Conductor::Sounder** s);
 	bool Starts(bool isSE ,bool isBGM);
 	bool Stops(bool isSE, bool isBGM);
 	bool Destroys(bool isSE,bool isBGM);
@@ -103,8 +103,8 @@ namespace S_Sound
 	bool StopBGM( Conductor::Sounder* ptr);
 	bool DestroySE( Conductor::Sounder* ptr);
 	bool DestroyBGM( Conductor::Sounder* ptr);
-	bool ReStartSE(Conductor* ptr);
-	bool ReStartBGM(Conductor* ptr);
+	bool ReSetSE(Conductor* ptr);
+	bool ReSetBGM(Conductor* ptr);
 
 	size_t GetAudioFileData(std::wstring file ,IMFMediaType* t);
 

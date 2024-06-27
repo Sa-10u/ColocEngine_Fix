@@ -27,15 +27,24 @@ namespace S_Sound
 	{
 	private:
 
-		Conductor::Sounder* ptr_;
+		Conductor::Sounder** ptr_;
+		HANDLE handle_;
 
 	public:
 		void OnStreamEnd() override
 		{
-			delete ptr_;
+			delete *ptr_;
 		}
 
-		CB_Release(Conductor::Sounder* s) :ptr_(s) {}
+		CB_Release(Conductor::Sounder** s) :ptr_(s), handle_(CreateEvent(NULL, FALSE, FALSE, NULL)) {}
+		~CB_Release() { CloseHandle(handle_); }
+
+		void OnVoiceProcessingPassEnd() { }
+		void OnVoiceProcessingPassStart(UINT32 SamplesRequired) {    }
+		void OnBufferEnd(void* pBufferContext) { }
+		void OnBufferStart(void* pBufferContext) {    }
+		void OnLoopEnd(void* pBufferContext) {    }
+		void OnVoiceError(void* pBufferContext, HRESULT Error) { }
 	};
 
 
@@ -43,13 +52,14 @@ namespace S_Sound
 	{
 	private:
 
-		Conductor::Sounder* ptr_;
+		Conductor::Sounder** ptr_;
+		HANDLE handle_;
 
 	public:
 		void OnStreamEnd() override
 		{
-			auto&& sv = ptr_->GetPointer();
-			auto&& data = ptr_->GetAudioData();
+			auto&& sv = (*ptr_)->GetPointer();
+			auto&& data = (*ptr_)->GetAudioData();
 			sv->Stop();
 			sv->FlushSourceBuffers();
 			{
@@ -64,7 +74,15 @@ namespace S_Sound
 			}
 		}
 
-		CB_Stop(Conductor::Sounder* s) :ptr_(s) {}
+		CB_Stop(Conductor::Sounder** s) :ptr_(s), handle_(CreateEvent(NULL, FALSE, FALSE, NULL)){};
+		~CB_Stop() { CloseHandle(handle_); }
+
+		void OnVoiceProcessingPassEnd() { }
+		void OnVoiceProcessingPassStart(UINT32 SamplesRequired) {    }
+		void OnBufferEnd(void* pBufferContext) { }
+		void OnBufferStart(void* pBufferContext) {    }
+		void OnLoopEnd(void* pBufferContext) {    }
+		void OnVoiceError(void* pBufferContext, HRESULT Error) { }
 	};
 
 
@@ -105,18 +123,25 @@ namespace S_Sound
 		master_->DestroyVoice();
 		audio_->Release();
 
+		for (auto i = 0; i < SE_Amount; ++i) {
+			SEs_[i]->Stop();	SEs_[i]->DestroyVoice();
+		}
+		for (auto i = 0; i < BGM_Amount; ++i) {
+			BGMs_[i]->Stop();	BGMs_[i]->DestroyVoice();
+		}
+
 		MFShutdown();
 
 		CoUninitialize();
 	}
 
-	bool CreateBGM(const AudioData* data, Conductor::Sounder** s)
+	bool CreateBGM(AudioData* data, Conductor::Sounder** s)
 	{
 		if (!idleBGM.size())	return false;
 		return false;
 	}
 
-	bool CreateSE(const AudioData* data , FLAG flag, Conductor::Sounder** s)
+	bool CreateSE(AudioData* data , FLAG flag, Conductor::Sounder** s)
 	{
 		if (!idleSE.size())	return false;
 
@@ -129,8 +154,8 @@ namespace S_Sound
 		switch (flag)
 		{
 		case FLAG::AutoRelease :
-
-			pcb = new CB_Release(*s);
+			
+			pcb = new CB_Release(s);
 
 			res = audio_->CreateSourceVoice
 			(
@@ -142,12 +167,31 @@ namespace S_Sound
 				nullptr,
 				nullptr
 			);
+			break;
+
+		case FLAG::ManualRelease:
+
+
+			pcb = new CB_Stop(s);
+
+			res = audio_->CreateSourceVoice
+			(
+				buf,
+				&data->format_,
+				0,
+				XAUDIO2_DEFAULT_FREQ_RATIO,
+				pcb,
+				nullptr,
+				nullptr
+			);
+			break;
 
 		default : res = audio_->CreateSourceVoice
 				(
 					buf,
 					&data->format_
 				);
+			break;
 		}
 		if (FAILED(res))	return false;
 
@@ -163,7 +207,7 @@ namespace S_Sound
 		}
 		standbySE.push_back(buf);
 		
-		if (s != nullptr)	*s = new Conductor::Sounder(*buf, true, const_cast<AudioData*>(data)); (*s)->SetCallBack(pcb);
+		if (s != nullptr) { *s = new Conductor::Sounder(*buf, true, data); (*s)->SetCallBack(pcb);}
 		return true;
 
 	}
@@ -299,8 +343,6 @@ namespace S_Sound
 
 					auto res = (sv)->SubmitSourceBuffer(&temp);
 					if (FAILED(res))	return false;
-
-					sv->Start();
 				}
 
 				return true;
@@ -339,12 +381,12 @@ namespace S_Sound
 		return l_destroy((ptr->GetPointer()), standbyBGM, idleBGM);
 	}
 
-	bool ReStartSE(Conductor* ptr)
+	bool ReSetSE(Conductor* ptr)
 	{
 		return l_restart((ptr), SEs_, SE_Amount);
 	}
 
-	bool ReStartBGM(Conductor* ptr)
+	bool ReSetBGM(Conductor* ptr)
 	{
 		return l_restart((ptr), BGMs_, BGM_Amount);
 	}
@@ -547,9 +589,16 @@ void Conductor::Sounder::SetVolume(float v)
 
  Conductor::Sounder::~Sounder()
 {
-	 src_->DestroyVoice();
+	 if (src_)
+	 {
+		 src_->DestroyVoice();
+		 src_ = nullptr;
+	 }
 
 	 delete cb_;
+	 cb_ = nullptr;
+
+	 mother_ = nullptr;
 }
 
 IXAudio2SourceVoice* Conductor::Sounder::GetPointer()
