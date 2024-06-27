@@ -22,6 +22,52 @@ namespace S_Sound
 
 	IMFMediaType* type_ = {};
 
+
+	class CB_Release : public IXAudio2VoiceCallback
+	{
+	private:
+
+		Conductor::Sounder* ptr_;
+
+	public:
+		void OnStreamEnd() override
+		{
+			delete ptr_;
+		}
+
+		CB_Release(Conductor::Sounder* s) :ptr_(s) {}
+	};
+
+
+	class CB_Stop : public IXAudio2VoiceCallback
+	{
+	private:
+
+		Conductor::Sounder* ptr_;
+
+	public:
+		void OnStreamEnd() override
+		{
+			auto&& sv = ptr_->GetPointer();
+			auto&& data = ptr_->GetAudioData();
+			sv->Stop();
+			sv->FlushSourceBuffers();
+			{
+				XAUDIO2_BUFFER temp = {};
+				temp.pAudioData = data->pBuf_.data();
+				temp.Flags = XAUDIO2_END_OF_STREAM;
+				temp.AudioBytes = data->pBuf_.size() * sizeof(data->pBuf_[0]);
+				temp.LoopCount = false;
+
+				auto res = (sv)->SubmitSourceBuffer(&temp);
+				if (FAILED(res))	return;
+			}
+		}
+
+		CB_Stop(Conductor::Sounder* s) :ptr_(s) {}
+	};
+
+
 	bool Init()
 	{
 		auto&& res = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
@@ -64,21 +110,45 @@ namespace S_Sound
 		CoUninitialize();
 	}
 
-	bool CreateBGM(const AudioData* data, Sounder** s)
+	bool CreateBGM(const AudioData* data, Conductor::Sounder** s)
 	{
+		if (!idleBGM.size())	return false;
 		return false;
 	}
 
-	bool CreateSE(const AudioData* data ,bool isLoop, Sounder** s)
+	bool CreateSE(const AudioData* data , FLAG flag, Conductor::Sounder** s)
 	{
+		if (!idleSE.size())	return false;
+
 		auto buf = idleSE.front();
 		idleSE.pop_front();
 
-		auto&& res = audio_->CreateSourceVoice
-		(
-			buf,
-			&data->format_
-		);
+		HRESULT res = {};
+
+		IXAudio2VoiceCallback* pcb = nullptr;
+		switch (flag)
+		{
+		case FLAG::AutoRelease :
+
+			pcb = new CB_Release(*s);
+
+			res = audio_->CreateSourceVoice
+			(
+				buf,
+				&data->format_,
+				0,
+				XAUDIO2_DEFAULT_FREQ_RATIO,
+				pcb, 
+				nullptr,
+				nullptr
+			);
+
+		default : res = audio_->CreateSourceVoice
+				(
+					buf,
+					&data->format_
+				);
+		}
 		if (FAILED(res))	return false;
 
 		{
@@ -86,14 +156,14 @@ namespace S_Sound
 			temp.pAudioData = data->pBuf_.data();
 			temp.Flags = XAUDIO2_END_OF_STREAM;
 			temp.AudioBytes = data->pBuf_.size() * sizeof(data->pBuf_[0]);
-			temp.LoopCount = isLoop ? XAUDIO2_LOOP_INFINITE : false;
+			temp.LoopCount = flag == FLAG::Loop ? XAUDIO2_LOOP_INFINITE : false;
 			
 			res = (*buf)->SubmitSourceBuffer(&temp);
 			if (FAILED(res))	return false;
 		}
 		standbySE.push_back(buf);
 		
-		if(s != nullptr)	*s = new Sounder(*buf, true);
+		if (s != nullptr)	*s = new Conductor::Sounder(*buf, true, const_cast<AudioData*>(data)); (*s)->SetCallBack(pcb);
 		return true;
 
 	}
@@ -210,34 +280,73 @@ namespace S_Sound
 			return false;
 		};
 
-	bool StartSE(Sounder* ptr)
+	auto l_restart = [](Conductor* ptr, IXAudio2SourceVoice** arr , uint16_t size)
+		{
+			for (auto i = 0u; i < size;i++) {
+
+				if ((arr[i]) != ptr->GetSounder()->GetPointer()) continue;
+
+				auto&& sv = ptr->GetSounder()->GetPointer();
+				auto&& data = ptr->GetSounder()->GetAudioData();
+				sv->Stop();
+				sv->FlushSourceBuffers();
+				{
+					XAUDIO2_BUFFER temp = {};
+					temp.pAudioData = data->pBuf_.data();
+					temp.Flags = XAUDIO2_END_OF_STREAM;
+					temp.AudioBytes = data->pBuf_.size() * sizeof(data->pBuf_[0]);
+					temp.LoopCount = false;
+
+					auto res = (sv)->SubmitSourceBuffer(&temp);
+					if (FAILED(res))	return false;
+
+					sv->Start();
+				}
+
+				return true;
+			}
+
+			return false;
+		};
+
+	bool StartSE( Conductor::Sounder* ptr)
 	{
 		return l_start((ptr->GetPointer()), standbySE, useSE);
 	}
 
-	bool StartBGM(Sounder* ptr)
+	bool StartBGM( Conductor::Sounder* ptr)
 	{
 		return  l_start((ptr->GetPointer()), standbyBGM, useBGM);
 	}
 
-	bool StopSE(Sounder* ptr)
+	bool StopSE( Conductor::Sounder* ptr)
 	{
 		return l_stop((ptr->GetPointer()), useSE, standbySE);
 	}
 
-	bool StopBGM(Sounder* ptr)
+	bool StopBGM( Conductor::Sounder* ptr)
 	{
 		return l_stop((ptr->GetPointer()), useBGM, standbyBGM);
 	}
 
-	bool DestroySE(Sounder* ptr)
+	bool DestroySE( Conductor::Sounder* ptr)
 	{
 		return l_destroy((ptr->GetPointer()), standbySE, idleSE);
 	}
 
-	bool DestroyBGM(Sounder* ptr)
+	bool DestroyBGM( Conductor::Sounder* ptr)
 	{
 		return l_destroy((ptr->GetPointer()), standbyBGM, idleBGM);
+	}
+
+	bool ReStartSE(Conductor* ptr)
+	{
+		return l_restart((ptr), SEs_, SE_Amount);
+	}
+
+	bool ReStartBGM(Conductor* ptr)
+	{
+		return l_restart((ptr), BGMs_, BGM_Amount);
 	}
 
 	size_t GetAudioFileData(std::wstring file, IMFMediaType* t)
@@ -427,27 +536,90 @@ AudioData::~AudioData()
 	pBuf_.clear();
 }
 //------------------------------------
-void Sounder::SetVolume(float v)
+void Conductor::Sounder::SetVolume(float v)
 {
-	vol_ = v;
-	(src_)->SetVolume(vol_ * S_Sound::BaseVol_Master * (isSE_ ? S_Sound::BaseVol_SE : S_Sound::BaseVol_BGM));
+	(src_)->SetVolume(v * S_Sound::BaseVol_Master * (isSE_ ? S_Sound::BaseVol_SE : S_Sound::BaseVol_BGM));
 }
 
-float Sounder::GetVolume()
+ Conductor::Sounder::Sounder(IXAudio2SourceVoice* sv,bool isSE ,AudioData* ad) :isSE_(isSE), src_(sv),mother_(ad),cb_(nullptr)
+{
+}
+
+ Conductor::Sounder::~Sounder()
+{
+	 src_->DestroyVoice();
+
+	 delete cb_;
+}
+
+IXAudio2SourceVoice* Conductor::Sounder::GetPointer()
+{
+	return src_;
+}
+
+bool Conductor::Sounder::isSE()
+{
+	return isSE_;
+}
+
+AudioData* Conductor::Sounder::GetAudioData()
+{
+	return mother_;
+}
+
+Conductor::Sounder* Conductor::GetSounder()
+{
+	return sd_;
+}
+
+void Conductor::SetSounder(Sounder* ptr)
+{
+	delete sd_;
+	sd_ = ptr;
+}
+
+void Conductor::Release()
+{
+	delete sd_;
+	sd_ = nullptr;
+}
+
+Conductor::Conductor() :sd_(nullptr),pos_{},vol_(1.0f)
+{
+}
+
+Conductor::~Conductor()
+{
+	Release();
+}
+
+void Conductor::SetVolume(float v)
+{
+	vol_ = v;
+	this->sd_->SetVolume(vol_);
+}
+
+float Conductor::GetVolume()
 {
 	return vol_;
 }
 
-
-Sounder::Sounder(IXAudio2SourceVoice* ad,bool isSE) :pos_{}, isSE_(isSE), vol_(1.0f), src_(ad)
+void Conductor::SetPos(float3 pos)
 {
+	pos_ = pos;
 }
 
-Sounder::~Sounder()
+float3 Conductor::GetPos()
 {
+	return pos_;
 }
 
-IXAudio2SourceVoice* Sounder::GetPointer()
+void Conductor::Sounder::SetCallBack(IXAudio2VoiceCallback* cb)
 {
-	return src_;
+	cb_ = cb;
+}
+
+IXAudio2VoiceCallback* Conductor::Sounder::GetCallBack()
+{
+	return cb_;
 }

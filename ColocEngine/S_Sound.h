@@ -29,25 +29,50 @@ struct AudioData
 	~AudioData();
 };
 
-class Sounder
+class Conductor
 {
 public:
+	class Sounder
+	{
+	public:
+		void SetVolume(float v);
 
-public:
+		Sounder(IXAudio2SourceVoice* sv, bool isSE_,AudioData* ad);
+
+		~Sounder();
+
+		IXAudio2SourceVoice* GetPointer();
+		bool isSE();
+		AudioData* GetAudioData();
+
+		void SetCallBack(IXAudio2VoiceCallback* cb);
+		IXAudio2VoiceCallback* GetCallBack();
+
+	private:
+		IXAudio2SourceVoice* src_;
+		bool isSE_;
+		AudioData* mother_;
+		IXAudio2VoiceCallback* cb_;
+
+	};
+
+	Sounder* GetSounder();
+	void SetSounder(Sounder* ptr);
+	void Release();
+
+	Conductor();
+	~Conductor();
+
 	void SetVolume(float v);
 	float GetVolume();
-	
-	Sounder(IXAudio2SourceVoice* ad ,bool isSE_);
 
-	~Sounder();
-
-	IXAudio2SourceVoice* GetPointer();
+	void SetPos(float3 pos);
+	float3 GetPos();
 
 private:
-	IXAudio2SourceVoice* src_;
+	Sounder* sd_;
 	float vol_;
 	float3 pos_;
-	bool isSE_;
 
 };
 
@@ -56,21 +81,30 @@ namespace S_Sound
 	constexpr uint8_t SE_Amount = 16u;
 	constexpr uint8_t BGM_Amount = 4;
 
+	enum class FLAG
+	{
+		Loop = 0,
+		AutoRelease,
+		ManualRelease,
+	};
+
 	bool Init();
 	void Run();
 	void Term();
-	bool CreateSE(const AudioData* data,bool isLoop,Sounder** s);//sounder
-	bool CreateBGM(const AudioData* data,Sounder** s);
+	bool CreateSE(const AudioData* data,FLAG flag,Conductor::Sounder** s);//sounder
+	bool CreateBGM(const AudioData* data,Conductor::Sounder** s);
 	bool Starts(bool isSE ,bool isBGM);
 	bool Stops(bool isSE, bool isBGM);
 	bool Destroys(bool isSE,bool isBGM);
 
-	bool StartSE(Sounder* ptr);
-	bool StartBGM(Sounder* ptr);
-	bool StopSE(Sounder* ptr);
-	bool StopBGM(Sounder* ptr);
-	bool DestroySE(Sounder* ptr);
-	bool DestroyBGM(Sounder* ptr);
+	bool StartSE( Conductor::Sounder* ptr);
+	bool StartBGM( Conductor::Sounder* ptr);
+	bool StopSE( Conductor::Sounder* ptr);
+	bool StopBGM( Conductor::Sounder* ptr);
+	bool DestroySE( Conductor::Sounder* ptr);
+	bool DestroyBGM( Conductor::Sounder* ptr);
+	bool ReStartSE(Conductor* ptr);
+	bool ReStartBGM(Conductor* ptr);
 
 	size_t GetAudioFileData(std::wstring file ,IMFMediaType* t);
 

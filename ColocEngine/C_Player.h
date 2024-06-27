@@ -21,5 +21,5 @@ private:
 	AudioData ad;
 	AudioData a;
 
-	Sounder* sd;
+	Conductor c;
 };
