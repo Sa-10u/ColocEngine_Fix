@@ -182,6 +182,8 @@ void WinView::loop()
             D3D->Run(1);
             WorldManager::Changer();
 
+            S_Sound::Run();
+
             ed = system_clock::now();
             auto&& t = ed - st;
             auto mili = duration_cast<milliseconds>(t).count();

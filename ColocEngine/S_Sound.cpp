@@ -16,7 +16,9 @@ namespace S_Sound
 	std::list<IXAudio2SourceVoice**> idleBGM = {};
 	std::list<IXAudio2SourceVoice**> standbyBGM = {};
 
-	std::list<IXAudio2VoiceCallback*> dustCB = {};
+	std::list<Conductor::Sounder**> Sounders = {};
+
+	static bool isNeedCheck = false;
 
 	float BaseVol_SE = 1.0f;
 	float BaseVol_BGM = 1.0f;
@@ -24,22 +26,20 @@ namespace S_Sound
 
 	IMFMediaType* type_ = {};
 
-
-	class CB_Release : public IXAudio2VoiceCallback
+	class CallBack_Voice : public IXAudio2VoiceCallback
 	{
 	private:
 
-		Conductor::Sounder** ptr_;
 		HANDLE handle_;
 
 	public:
 		void OnStreamEnd() override
 		{
-			delete *ptr_;
+			isNeedCheck = true;;
 		}
 
-		CB_Release(Conductor::Sounder** s) :ptr_(s), handle_(CreateEvent(NULL, FALSE, FALSE, NULL)) {}
-		~CB_Release(){ CloseHandle(handle_); }
+		CallBack_Voice():handle_(CreateEvent(NULL, FALSE, FALSE, NULL)) {}
+		~CallBack_Voice(){ CloseHandle(handle_); }
 
 		void OnVoiceProcessingPassEnd() override { }
 		void OnVoiceProcessingPassStart(UINT32 SamplesRequired) override {    }
@@ -47,9 +47,9 @@ namespace S_Sound
 		void OnBufferStart(void* pBufferContext) override {    }
 		void OnLoopEnd(void* pBufferContext) override {    }
 		void OnVoiceError(void* pBufferContext, HRESULT Error) override { }
-	};
+	}cb_voice;
 
-
+	/*
 	class CB_Stop : public IXAudio2VoiceCallback
 	{
 	private:
@@ -86,7 +86,7 @@ namespace S_Sound
 		void OnLoopEnd(void* pBufferContext) {    }
 		void OnVoiceError(void* pBufferContext, HRESULT Error) { }
 	};
-
+	*/
 
 	bool Init()
 	{
@@ -115,10 +115,47 @@ namespace S_Sound
 
 	void Run()
 	{
-		for (auto& itr = S_Sound::dustCB.front(); itr != ) {
+		if (!isNeedCheck)	return;
 
-			
+		for (auto&& itr = Sounders.begin(); itr != Sounders.end();) {
+
+			XAUDIO2_VOICE_STATE st = {};
+			auto& sd = **itr;
+			sd->GetPointer()->GetState(&st);
+			if (st.BuffersQueued)	itr++; continue;
+
+			auto flst = sd->GetState();
+			auto place = sd->GetState() == S_Sound::F ? Conductor::Sounder::PLACE::idleSE : Conductor::Sounder::PLACE::idleBGM;
+
+			switch (flst)
+			{
+			case S_Sound::FLAG::AutoRelease:	
+				
+				sd->ShifTo(place);
+				delete sd;
+
+			case S_Sound::FLAG::ManualRelease:
+				
+				auto&& sv = sd->GetPointer();
+				auto&& data = sd->GetAudioData();
+				sv->Stop();
+				sv->FlushSourceBuffers();
+				{
+					XAUDIO2_BUFFER temp = {};
+					temp.pAudioData = data->pBuf_.data();
+					temp.Flags = XAUDIO2_END_OF_STREAM;
+					temp.AudioBytes = data->pBuf_.size() * sizeof(data->pBuf_[0]);
+					temp.LoopCount = false;
+					
+					(sv)->SubmitSourceBuffer(&temp);
+				}
+				
+				break;
+
+			default:	break;
+			}
 		}
+		isNeedCheck = false;
 	}
 
 	void Term()
@@ -130,10 +167,10 @@ namespace S_Sound
 		audio_->Release();
 
 		for (auto i = 0; i < SE_Amount; ++i) {
-			SEs_[i]->Stop();	SEs_[i]->DestroyVoice();
+			if(!SEs_[i])continue;	SEs_[i]->Stop();	SEs_[i]->DestroyVoice();
 		}
 		for (auto i = 0; i < BGM_Amount; ++i) {
-			BGMs_[i]->Stop();	BGMs_[i]->DestroyVoice();
+			if(!BGMs_[i])continue;	BGMs_[i]->Stop();	BGMs_[i]->DestroyVoice();
 		}
 
 		MFShutdown();
@@ -154,51 +191,16 @@ namespace S_Sound
 		auto buf = idleSE.front();
 		idleSE.pop_front();
 
-		HRESULT res = {};
-
-		IXAudio2VoiceCallback* pcb = nullptr;
-		switch (flag)
-		{
-		case FLAG::AutoRelease :
-			
-			pcb = new CB_Release(s);
-
-			res = audio_->CreateSourceVoice
-			(
-				buf,
-				&data->format_,
-				0,
-				XAUDIO2_DEFAULT_FREQ_RATIO,
-				pcb, 
-				nullptr,
-				nullptr
-			);
-			break;
-
-		case FLAG::ManualRelease:
-
-
-			pcb = new CB_Stop(s);
-
-			res = audio_->CreateSourceVoice
-			(
-				buf,
-				&data->format_,
-				0,
-				XAUDIO2_DEFAULT_FREQ_RATIO,
-				pcb,
-				nullptr,
-				nullptr
-			);
-			break;
-
-		default : res = audio_->CreateSourceVoice
-				(
-					buf,
-					&data->format_
-				);
-			break;
-		}
+		auto&& res = audio_->CreateSourceVoice
+		(
+			buf,
+			&data->format_,
+			0,
+			XAUDIO2_DEFAULT_FREQ_RATIO,
+			&cb_voice, 
+			nullptr,
+			nullptr
+		);
 		if (FAILED(res))	return false;
 
 		{
@@ -213,7 +215,7 @@ namespace S_Sound
 		}
 		standbySE.push_back(buf);
 
-		if (s != nullptr) { *s = new Conductor::Sounder(*buf, true, data,pcb);}
+		if (s != nullptr) { *s = new Conductor::Sounder(*buf, true, data, flag);		Sounders.push_back(s); }
 		return true;
 
 	}
@@ -266,6 +268,8 @@ namespace S_Sound
 			{
 				for (auto&& itr = sli.begin(); itr != sli.end();) {
 
+					(**itr)->Stop();
+					(**itr)->FlushSourceBuffers();
 					(**itr)->DestroyVoice();
 					rli.push_back(*itr);
 
@@ -273,8 +277,8 @@ namespace S_Sound
 				}
 			};
 
-		if (isSE)	itr(standbySE, idleSE);
-		if (isBGM)	itr(standbyBGM, idleBGM);
+		if (isSE) { itr(standbySE, idleSE); itr(useSE, idleSE);}
+		if (isBGM) { itr(standbyBGM, idleBGM); itr(useBGM, idleBGM); }
 
 		return true;
 	}
@@ -589,7 +593,7 @@ void Conductor::Sounder::SetVolume(float v)
 	(src_)->SetVolume(v * S_Sound::BaseVol_Master * (isSE_ ? S_Sound::BaseVol_SE : S_Sound::BaseVol_BGM));
 }
 
- Conductor::Sounder::Sounder(IXAudio2SourceVoice* sv,bool isSE ,AudioData* ad, IXAudio2VoiceCallback* cb) :isSE_(isSE), src_(sv),mother_(ad),cb_(cb)
+Conductor::Sounder::Sounder(IXAudio2SourceVoice* sv, bool isSE, AudioData* ad, S_Sound::FLAG f):isSE_(isSE), src_(sv), mother_(ad), flag_(f)
 {
 }
 
@@ -597,12 +601,10 @@ void Conductor::Sounder::SetVolume(float v)
 {
 	 if (src_)
 	 {
+		 src_->FlushSourceBuffers();
 		 src_->DestroyVoice();
 		 src_ = nullptr;
 	 }
-
-	 S_Sound::dustCB.push_back(cb_);
-	 cb_ = nullptr;
 
 	 mother_ = nullptr;
 }
@@ -674,7 +676,34 @@ float3 Conductor::GetPos()
 	return pos_;
 }
 
-IXAudio2VoiceCallback* Conductor::Sounder::GetCallBack()
+S_Sound::FLAG Conductor::Sounder::GetState()
 {
-	return cb_;
+	return flag_;
 }
+
+void Conductor::Sounder::SetState(S_Sound::FLAG flag)
+{
+	flag_ = flag;
+}
+
+bool Conductor::Sounder::ShifTo(PLACE p)
+{
+	using namespace S_Sound;
+
+	std::list<IXAudio2SourceVoice**>* lists[] = {&useSE, &standbySE, &idleSE, &useBGM, &standbyBGM, &idleBGM};
+	auto tgt = lists[static_cast<uint8_t>(p)];
+
+	for (auto i = 0u; i < _countof(lists); i++) {
+
+		for (auto&& itr = lists[i]->begin(); itr != lists[i]->end();++itr) {
+
+			if (*itr != &src_)	continue;
+
+			lists[i]->erase(itr);
+			tgt->push_back(*itr);
+		}
+	}
+
+	return false;
+}
+

@@ -29,6 +29,16 @@ struct AudioData
 	~AudioData();
 };
 
+namespace S_Sound
+{
+	enum class FLAG
+	{
+		Loop = 0,
+		AutoRelease,
+		ManualRelease,
+	};
+}
+
 class Conductor
 {
 public:
@@ -37,7 +47,7 @@ public:
 	public:
 		void SetVolume(float v);
 
-		Sounder(IXAudio2SourceVoice* sv, bool isSE_,AudioData* ad , IXAudio2VoiceCallback* cb);
+		Sounder(IXAudio2SourceVoice* sv, bool isSE_,AudioData* ad , S_Sound::FLAG f);
 
 		~Sounder();
 
@@ -45,13 +55,28 @@ public:
 		bool isSE();
 		AudioData* GetAudioData();
 
-		IXAudio2VoiceCallback* GetCallBack();
+		S_Sound::FLAG GetState();
+		void SetState(S_Sound::FLAG flag);
+
+	public :
+
+		enum class PLACE
+		{
+			useSE,
+			standbySE,
+			idleSE,
+			useBGM,
+			standbyBGM,
+			idleBGM
+		};
+
+		bool ShifTo(PLACE p);
 
 	private:
 		IXAudio2SourceVoice* src_;
 		bool isSE_;
 		AudioData* mother_;
-		IXAudio2VoiceCallback* cb_;
+		S_Sound::FLAG flag_;
 
 	};
 
@@ -81,12 +106,6 @@ namespace S_Sound
 	constexpr uint8_t SE_Amount = 16u;
 	constexpr uint8_t BGM_Amount = 4;
 
-	enum class FLAG
-	{
-		Loop = 0,
-		AutoRelease,
-		ManualRelease,
-	};
 
 	bool Init();
 	void Run();
