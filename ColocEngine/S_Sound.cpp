@@ -16,6 +16,8 @@ namespace S_Sound
 	std::list<IXAudio2SourceVoice**> idleBGM = {};
 	std::list<IXAudio2SourceVoice**> standbyBGM = {};
 
+	std::list<IXAudio2VoiceCallback*> dustCB = {};
+
 	float BaseVol_SE = 1.0f;
 	float BaseVol_BGM = 1.0f;
 	float BaseVol_Master = 1.0f;
@@ -37,14 +39,14 @@ namespace S_Sound
 		}
 
 		CB_Release(Conductor::Sounder** s) :ptr_(s), handle_(CreateEvent(NULL, FALSE, FALSE, NULL)) {}
-		~CB_Release() { CloseHandle(handle_); }
+		~CB_Release(){ CloseHandle(handle_); }
 
-		void OnVoiceProcessingPassEnd() { }
-		void OnVoiceProcessingPassStart(UINT32 SamplesRequired) {    }
-		void OnBufferEnd(void* pBufferContext) { }
-		void OnBufferStart(void* pBufferContext) {    }
-		void OnLoopEnd(void* pBufferContext) {    }
-		void OnVoiceError(void* pBufferContext, HRESULT Error) { }
+		void OnVoiceProcessingPassEnd() override { }
+		void OnVoiceProcessingPassStart(UINT32 SamplesRequired) override {    }
+		void OnBufferEnd(void* pBufferContext) override { }
+		void OnBufferStart(void* pBufferContext) override {    }
+		void OnLoopEnd(void* pBufferContext) override {    }
+		void OnVoiceError(void* pBufferContext, HRESULT Error) override { }
 	};
 
 
@@ -113,6 +115,10 @@ namespace S_Sound
 
 	void Run()
 	{
+		for (auto& itr = S_Sound::dustCB.front(); itr != ) {
+
+			
+		}
 	}
 
 	void Term()
@@ -206,8 +212,8 @@ namespace S_Sound
 			if (FAILED(res))	return false;
 		}
 		standbySE.push_back(buf);
-		
-		if (s != nullptr) { *s = new Conductor::Sounder(*buf, true, data); (*s)->SetCallBack(pcb);}
+
+		if (s != nullptr) { *s = new Conductor::Sounder(*buf, true, data,pcb);}
 		return true;
 
 	}
@@ -218,7 +224,7 @@ namespace S_Sound
 		auto itr = []
 		(auto& sli ,auto& rli)
 		{
-			for (auto itr = sli.begin(); itr != sli.end();) {
+			for (auto&& itr = sli.begin(); itr != sli.end();) {
 
 				(**itr)->Start();
 				rli.push_back(*itr);
@@ -238,7 +244,7 @@ namespace S_Sound
 		auto itr = []
 		(auto& sli, auto& rli)
 			{
-				for (auto itr = sli.begin(); itr != sli.end();) {
+				for (auto&& itr = sli.begin(); itr != sli.end();) {
 
 					(**itr)->Stop();
 					rli.push_back(*itr);
@@ -258,7 +264,7 @@ namespace S_Sound
 		auto itr = []
 		(auto& sli, auto& rli)
 			{
-				for (auto itr = sli.begin(); itr != sli.end();) {
+				for (auto&& itr = sli.begin(); itr != sli.end();) {
 
 					(**itr)->DestroyVoice();
 					rli.push_back(*itr);
@@ -276,7 +282,7 @@ namespace S_Sound
 
 	auto l_start = [](IXAudio2SourceVoice* ptr,auto& sli,auto& rli)
 		{
-			for (auto itr = sli.begin(); itr != sli.end();) {
+			for (auto&& itr = sli.begin(); itr != sli.end();) {
 
 				if ((**itr) != ptr)	itr++; continue;
 
@@ -293,7 +299,7 @@ namespace S_Sound
 
 	auto l_stop = [](IXAudio2SourceVoice* ptr, auto& sli, auto& rli)
 		{
-			for (auto itr = sli.begin(); itr != sli.end();) {
+			for (auto&& itr = sli.begin(); itr != sli.end();) {
 
 				if ((**itr) != ptr)	itr++; continue;
 
@@ -310,7 +316,7 @@ namespace S_Sound
 
 	auto l_destroy = [](IXAudio2SourceVoice* ptr, auto& sli, auto& rli)
 		{
-			for (auto itr = sli.begin(); itr != sli.end();) {
+			for (auto&& itr = sli.begin(); itr != sli.end();) {
 
 				if ((**itr) != ptr)	itr++; continue;
 
@@ -326,7 +332,7 @@ namespace S_Sound
 
 	auto l_restart = [](Conductor* ptr, IXAudio2SourceVoice** arr , uint16_t size)
 		{
-			for (auto i = 0u; i < size;i++) {
+			for (auto&& i = 0u; i < size;i++) {
 
 				if ((arr[i]) != ptr->GetSounder()->GetPointer()) continue;
 
@@ -583,7 +589,7 @@ void Conductor::Sounder::SetVolume(float v)
 	(src_)->SetVolume(v * S_Sound::BaseVol_Master * (isSE_ ? S_Sound::BaseVol_SE : S_Sound::BaseVol_BGM));
 }
 
- Conductor::Sounder::Sounder(IXAudio2SourceVoice* sv,bool isSE ,AudioData* ad) :isSE_(isSE), src_(sv),mother_(ad),cb_(nullptr)
+ Conductor::Sounder::Sounder(IXAudio2SourceVoice* sv,bool isSE ,AudioData* ad, IXAudio2VoiceCallback* cb) :isSE_(isSE), src_(sv),mother_(ad),cb_(cb)
 {
 }
 
@@ -595,7 +601,7 @@ void Conductor::Sounder::SetVolume(float v)
 		 src_ = nullptr;
 	 }
 
-	 delete cb_;
+	 S_Sound::dustCB.push_back(cb_);
 	 cb_ = nullptr;
 
 	 mother_ = nullptr;
@@ -619,6 +625,11 @@ AudioData* Conductor::Sounder::GetAudioData()
 Conductor::Sounder* Conductor::GetSounder()
 {
 	return sd_;
+}
+
+Conductor::Sounder** Conductor::GetPPS()
+{
+	return &sd_;
 }
 
 void Conductor::SetSounder(Sounder* ptr)
@@ -661,11 +672,6 @@ void Conductor::SetPos(float3 pos)
 float3 Conductor::GetPos()
 {
 	return pos_;
-}
-
-void Conductor::Sounder::SetCallBack(IXAudio2VoiceCallback* cb)
-{
-	cb_ = cb;
 }
 
 IXAudio2VoiceCallback* Conductor::Sounder::GetCallBack()

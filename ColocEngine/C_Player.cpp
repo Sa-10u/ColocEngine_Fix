@@ -26,10 +26,7 @@ void C_Player::initialize()
 
 	S_Sound::LoadWave_wav(L"loop1.wav", &ad);
 
-	Conductor::Sounder* ptr;
-	S_Sound::CreateSE(&ad, S_Sound::FLAG::ManualRelease,&ptr);
-
-	c.SetSounder(ptr);
+	S_Sound::CreateSE(&ad, S_Sound::FLAG::AutoRelease,c.GetPPS());
 
 	S_Sound::Starts(1, 1);
 }

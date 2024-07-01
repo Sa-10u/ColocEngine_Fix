@@ -37,7 +37,7 @@ public:
 	public:
 		void SetVolume(float v);
 
-		Sounder(IXAudio2SourceVoice* sv, bool isSE_,AudioData* ad);
+		Sounder(IXAudio2SourceVoice* sv, bool isSE_,AudioData* ad , IXAudio2VoiceCallback* cb);
 
 		~Sounder();
 
@@ -45,7 +45,6 @@ public:
 		bool isSE();
 		AudioData* GetAudioData();
 
-		void SetCallBack(IXAudio2VoiceCallback* cb);
 		IXAudio2VoiceCallback* GetCallBack();
 
 	private:
@@ -57,6 +56,7 @@ public:
 	};
 
 	Sounder* GetSounder();
+	Sounder** GetPPS();
 	void SetSounder(Sounder* ptr);
 	void Release();
 
