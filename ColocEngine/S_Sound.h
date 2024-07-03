@@ -37,6 +37,13 @@ namespace S_Sound
 		AutoRelease,
 		ManualRelease,
 	};
+
+	class CallBack_Voice : public IXAudio2VoiceCallback
+	{
+	public:
+		bool isEnd;
+		CallBack_Voice();
+	};
 }
 
 class Conductor
@@ -47,7 +54,7 @@ public:
 	public:
 		void SetVolume(float v);
 
-		Sounder(IXAudio2SourceVoice* sv, bool isSE_,AudioData* ad , IXAudio2VoiceCallback* cb);
+		Sounder(IXAudio2SourceVoice** ppsv, bool isSE_,AudioData* ad , S_Sound::CallBack_Voice* cb);
 
 		~Sounder();
 
@@ -70,10 +77,10 @@ public:
 		bool ShifTo(PLACE p);
 
 	private:
-		IXAudio2SourceVoice* src_;
+		IXAudio2SourceVoice** psrc_;
 		bool isSE_;
 		AudioData* mother_;
-		CallBack_Voice* cb_;
+		S_Sound::CallBack_Voice* cb_;
 	};
 
 	Sounder* GetSounder();
@@ -94,14 +101,12 @@ private:
 	Sounder* sd_;
 	float vol_;
 	float3 pos_;
-
 };
 
 namespace S_Sound
 {
 	constexpr uint8_t SE_Amount = 16u;
 	constexpr uint8_t BGM_Amount = 4;
-
 
 	bool Init();
 	void Run();
