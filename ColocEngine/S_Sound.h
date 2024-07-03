@@ -47,16 +47,13 @@ public:
 	public:
 		void SetVolume(float v);
 
-		Sounder(IXAudio2SourceVoice* sv, bool isSE_,AudioData* ad , S_Sound::FLAG f);
+		Sounder(IXAudio2SourceVoice* sv, bool isSE_,AudioData* ad , IXAudio2VoiceCallback* cb);
 
 		~Sounder();
 
 		IXAudio2SourceVoice* GetPointer();
 		bool isSE();
 		AudioData* GetAudioData();
-
-		S_Sound::FLAG GetState();
-		void SetState(S_Sound::FLAG flag);
 
 	public :
 
@@ -76,8 +73,7 @@ public:
 		IXAudio2SourceVoice* src_;
 		bool isSE_;
 		AudioData* mother_;
-		S_Sound::FLAG flag_;
-
+		CallBack_Voice* cb_;
 	};
 
 	Sounder* GetSounder();
