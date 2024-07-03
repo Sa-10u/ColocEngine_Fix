@@ -51,11 +51,12 @@ bool WinView::setup()
 
             ResourceManager::Init();
             CAM::Init();
-            GameMain::Init();
             DataManager::Init();
             WorldManager::Init();
             Input_KB::Init();
             S_Sound::Init();
+
+            GameMain::Init();
 
             return true;
         }

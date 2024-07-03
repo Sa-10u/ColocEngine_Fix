@@ -19,3 +19,7 @@ void WorldWork::Release()
 	//ResourceManager::ALL_RELEASE_MODEL();
 	//ResourceManager::ALL_RELEASE_TEX();
 }
+
+WorldWork::~WorldWork()
+{
+}

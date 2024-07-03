@@ -11,6 +11,8 @@ public:
 
 	void Update(float tick);
 	void Release();
+
+	virtual ~WorldWork();
 };
 
 enum class WLD_ID

@@ -24,11 +24,11 @@ void C_Player::initialize()
 	//S_Sound::LoadWave_wav(L"loop1.wav", &a);
 	//S_Sound::CreateSE(&a, false, nullptr);
 
-	S_Sound::LoadWave_wav(L"loop1.wav", &ad);
+	S_Sound::LoadWave(L"loop1.wav", &ad);
 
-	S_Sound::CreateSE(&ad, S_Sound::FLAG::ManualRelease,c.GetPPS());
+	S_Sound::CreateSE(&ad, S_Sound::FLAG::AutoRelease,&c);
 
-	S_Sound::Starts(1, 1);
+	S_Sound::StartSE(c.GetSounder());
 }
 
 void C_Player::Run(float tick)
@@ -77,7 +77,7 @@ void C_Player::Run(float tick)
 		//c.Release();
 	}
 
-	if (cnt == 1200)
+	if (cnt == 900)
 	{
 		S_Sound::StartSE(c.GetSounder());
 	}

@@ -2,6 +2,7 @@
 #include "WorldManager.h"
 #include"C_Trans.h"
 #include"BUFFER.h"
+#include"S_Sound.h"
 
 class WW_BlackScreen : public WorldWork
 {
@@ -10,6 +11,7 @@ public:
 	void Initialize()override;
 	void release() override;
 
+	~WW_BlackScreen();
 
 private:
 
@@ -25,5 +27,6 @@ private:
 	float val1;
 
 	Entity* e_title;
+	Conductor c; AudioData ad;
 };
 

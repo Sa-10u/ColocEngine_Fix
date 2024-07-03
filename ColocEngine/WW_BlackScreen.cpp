@@ -14,6 +14,10 @@ void WW_BlackScreen::Initialize()
 	val1 = .0f;
 
 	DataManager::CreateEntity(&e_title , "Title");
+
+	S_Sound::LoadWave(L"loop1.wav", &ad);
+
+	S_Sound::CreateSE(&ad, S_Sound::FLAG::AutoRelease, &c);
 }
 
 void WW_BlackScreen::Run(float tick)
@@ -23,6 +27,12 @@ void WW_BlackScreen::Run(float tick)
 
 void WW_BlackScreen::release()
 {
+	e_title->Release();
+}
+
+WW_BlackScreen::~WW_BlackScreen()
+{
+	auto i = 0;
 }
 
 void WW_BlackScreen::P1_BlackToWhite()
@@ -37,8 +47,6 @@ void WW_BlackScreen::P1_BlackToWhite()
 		ptr = &WW_BlackScreen::P2_Title;
 		val0 = 0;
 		val1 = 0;
-
-		
 	}
 
 	val1 = col;

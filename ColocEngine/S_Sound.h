@@ -41,8 +41,8 @@ namespace S_Sound
 	class CallBack_Voice : public IXAudio2VoiceCallback
 	{
 	public:
-		bool isEnd;
 		CallBack_Voice();
+		virtual ~CallBack_Voice();
 	};
 }
 
@@ -54,7 +54,7 @@ public:
 	public:
 		void SetVolume(float v);
 
-		Sounder(IXAudio2SourceVoice** ppsv, bool isSE_,AudioData* ad , S_Sound::CallBack_Voice* cb);
+		Sounder(IXAudio2SourceVoice** ppsv, bool isSE_,AudioData* ad);
 
 		~Sounder();
 
@@ -80,10 +80,11 @@ public:
 		IXAudio2SourceVoice** psrc_;
 		bool isSE_;
 		AudioData* mother_;
-		S_Sound::CallBack_Voice* cb_;
 	};
 
 	Sounder* GetSounder();
+	S_Sound::CallBack_Voice* GetCallBack();
+	void SetCallBack(S_Sound::CallBack_Voice* cb);
 	Sounder** GetPPS();
 	void SetSounder(Sounder* ptr);
 	void Release();
@@ -101,6 +102,7 @@ private:
 	Sounder* sd_;
 	float vol_;
 	float3 pos_;
+	S_Sound::CallBack_Voice* cb_;
 };
 
 namespace S_Sound
@@ -110,9 +112,10 @@ namespace S_Sound
 
 	bool Init();
 	void Run();
+	void Flush();
 	void Term();
-	bool CreateSE(AudioData* data,FLAG flag,Conductor::Sounder** s);//sounder
-	bool CreateBGM(AudioData* data,Conductor::Sounder** s);
+	bool CreateSE(AudioData* data,FLAG flag,Conductor* c);//sounder
+	bool CreateBGM(AudioData* data,Conductor* c);
 	bool Starts(bool isSE ,bool isBGM);
 	bool Stops(bool isSE, bool isBGM);
 	bool Destroys(bool isSE,bool isBGM);
@@ -128,7 +131,7 @@ namespace S_Sound
 
 	size_t GetAudioFileData(std::wstring file ,IMFMediaType* t);
 
-	bool LoadWave_wav(std::wstring str , AudioData* ad);
+	bool LoadWave(std::wstring str , AudioData* ad);
 
 	void SetVol_BGM(float v);
 	void SetVol_SE(float v);

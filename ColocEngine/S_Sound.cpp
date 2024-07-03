@@ -17,8 +17,6 @@ namespace S_Sound
 	std::list<IXAudio2SourceVoice**> idleBGM = {};
 	std::list<IXAudio2SourceVoice**> standbyBGM = {};
 
-	std::queue<CallBack_Voice*> dustcbs_= {};
-
 	float BaseVol_SE = 1.0f;
 	float BaseVol_BGM = 1.0f;
 	float BaseVol_Master = 1.0f;
@@ -42,7 +40,6 @@ namespace S_Sound
 
 		void OnVoiceProcessingPassEnd() override
 		{
-			if (isEnd)	dustcbs_.push(this);
 		}
 
 		void OnVoiceProcessingPassStart(UINT32 SamplesRequired) override {    }
@@ -61,10 +58,11 @@ namespace S_Sound
 	public:
 		void OnStreamEnd() override
 		{
-			auto&& sv = (*ptr_)->GetPointer();
-			auto&& data = (*ptr_)->GetAudioData();
-			sv->Stop();
+			auto sv = (*ptr_)->GetPointer();
+			auto data = (*ptr_)->GetAudioData();
+			
 			sv->FlushSourceBuffers();
+			sv->Stop();
 			{
 				XAUDIO2_BUFFER temp = {};
 				temp.pAudioData = data->pBuf_.data();
@@ -75,6 +73,7 @@ namespace S_Sound
 				auto res = (sv)->SubmitSourceBuffer(&temp);
 				if (FAILED(res))	return;
 			}
+
 			(*ptr_)->ShifTo(Conductor::Sounder::PLACE::standbySE);
 			
 		}
@@ -84,7 +83,6 @@ namespace S_Sound
 
 		void OnVoiceProcessingPassEnd() override 
 		{
-			if (isEnd)	dustcbs_.push(this);
 		}
 
 		void OnVoiceProcessingPassStart(UINT32 SamplesRequired) override {    }
@@ -121,31 +119,31 @@ namespace S_Sound
 
 	void Run()
 	{
-		while (dustcbs_.size()) {
+	}
 
-			auto temp = dustcbs_.front();
-			dustcbs_.pop();
+	void Flush()
+	{
+		for (auto i = 0; i < SE_Amount; ++i) {
+			if (!SEs_[i])continue;	SEs_[i]->Stop();	SEs_[i]->DestroyVoice();
+		}
+		for (auto i = 0; i < BGM_Amount; ++i) {
+			if (!BGMs_[i])continue;	BGMs_[i]->Stop();	BGMs_[i]->DestroyVoice();
+		}
+		
+		idleSE.clear(); useSE.clear(); standbySE.clear();
+		idleBGM.clear(); useBGM.clear(); standbyBGM.clear();
 
-			delete temp;
+		for (auto i = 0u; i < SE_Amount; ++i) {
+			idleSE.push_back(&SEs_[i]);
+		}
+		for (auto i = 0u; i < BGM_Amount; ++i) {
+			idleBGM.push_back(&BGMs_[i]);
 		}
 	}
 
 	void Term()
 	{
-		for (auto i = 0; i < SE_Amount; ++i) {
-			if(!SEs_[i])continue;	SEs_[i]->Stop();	SEs_[i]->DestroyVoice();
-		}
-		for (auto i = 0; i < BGM_Amount; ++i) {
-			if(!BGMs_[i])continue;	BGMs_[i]->Stop();	BGMs_[i]->DestroyVoice();
-		}
-
-		while (dustcbs_.size()) {
-
-			auto temp = dustcbs_.front();
-			dustcbs_.pop();
-
-			delete temp;
-		}
+		Flush();
 
 		master_->DestroyVoice();
 		audio_->Release();
@@ -154,7 +152,7 @@ namespace S_Sound
 		CoUninitialize();
 	}
 
-	bool CreateBGM(AudioData* data, Conductor::Sounder** s)
+	bool CreateBGM(AudioData* data, Conductor* cd)
 	{
 		if (!idleBGM.size())	return false;
 		
@@ -163,7 +161,6 @@ namespace S_Sound
 
 		S_Sound::CallBack_Voice* cb = nullptr;
 
-		
 		auto res = audio_->CreateSourceVoice
 		(
 			buf,
@@ -183,26 +180,23 @@ namespace S_Sound
 		}
 		standbySE.push_back(buf);
 
-		if (s != nullptr) { *s = new Conductor::Sounder(buf, false, data, cb); }
+		cd->SetSounder(new Conductor::Sounder(buf, false, data));
 		return true;
-
 	}
 
-	bool CreateSE(AudioData* data , FLAG flag, Conductor::Sounder** s)
+	bool CreateSE(AudioData* data , FLAG flag, Conductor* cd)
 	{
 		if (!idleSE.size())	return false;
 
 		auto buf = idleSE.front();
 		idleSE.pop_front();
 
-		S_Sound::CallBack_Voice* cb = nullptr;
-
 		HRESULT res = {};
 		switch (flag)
 		{
 		case FLAG::AutoRelease:
 
-			cb = new CB_Release(s);
+			cd->SetCallBack(new CB_Release(cd->GetPPS()));
 
 			res = audio_->CreateSourceVoice
 			(
@@ -210,7 +204,7 @@ namespace S_Sound
 				&data->format_,
 				0,
 				XAUDIO2_DEFAULT_FREQ_RATIO,
-				cb,
+				cd->GetCallBack(),
 				nullptr,
 				nullptr
 			);
@@ -218,7 +212,7 @@ namespace S_Sound
 
 		case FLAG::ManualRelease:
 
-			cb = new CB_Reset(s);
+			cd->SetCallBack(new CB_Reset(cd->GetPPS()));
 
 			res = audio_->CreateSourceVoice
 			(
@@ -226,7 +220,7 @@ namespace S_Sound
 				&data->format_,
 				0,
 				XAUDIO2_DEFAULT_FREQ_RATIO,
-				cb,
+				cd->GetCallBack(),
 				nullptr,
 				nullptr
 			);
@@ -254,9 +248,8 @@ namespace S_Sound
 		}
 		standbySE.push_back(buf);
 
-		if (s != nullptr) { *s = new Conductor::Sounder(buf, true, data, cb);}
+		cd->SetSounder(new Conductor::Sounder(buf, true, data));
 		return true;
-
 	}
 
 	bool Starts(bool isSE,bool isBGM)//when stop or end,call back of self push to list
@@ -327,12 +320,13 @@ namespace S_Sound
 		{
 			for (auto&& itr = sli.begin(); itr != sli.end();) {
 
-				if ((**itr) != ptr)	itr++; continue;
-
+				if ((**itr) != ptr) { itr++; continue; }
 
 				(**itr)->Start();
-				rli.push_back(*itr);
+
+				auto temp = *itr;
 				sli.erase(itr);
+				rli.push_back(temp);
 
 				return true;
 			}
@@ -344,12 +338,14 @@ namespace S_Sound
 		{
 			for (auto&& itr = sli.begin(); itr != sli.end();) {
 
-				if ((**itr) != ptr)	itr++; continue;
-
+				if ((**itr) != ptr) { itr++; continue; }
 
 				(**itr)->Stop();
-				rli.push_back(*itr);
+
+				auto temp = *itr;
 				sli.erase(itr);
+				rli.push_back(temp);
+
 
 				return true;
 			}
@@ -361,12 +357,15 @@ namespace S_Sound
 		{
 			for (auto&& itr = sli.begin(); itr != sli.end();) {
 
-				if ((**itr) != ptr)	itr++; continue;
+				if ((**itr) != ptr) { itr++; continue; }
 
 				(**itr)->FlushSourceBuffers();
 				(**itr)->DestroyVoice();
-				rli.push_back(*itr);
+				
+				auto temp = *itr;
 				sli.erase(itr);
+				rli.push_back(temp);
+
 
 				return true;
 			}
@@ -374,7 +373,7 @@ namespace S_Sound
 			return false;
 		};
 
-	auto l_restart = [](Conductor* ptr, IXAudio2SourceVoice** arr , uint16_t size)
+	auto l_restart = [](Conductor* ptr, IXAudio2SourceVoice** arr , uint16_t size, Conductor::Sounder::PLACE p)
 		{
 			for (auto&& i = 0u; i < size;i++) {
 
@@ -394,6 +393,8 @@ namespace S_Sound
 					auto res = (sv)->SubmitSourceBuffer(&temp);
 					if (FAILED(res))	return false;
 				}
+
+				ptr->GetSounder()->ShifTo(p);
 
 				return true;
 			}
@@ -433,12 +434,12 @@ namespace S_Sound
 
 	bool ReSetSE(Conductor* ptr)
 	{
-		return l_restart((ptr), SEs_, SE_Amount);
+		return l_restart((ptr), SEs_, SE_Amount, Conductor::Sounder::PLACE::standbySE);
 	}
 
 	bool ReSetBGM(Conductor* ptr)
 	{
-		return l_restart((ptr), BGMs_, BGM_Amount);
+		return l_restart((ptr), BGMs_, BGM_Amount, Conductor::Sounder::PLACE::standbyBGM);
 	}
 
 	size_t GetAudioFileData(std::wstring file, IMFMediaType* t)
@@ -492,7 +493,7 @@ namespace S_Sound
 		return size;
 	}
 
-	bool LoadWave_wav(std::wstring str, AudioData* ad)
+	bool LoadWave(std::wstring str, AudioData* ad)
 	{
 		std::wstring file = {};
 		if (!isResourceFile(str.c_str(), &file))	return false;
@@ -612,7 +613,8 @@ namespace S_Sound
 	}
 	
 	
-	CallBack_Voice::CallBack_Voice():isEnd(false){}
+	CallBack_Voice::CallBack_Voice(){}
+	CallBack_Voice::~CallBack_Voice(){}
 
 }
 //----------------------------------
@@ -635,7 +637,7 @@ void Conductor::Sounder::SetVolume(float v)
 	(*psrc_)->SetVolume(v * S_Sound::BaseVol_Master * (isSE_ ? S_Sound::BaseVol_SE : S_Sound::BaseVol_BGM));
 }
 
-Conductor::Sounder::Sounder(IXAudio2SourceVoice** ppsv, bool isSE, AudioData* ad, S_Sound::CallBack_Voice* cb):isSE_(isSE), psrc_(ppsv), mother_(ad),cb_(cb)
+Conductor::Sounder::Sounder(IXAudio2SourceVoice** ppsv, bool isSE, AudioData* ad):isSE_(isSE), psrc_(ppsv), mother_(ad)
 {
 }
 
@@ -650,12 +652,6 @@ Conductor::Sounder::Sounder(IXAudio2SourceVoice** ppsv, bool isSE, AudioData* ad
 	 }
 
 	 mother_ = nullptr;
-
-	 if (cb_)
-	 {
-		 cb_->isEnd = true;
-		 cb_ = nullptr;
-	 }
 }
 
 IXAudio2SourceVoice* Conductor::Sounder::GetPointer()
@@ -678,6 +674,17 @@ Conductor::Sounder* Conductor::GetSounder()
 	return sd_;
 }
 
+S_Sound::CallBack_Voice* Conductor::GetCallBack()
+{
+	return cb_;
+}
+
+void Conductor::SetCallBack(S_Sound::CallBack_Voice* cb)
+{
+	delete cb_;
+	cb_ = cb;
+}
+
 Conductor::Sounder** Conductor::GetPPS()
 {
 	return &sd_;
@@ -693,6 +700,9 @@ void Conductor::Release()
 {
 	delete sd_;
 	sd_ = nullptr;
+
+	delete cb_;
+	cb_ = nullptr;
 }
 
 Conductor::Conductor() :sd_(nullptr),pos_{},vol_(1.0f)
@@ -739,8 +749,10 @@ bool Conductor::Sounder::ShifTo(PLACE p)
 
 			if (*itr != psrc_)	continue;
 
-			tgt->push_back(*itr);
+			auto temp = *itr;
+
 			lists[i]->erase(itr);
+			tgt->push_back(temp);
 
 			return true;
 		}
