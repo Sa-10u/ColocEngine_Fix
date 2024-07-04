@@ -5,12 +5,16 @@
 
 namespace ResourceManager
 {
-    std::vector<RModel> models_;
-    std::vector<RTexture> textures_;
+   
     RModel E_Model;
     RTexture E_Tex;
     const uint16_t MAX_Textures = 1024;
-    const uint16_t MAT_Models = 1024;
+    const uint16_t MAX_Models = 1024;
+    const uint16_t MAX_AudioData = 1024;
+
+    std::array<RModel,MAX_Models> models_;
+    std::array<RTexture,MAX_Textures> textures_;
+    std::array<RAudioData, MAX_AudioData> audiodata_;
 
     ID3D12DescriptorHeap* heapCBV_SRV_UAV_;
     DH* DHH_CbSrUaV;
@@ -18,8 +22,8 @@ namespace ResourceManager
 
 void ResourceManager::Init()
 {
-	models_.clear();
-	textures_.clear();
+    models_ = {};
+    textures_ = {};
 
     {
         Texture tex = {};
@@ -33,7 +37,7 @@ void ResourceManager::Init()
         E_Tex.tex_ = tex;
         E_Tex.is_using = true;
 
-        textures_.push_back(E_Tex);
+        textures_.at(0) = E_Tex;
     }
     //--------Alloc tex 
 
@@ -47,7 +51,7 @@ void ResourceManager::Init()
         temp.tex_ = tex;
         temp.is_using = false;
 
-        textures_.push_back(temp);
+        textures_.at(i) = temp;
     }
 }
 
@@ -140,10 +144,18 @@ void ResourceManager::MakeErrorTex(Texture* tex)
 UINT ResourceManager::ModelLoad(std::wstring str)
 {
     std::wstring path;
-    if(!isResourceFile(str.c_str(), &path))    return 0;
+    if(!isResourceFile(str.c_str(), &path))    return NULL;
+
+    uint16_t index = NULL;
 
     for (int v = 0; v < models_.size();v++) {
 		if (models_[v].Name_ == path)	return v;
+        
+        if (models_[v].Name_ == L"")
+        {
+            index = v;
+            break;
+        }
 	}
 
     ID3D12Device* device_ = PTR_D3D::ptr->GetDevice();
@@ -152,7 +164,7 @@ UINT ResourceManager::ModelLoad(std::wstring str)
 
 	RModel temp;
 	
-	if (!LoadMesh(path.c_str(), &temp)) return 0;
+	if (!LoadMesh(path.c_str(), &temp)) return NULL;
 
     temp.VB.resize(temp.Mesh_.size());
     temp.IB.resize(temp.Mesh_.size());
@@ -198,12 +210,12 @@ UINT ResourceManager::ModelLoad(std::wstring str)
                 nullptr,
                 IID_PPV_ARGS(&(temp.VB[i]))
             );
-            if (FAILED(res))  return 0;
+            if (FAILED(res))  return NULL;
 
             //----------------------------------------------------
             void* ptr = nullptr;
             res = temp.VB[i]->Map(NULL, 0, &ptr);
-            if (FAILED(res)) return 0;
+            if (FAILED(res)) return NULL;
 
             memcpy(ptr, vtcs, size);
 
@@ -253,11 +265,11 @@ UINT ResourceManager::ModelLoad(std::wstring str)
                     nullptr,
                     IID_PPV_ARGS(&temp.IB[i])
                 );
-                if (FAILED(res)) return 0;
+                if (FAILED(res)) return NULL;
 
                 void* ptr = nullptr;
                 res = temp.IB[i]->Map(0, nullptr, &ptr);
-                if (FAILED(res)) return 0;
+                if (FAILED(res)) return NULL;
 
                 memcpy(ptr, indcs, size);
                 temp.IB[i]->Unmap(0, 0);
@@ -271,15 +283,15 @@ UINT ResourceManager::ModelLoad(std::wstring str)
             temp.Name_ = path.c_str();
 
 
-        ResourceManager::models_.push_back(temp);
-        return ResourceManager::models_.size() - 1;
+        ResourceManager::models_.at(index) = temp;
+        return index;
     
 }
 
 UINT ResourceManager::TexLoad(std::wstring str)
 {
     std::wstring path;
-    if (!isResourceFile(str.c_str(), &path))    return 0;
+    if (!isResourceFile(str.c_str(), &path))    return NULL;
 
     ID3D12Device* device_ = PTR_D3D::ptr->GetDevice();
 
@@ -314,7 +326,7 @@ UINT ResourceManager::TexLoad(std::wstring str)
         &data,
         scr
     );
-    if (FAILED(res)) return 0;
+    if (FAILED(res)) return NULL;
 
     image = scr.GetImage(0, 0, 0);
 
@@ -350,7 +362,7 @@ UINT ResourceManager::TexLoad(std::wstring str)
         nullptr,
         IID_PPV_ARGS(&textures_.at(index).tex_.rsc_ptr)
     );
-    if (FAILED(res)) return 0;
+    if (FAILED(res)) return NULL;
 
     textures_.at(index).tex_.rsc_ptr->WriteToSubresource
     (
@@ -384,6 +396,21 @@ UINT ResourceManager::TexLoad(std::wstring str)
     return index;
 }
 
+UINT ResourceManager::ADLoad(std::wstring str)
+{
+    auto index_ = 0u;
+
+    for (auto i = 0u;i<MAX_AudioData;i++) {
+
+        if (audiodata_[i].Name_ == str)     return i;
+
+        if (audiodata_[i].Name_ == L"")     { index_ = i; break; }
+    }
+
+    return S_Sound::LoadWave(str,&audiodata_[index_].ad_) ? index_ : NULL;
+
+}
+
 void ResourceManager::ModelFlush()
 {
     for (auto& md : models_) {
@@ -405,11 +432,21 @@ void ResourceManager::TexFlush()
         {
             itr.tex_.rsc_ptr->Release();
             itr.Name_.clear();
+            itr.is_using = false;
         }
-    }
-    textures_.clear();
 
-    textures_.push_back(E_Tex);
+        itr = {};
+    }
+
+    textures_.at(0) = E_Tex;
+
+}
+
+void ResourceManager::ADFlush()
+{
+    for (auto& itr : audiodata_) {
+        itr = {};
+    }
 }
 
 void ResourceManager::ALL_RELEASE_MODEL()
@@ -432,9 +469,9 @@ void ResourceManager::ALL_RELEASE_MODEL()
         itr.Mesh_.clear();
         itr.Mtr_.clear();
         itr.Name_.clear();
-    }
 
-    models_.clear();
+        itr = {};
+    }
 }
 
 void ResourceManager::ALL_RELEASE_TEX()
@@ -446,7 +483,29 @@ void ResourceManager::ALL_RELEASE_TEX()
             itr.tex_.rsc_ptr->Release();
             itr.Name_.clear();
         }
-    }
-    textures_.clear();
 
+        itr = {};
+    }
+}
+
+void ResourceManager::ALL_RELEASE_AD()
+{
+    for (auto& itr : audiodata_) {
+        itr = {};
+    }
+}
+
+RTexture* ResourceManager::GetPointer_Tex()
+{
+    return textures_.data();
+}
+
+RModel* ResourceManager::GetPointer_Mdl()
+{
+    return models_.data();
+}
+
+RAudioData* ResourceManager::GetPointer_Ad()
+{
+    return audiodata_.data();
 }

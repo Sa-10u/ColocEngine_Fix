@@ -593,7 +593,6 @@ namespace S_Sound
 			}
 
 		}
-		ad->name_ = str;
 		return true;
 	}
 
@@ -621,8 +620,13 @@ namespace S_Sound
 void AudioData::Release()
 {
 	this->pBuf_.clear();
-	this->name_.clear();
 	this->format_ = {};
+}
+
+AudioData::AudioData()
+{
+	format_ = {};
+	pBuf_ = {};
 }
 
 AudioData::~AudioData()

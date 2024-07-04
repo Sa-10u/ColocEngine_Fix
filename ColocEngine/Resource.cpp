@@ -9,3 +9,9 @@ RTexture::RTexture():is_using(false)
 RModel::RModel() :DrawCount_(0)
 {
 }
+
+RAudioData::RAudioData()
+{
+	Name_ = {};
+	ad_ = {};
+}

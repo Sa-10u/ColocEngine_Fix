@@ -1139,7 +1139,7 @@ void D3d::write()
     cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_U, CBV_Util[IND_frame].desc.BufferLocation);
     cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::CB_C, CBV_Cam[IND_frame].desc.BufferLocation);
 
-    cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::TEX, ResourceManager::textures_[0].tex_.HGPU);
+    cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::TEX, ResourceManager::GetPointer_Tex()->tex_.HGPU);
 
     cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_MTL, SB_MTL[IND_frame].HGPU);
     cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::SB_OI, SB_OI[IND_frame].HGPU);
@@ -1153,7 +1153,10 @@ void D3d::write()
 
     size_t _inscnt = 0;
     auto MDIND = 0u;
-    for (auto& itr : ResourceManager::models_) {
+    for (auto i = 0u; i < ResourceManager::MAX_Models;++i) {
+
+        auto& itr = ResourceManager::GetPointer_Mdl()[i];
+        if (itr.Name_ == L"")  continue;
 
         auto v = 0u;
         for (auto& mesh : itr.Mesh_) {
@@ -1166,15 +1169,58 @@ void D3d::write()
                 SB_MTL[IND_frame].view[v].spec = itr.Mtr_[v].spec;
                 SB_MTL[IND_frame].view[v].emis_str = 0;
             }
-            int i = 0;
+
+            if (_inscnt + itr.DrawCount_ >= ResourceManager::CBCOUNT - 1)
             {
-                memcpy(SB_OI[IND_frame].view + (_inscnt), itr.info.data(), sizeof(ObjInfo)* itr.DrawCount_);
-                memcpy(SB_MB[IND_frame].view + (_inscnt), itr.Mesh_[v].texIndex_.data(), sizeof(MapBOOL)* itr.DrawCount_);
+                auto dc = ResourceManager::CBCOUNT - _inscnt - 1;
+
+                {
+                    memcpy(SB_OI[IND_frame].view + (_inscnt), itr.info.data(), sizeof(ObjInfo) * dc);
+                    memcpy(SB_MB[IND_frame].view + (_inscnt), itr.Mesh_[v].texIndex_.data(), sizeof(MapBOOL) * dc);
+
+                    cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
+                    cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
+                    cmdlist_->DrawIndexedInstanced(mesh.indexes_.size(), dc, 0, 0, _inscnt);
+                }
+
+                cmdlist_->Close();
+                ID3D12CommandList* commands[] = { cmdlist_ };
+                cmdque_->ExecuteCommandLists(1, commands);
+
+                waitGPU();
+
+                cmdalloc_[IND_frame]->Reset();
+                cmdlist_->Reset(cmdalloc_[IND_frame], nullptr);
+
+                _inscnt = 0u;
+                
+                auto rem = (itr.DrawCount_ - dc);
+
+                {
+                    memcpy(SB_OI[IND_frame].view + (_inscnt), &itr.info.at(dc), sizeof(ObjInfo)* rem);
+                    memcpy(SB_MB[IND_frame].view + (_inscnt), &itr.Mesh_[v].texIndex_.at(dc), sizeof(MapBOOL)* rem);
+
+                    cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
+                    cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
+                    cmdlist_->DrawIndexedInstanced(mesh.indexes_.size(), rem, 0, 0, _inscnt);
+                }
+                v++;
+            
+                S_Draw::Flush(MDIND);
+                MDIND++;
+
+                _inscnt += rem;
+                continue;
             }
 
-            cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
-            cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
-            cmdlist_->DrawIndexedInstanced(mesh.indexes_.size(), itr.DrawCount_ , 0, 0, _inscnt);
+            {
+                memcpy(SB_OI[IND_frame].view + (_inscnt), itr.info.data(), sizeof(ObjInfo) * itr.DrawCount_);
+                memcpy(SB_MB[IND_frame].view + (_inscnt), itr.Mesh_[v].texIndex_.data(), sizeof(MapBOOL) * itr.DrawCount_);
+
+                cmdlist_->IASetVertexBuffers(0, 1, &itr.VBV[v]);
+                cmdlist_->IASetIndexBuffer(&itr.IBV[v]);
+                cmdlist_->DrawIndexedInstanced(mesh.indexes_.size(), itr.DrawCount_, 0, 0, _inscnt);
+            }
             _inscnt += itr.DrawCount_;
 
             v++; 
@@ -1273,7 +1319,7 @@ void D3d::deferredrender()
     cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::D_CB_L, CBV_LGT[IND_frame].desc.BufferLocation);
     cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::D_CB_U, CBV_Util[IND_frame].desc.BufferLocation);
 
-    cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::D_TEX, ResourceManager::textures_[0].tex_.HGPU);
+    cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::D_TEX, ResourceManager::GetPointer_Tex()->tex_.HGPU);
     {
         cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::D_R_Color, f_GPU_SRV);
         cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::D_R_Normal, h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Normal)]);
@@ -1343,7 +1389,7 @@ void D3d::preeffectUI()
 
         cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_SB_OI, SB_UI[IND_frame].HGPU);
         cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_SB_MB, SB_MB[IND_frame].HGPU);
-        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_TEX, ResourceManager::textures_.data()->tex_.HGPU);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::U_TEX, ResourceManager::GetPointer_Tex()->tex_.HGPU);
 
         cmdlist_->RSSetViewports(1, &view_);
         cmdlist_->RSSetScissorRects(1, &rect_);
@@ -1414,7 +1460,7 @@ void D3d::postEffect()
     cmdlist_->SetDescriptorHeaps(1, ResourceManager::DHH_CbSrUaV->ppHeap_);
     {
         cmdlist_->SetGraphicsRootConstantBufferView(PSOManager::P_CB, CBV_Util[IND_frame].desc.BufferLocation);
-        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_TEX, ResourceManager::textures_.data()->tex_.HGPU);
+        cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_TEX, ResourceManager::GetPointer_Tex()->tex_.HGPU);
     }
     {
         cmdlist_->SetGraphicsRootDescriptorTable(PSOManager::P_R_Color,h_GPU_SRV[static_cast<uint16_t>(RenderUsage::Color)]);

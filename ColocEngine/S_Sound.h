@@ -22,10 +22,10 @@ struct AudioData
 {
 	WAVEFORMATEX format_;
 	std::vector<byte> pBuf_;
-	std::wstring name_;
 
 	void Release();
 
+	AudioData();
 	~AudioData();
 };
 

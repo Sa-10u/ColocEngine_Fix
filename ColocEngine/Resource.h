@@ -1,5 +1,6 @@
 #pragma once
 #include "BUFFER.h"
+#include"S_Sound.h"
 
 class RTexture
 {
@@ -32,3 +33,14 @@ public:
 	std::wstring Name_;
 	RModel();
 };
+
+class RAudioData
+{
+public:
+	RAudioData();
+
+	AudioData ad_;
+	std::wstring Name_;
+
+};
+
