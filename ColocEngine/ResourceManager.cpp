@@ -18,6 +18,10 @@ namespace ResourceManager
 
     ID3D12DescriptorHeap* heapCBV_SRV_UAV_;
     DH* DHH_CbSrUaV;
+
+    uint16_t nowLength_TEX = NULL;
+    uint16_t nowLength_MDL = NULL;
+    uint16_t nowLength_AD  = NULL;
 }
 
 void ResourceManager::Init()
@@ -38,6 +42,8 @@ void ResourceManager::Init()
         E_Tex.is_using = true;
 
         textures_.at(0) = E_Tex;
+
+        nowLength_TEX++;
     }
     //--------Alloc tex 
 
@@ -146,17 +152,29 @@ UINT ResourceManager::ModelLoad(std::wstring str)
     std::wstring path;
     if(!isResourceFile(str.c_str(), &path))    return NULL;
 
-    uint16_t index = NULL;
+    uint16_t index = -1;
 
-    for (int v = 0; v < models_.size();v++) {
-		if (models_[v].Name_ == path)	return v;
-        
-        if (models_[v].Name_ == L"")
-        {
-            index = v;
-            break;
+    {
+        bool isDecided = false;
+
+        for (int v = 0; v < nowLength_MDL; v++) {
+            if (models_[v].Name_ == path)	return v;
+
+            if (models_[v].Name_ == L"" && !isDecided)
+            {
+                index = v;
+                isDecided = true;
+            }
         }
-	}
+
+        if (index == -1)
+        {
+            nowLength_MDL = (std::min)(++nowLength_MDL, MAX_Models);
+            index = nowLength_MDL;
+
+            if (index == MAX_Models) return NULL;
+        }
+    }
 
     ID3D12Device* device_ = PTR_D3D::ptr->GetDevice();
 
@@ -295,23 +313,31 @@ UINT ResourceManager::TexLoad(std::wstring str)
 
     ID3D12Device* device_ = PTR_D3D::ptr->GetDevice();
 
-    for (auto v = 0u; v < textures_.size();v++) {
-        if (textures_[v].Name_ == path)	return v;
-    }
+    auto index = -1;
+    
+    {
+        bool isDecided = false;
 
-    auto index = NULL;
-    HRESULT res = E_FAIL;
+        for (auto v = 0u; v < nowLength_TEX; v++) {
+            if (textures_[v].Name_ == path)	return v;
 
-    uint16_t arrSize = MAX_Textures;
 
-    for (auto i = 0u; i <arrSize; i++) {
+            if (!textures_[v].is_using && !isDecided)
+            {
+                index = v;
+                isDecided = true;
+            }
+        }
 
-        if (textures_.at(i).is_using == false)
+        if (index == -1)
         {
-            index = i;
-            break;
+            nowLength_TEX = (std::min)(++nowLength_TEX, MAX_Models);
+            index = nowLength_TEX;
+
+            if (index == MAX_Textures) return NULL;
         }
     }
+    HRESULT res = E_FAIL;
 
     res = E_FAIL;
     //-------
@@ -400,7 +426,7 @@ UINT ResourceManager::ADLoad(std::wstring str)
 {
     auto index_ = 0u;
 
-    for (auto i = 0u;i<MAX_AudioData;i++) {
+    for (auto i = 0u;i<nowLength_AD;i++) {
 
         if (audiodata_[i].Name_ == str)     return i;
 
