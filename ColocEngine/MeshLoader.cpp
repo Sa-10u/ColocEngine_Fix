@@ -37,12 +37,16 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<Material>&
     //---------
     auto flag = 0;
     flag |= aiProcess_Triangulate;
-    flag |= aiProcess_PreTransformVertices;
+    //flag |= aiProcess_PreTransformVertices;
     flag |= aiProcess_CalcTangentSpace;
     flag |= aiProcess_GenSmoothNormals;
     flag |= aiProcess_GenUVCoords;
     flag |= aiProcess_RemoveRedundantMaterials;
     flag |= aiProcess_OptimizeMeshes;
+    flag |= aiProcess_MakeLeftHanded;
+    flag |= aiProcess_FlipWindingOrder;
+    flag |= aiProcess_LimitBoneWeights;
+    flag |= aiProcess_FixInfacingNormals;
     //----------------
     auto scene = imp.ReadFile(path, flag);
     if (scene == nullptr)    return false;
@@ -53,6 +57,8 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<Material>&
 
         const auto pm = scene->mMeshes[i];
         ParseMesh(mesh[i], pm);
+
+        auto b = scene->mAnimations;
     }
 
     mtr.clear();
@@ -78,7 +84,7 @@ bool MeshLoader::Load(const wchar_t* file, RModel* ptr)
     //---------
     auto flag = 0;
     flag |= aiProcess_Triangulate;
-    flag |= aiProcess_PreTransformVertices;
+   // flag |= aiProcess_PreTransformVertices;
     flag |= aiProcess_CalcTangentSpace;
     flag |= aiProcess_GenSmoothNormals;
     flag |= aiProcess_GenUVCoords;

@@ -152,7 +152,7 @@ UINT ResourceManager::ModelLoad(std::wstring str)
     std::wstring path;
     if(!isResourceFile(str.c_str(), &path))    return NULL;
 
-    uint16_t index = -1;
+    auto index = -1;
 
     {
         bool isDecided = false;
@@ -169,9 +169,9 @@ UINT ResourceManager::ModelLoad(std::wstring str)
 
         if (index == -1)
         {
-            nowLength_MDL = (std::min)(++nowLength_MDL, MAX_Models);
+            nowLength_MDL = (std::min)(nowLength_MDL, MAX_Models);
             index = nowLength_MDL;
-
+            ++nowLength_MDL;
             if (index == MAX_Models) return NULL;
         }
     }
