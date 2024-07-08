@@ -124,4 +124,6 @@ float3 fl3Normalize(const float3& fl);
 float Dot(const float3& f0, const float3& f1);
 float3 Cross(const float3& f0, const float3& f1);
 
+float3 operator*(float3& fl, Mat& mat);
+
 #define __CREATE(LPCSTR)	{};

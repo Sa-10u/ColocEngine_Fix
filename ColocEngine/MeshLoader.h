@@ -18,9 +18,9 @@ public:
 
 private:
 
-	void ParseMesh(MESH& mesh, const aiMesh* src);
+	void ParseMesh(MESH& mesh, const aiMesh* src , Mat mat);
 	void ParseMaterial(Material& mtl,MapBOOL& mpb ,const aiMaterial* src);
-	void ParseBone(BONE_INFO& bns, const aiMesh* src);
+	void ParseBone(BONE_INFO& bns, const aiMesh* src , Mat mat);
 
 	void ParseUV(aiVector3D &uv);
 

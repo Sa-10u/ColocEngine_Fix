@@ -4,6 +4,7 @@
 #include<cstdint>
 #include"FileLoader.h"
 #include "ResourceManager.h"
+#include<functional>
 
 static constexpr unsigned int TRIANGLE = 3;
 
@@ -37,7 +38,6 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<Material>&
     //---------
     auto flag = 0;
     flag |= aiProcess_Triangulate;
-    //flag |= aiProcess_PreTransformVertices;
     flag |= aiProcess_CalcTangentSpace;
     flag |= aiProcess_GenSmoothNormals;
     flag |= aiProcess_GenUVCoords;
@@ -53,13 +53,50 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<Material>&
     
     mesh.clear();
     mesh.resize(scene->mNumMeshes);
+    /*
     for (size_t i = 0; i < mesh.size(); i++) {
 
+        auto r = scene->mRootNode->mChildren[0];
+        auto c = scene->mRootNode->mChildren[1];
+
+        auto h = scene->mRootNode->mChildren[0]->mChildren[0];
+        auto l = scene->mRootNode->mChildren[0]->mChildren[1];
         const auto pm = scene->mMeshes[i];
         ParseMesh(mesh[i], pm);
-
-        auto b = scene->mAnimations;
     }
+    */
+
+    uint16_t cnt_mesh = 0u;
+    std::function<void(aiNode* ,Mat mat)> getMesh = [&](aiNode* node,Mat r_mat)->void
+        {
+            auto m = node->mTransformation;
+            Mat mat =
+            {
+                
+            };
+
+            mat = mat * r_mat;
+
+            for (auto i = 0u; i < node->mNumChildren; ++i) {
+
+                getMesh(node->mChildren[i],mat);
+            }
+
+            for (auto i = 0u; i < node->mNumMeshes; ++i) {
+
+                ParseMesh(mesh[cnt_mesh++], scene->mMeshes[node->mMeshes[i]],mat);
+            }
+
+        };
+
+    Mat r_mat =
+    {
+        1,0,0,0,
+        0,1,0,0,
+        0,0,1,0,
+        0,0,0,1
+    };
+    getMesh(scene->mRootNode, r_mat);
 
     mtr.clear();
     mtr.resize(scene->mNumMaterials);
@@ -84,12 +121,15 @@ bool MeshLoader::Load(const wchar_t* file, RModel* ptr)
     //---------
     auto flag = 0;
     flag |= aiProcess_Triangulate;
-   // flag |= aiProcess_PreTransformVertices;
     flag |= aiProcess_CalcTangentSpace;
     flag |= aiProcess_GenSmoothNormals;
     flag |= aiProcess_GenUVCoords;
     flag |= aiProcess_RemoveRedundantMaterials;
     flag |= aiProcess_OptimizeMeshes;
+    flag |= aiProcess_MakeLeftHanded;
+    flag |= aiProcess_FlipWindingOrder;
+    flag |= aiProcess_LimitBoneWeights;
+    flag |= aiProcess_FixInfacingNormals;
     //----------------
     auto scene = imp.ReadFile(path, flag);
     if (scene == nullptr)    return false;
@@ -100,7 +140,7 @@ bool MeshLoader::Load(const wchar_t* file, RModel* ptr)
     for (size_t i = 0; i < ptr->Mesh_.size(); i++) {
 
         const auto pm = scene->mMeshes[i];
-        ParseMesh(ptr->Mesh_[i], pm);
+       // ParseMesh(ptr->Mesh_[i], pm);
     }
     //--------------------------------------------
     ptr->Mtr_.clear();
@@ -131,7 +171,7 @@ bool MeshLoader::Load(const wchar_t* file, RModel* ptr)
     return true;
 }
 
-void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src)
+void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src, Mat mat)
 {
     mesh.ID_Material = src->mMaterialIndex;
 
@@ -148,10 +188,10 @@ void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src)
         auto bitan = (src->HasTangentsAndBitangents()) ? &(src->mBitangents[i]) : &vecdef;
         auto Mtl_ID = mesh.ID_Material;
         ParseUV(*uv);
-
+        
         mesh.vtcs_[i] = VERTEX
         (
-            XMFLOAT3(pos->x, pos->y, pos->z),
+            float3(pos->x, pos->y, pos->z) * mat,
             XMFLOAT3(norm->x, norm->y, norm->z),
             XMFLOAT2(uv->x, uv->y),
             XMFLOAT3(tan->x, tan->y, tan->z),
@@ -350,7 +390,7 @@ void MeshLoader::ParseMaterial(Material& mtl, MapBOOL& mpb, const aiMaterial* sr
     }
 }
 
-void MeshLoader::ParseBone(BONE_INFO& bns, const aiMesh* src)
+void MeshLoader::ParseBone(BONE_INFO& bns, const aiMesh* src, Mat mat)
 {
     for (auto b = 0u; b < src->mNumBones; b++) {
 

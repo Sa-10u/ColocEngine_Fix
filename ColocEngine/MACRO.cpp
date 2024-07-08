@@ -263,3 +263,15 @@ float3 Cross(const float3& f0, const float3& f1)
 		(f0.x * f1.y) - (f1.y * f0.x)
 	);
 }
+
+float3 operator*(float3& fl, Mat& mat)
+{
+	auto vec = DirectX::XMLoadFloat3(&fl);
+	vec = DirectX::XMVectorSetW(vec, 1.0f);
+
+	auto val = XMVector3Transform(vec, mat);
+
+	float3 res;
+	DirectX::XMStoreFloat3(&res, val);
+	return res;
+}
