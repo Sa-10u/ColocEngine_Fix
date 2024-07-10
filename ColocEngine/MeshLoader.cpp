@@ -43,10 +43,9 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<Material>&
     flag |= aiProcess_GenUVCoords;
     flag |= aiProcess_RemoveRedundantMaterials;
     flag |= aiProcess_OptimizeMeshes;
-    flag |= aiProcess_MakeLeftHanded;
-    flag |= aiProcess_FlipWindingOrder;
     flag |= aiProcess_LimitBoneWeights;
     flag |= aiProcess_FixInfacingNormals;
+    flag |= aiProcess_PopulateArmatureData;
     //----------------
     auto scene = imp.ReadFile(path, flag);
     if (scene == nullptr)    return false;
@@ -72,7 +71,10 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<Material>&
             auto m = node->mTransformation;
             Mat mat =
             {
-                
+                m.a1,m.b1,m.c1,m.d1,
+                m.a2,m.b2,m.c2,m.d2,
+                m.a3,m.b3,m.c3,m.d3,
+                m.a4,m.b4,m.c4,m.d4
             };
 
             mat = mat * r_mat;
@@ -127,7 +129,7 @@ bool MeshLoader::Load(const wchar_t* file, RModel* ptr)
     flag |= aiProcess_RemoveRedundantMaterials;
     flag |= aiProcess_OptimizeMeshes;
     flag |= aiProcess_MakeLeftHanded;
-    flag |= aiProcess_FlipWindingOrder;
+    //flag |= aiProcess_FlipWindingOrder;
     flag |= aiProcess_LimitBoneWeights;
     flag |= aiProcess_FixInfacingNormals;
     //----------------
@@ -188,14 +190,19 @@ void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src, Mat mat)
         auto bitan = (src->HasTangentsAndBitangents()) ? &(src->mBitangents[i]) : &vecdef;
         auto Mtl_ID = mesh.ID_Material;
         ParseUV(*uv);
-        
+
+        float3 p = float3(pos->x, pos->y, pos->z);
+        float3 n = float3(norm->x, norm->y, norm->z);
+        float3 t = float3(tan->x, tan->y, tan->z);
+        float3 b = float3(bitan->x, bitan->y, bitan->z);
+
         mesh.vtcs_[i] = VERTEX
         (
-            float3(pos->x, pos->y, pos->z) * mat,
-            XMFLOAT3(norm->x, norm->y, norm->z),
-            XMFLOAT2(uv->x, uv->y),
-            XMFLOAT3(tan->x, tan->y, tan->z),
-            XMFLOAT3(bitan->x, bitan->y, bitan->z),
+            p*mat,
+            n*mat,
+            float2(uv->x, uv->y),
+            t * mat,
+            b * mat,
             Mtl_ID
         );
     }

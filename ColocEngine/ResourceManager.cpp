@@ -331,9 +331,9 @@ UINT ResourceManager::TexLoad(std::wstring str)
 
         if (index == -1)
         {
-            nowLength_TEX = (std::min)(++nowLength_TEX, MAX_Models);
+            nowLength_TEX = (std::min)(nowLength_TEX, MAX_Models);
             index = nowLength_TEX;
-
+            ++nowLength_TEX;
             if (index == MAX_Textures) return NULL;
         }
     }
