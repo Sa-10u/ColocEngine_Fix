@@ -49,21 +49,9 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<Material>&
     //----------------
     auto scene = imp.ReadFile(path, flag);
     if (scene == nullptr)    return false;
-    
+
     mesh.clear();
     mesh.resize(scene->mNumMeshes);
-    /*
-    for (size_t i = 0; i < mesh.size(); i++) {
-
-        auto r = scene->mRootNode->mChildren[0];
-        auto c = scene->mRootNode->mChildren[1];
-
-        auto h = scene->mRootNode->mChildren[0]->mChildren[0];
-        auto l = scene->mRootNode->mChildren[0]->mChildren[1];
-        const auto pm = scene->mMeshes[i];
-        ParseMesh(mesh[i], pm);
-    }
-    */
 
     uint16_t cnt_mesh = 0u;
     std::function<void(aiNode* ,Mat mat)> getMesh = [&](aiNode* node,Mat r_mat)->void
@@ -180,6 +168,7 @@ void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src, Mat mat)
     aiVector3D vecdef(0.0f, 0.0f, 0.0f);
 
     mesh.vtcs_.resize(src->mNumVertices);
+    
 
     for (auto i = 0u; i < src->mNumVertices; i++) {
 
@@ -212,6 +201,18 @@ void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src, Mat mat)
         mesh.indexes_.resize(src->mNumFaces * TRIANGLE);
     }
 
+    static int cnt = 0;
+    for (auto i = 0u; i < src->mNumBones; ++i) {
+
+        string str = src->mBones[i]->mName.C_Str();
+        auto p = src->mBones[i]->mNode;
+        if (str == "body")
+        {
+            auto b = src->mBones[i];
+            cnt++;
+        }
+    }
+
     for (auto i = 0; i < src->mNumFaces; i++) {
 
         const auto& face = src->mFaces[i];
@@ -220,6 +221,8 @@ void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src, Mat mat)
         mesh.indexes_[i * TRIANGLE + 1] = face.mIndices[1];
         mesh.indexes_[i * TRIANGLE + 2] = face.mIndices[2];
     }
+
+   
 }
 
 void MeshLoader::ParseMaterial(Material& mtl, MapBOOL& mpb, const aiMaterial* src)

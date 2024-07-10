@@ -10,6 +10,9 @@ struct VSinput
 
 	uint MID	: MATERIAL_ID;
 	
+    uint4 BIDs : BONE_IDs;
+    float4 BWGHTs: BONE_WEIGHTs;
+	
 	uint ID		: SV_InstanceID;
     uint VID	: SV_VertexID;
 	//uint offset : SV_StartInstanceLocation;

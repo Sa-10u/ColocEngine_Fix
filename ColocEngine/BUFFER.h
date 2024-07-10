@@ -53,6 +53,8 @@ struct VERTEX
 	XMFLOAT3 tan_;
 	XMFLOAT3 bitan_;
 	UINT	 mtlID_;
+	XMINT4	 bIDs_;
+	XMFLOAT4 bWghts_;
 
 	static const D3D12_INPUT_LAYOUT_DESC inp_Layout;
 
@@ -68,6 +70,8 @@ struct VERTEX
 		TANGENT,
 		BITANGENT,
 		MTLID,
+		BONE_IDs,
+		BONE_WEIGHTs,
 
 		AMMOUNT
 	};

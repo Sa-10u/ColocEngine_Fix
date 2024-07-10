@@ -45,6 +45,8 @@ namespace SEMANTICS_STR
 	extern LPCSTR NORMAL;
 	extern LPCSTR BITANGENT;
 	extern LPCSTR MATERIAL;
+	extern LPCSTR BONEIDs;
+	extern LPCSTR BONEWEIGHTs;
 }
 namespace SHADER_FILENAME
 {
