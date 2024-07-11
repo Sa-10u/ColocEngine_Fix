@@ -28,7 +28,7 @@ MeshLoader::~MeshLoader()
 {
 }
 
-bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<Material>& mtr)
+bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<Material>& mtr , std::vector<Armature>& amt)
 {
     if (file == nullptr) return false;
     auto path = wtoc(file);
@@ -54,6 +54,7 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<Material>&
     mesh.resize(scene->mNumMeshes);
 
     uint16_t cnt_mesh = 0u;
+
     std::function<void(aiNode* ,Mat mat)> getMesh = [&](aiNode* node,Mat r_mat)->void
         {
             auto m = node->mTransformation;
@@ -74,7 +75,9 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<Material>&
 
             for (auto i = 0u; i < node->mNumMeshes; ++i) {
 
-                ParseMesh(mesh[cnt_mesh++], scene->mMeshes[node->mMeshes[i]],mat);
+                auto index = cnt_mesh++;
+                if (scene->mMeshes[node->mMeshes[i]]->HasBones()) { ParseBone(amt, scene->mMeshes[node->mMeshes[i]]->mBones[0], mat, mesh[index]); }
+                ParseMesh(mesh[index], scene->mMeshes[node->mMeshes[i]],mat,amt);
             }
 
         };
@@ -95,73 +98,19 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<Material>&
         const auto pm = scene->mMaterials[i];
         ParseMaterial(mtr[i],mesh[i].defTex_ ,pm);
     }
+
+    for (auto i = 0; i < scene->mNumAnimations; ++i) {
+
+        auto anim = scene->mAnimations[i];
+    }
+
     scene = nullptr;
     imp.FreeScene();
 
     return true;
 }
 
-bool MeshLoader::Load(const wchar_t* file, RModel* ptr)
-{
-    if (file == nullptr) return false;
-    auto path = wtoc(file);
-
-    UVCheck(path);
-    Assimp::Importer imp = {};
-    //---------
-    auto flag = 0;
-    flag |= aiProcess_Triangulate;
-    flag |= aiProcess_CalcTangentSpace;
-    flag |= aiProcess_GenSmoothNormals;
-    flag |= aiProcess_GenUVCoords;
-    flag |= aiProcess_RemoveRedundantMaterials;
-    flag |= aiProcess_OptimizeMeshes;
-    flag |= aiProcess_MakeLeftHanded;
-    //flag |= aiProcess_FlipWindingOrder;
-    flag |= aiProcess_LimitBoneWeights;
-    flag |= aiProcess_FixInfacingNormals;
-    //----------------
-    auto scene = imp.ReadFile(path, flag);
-    if (scene == nullptr)    return false;
-
-    //--------------------------------------------
-    ptr->Mesh_.clear();
-    ptr->Mesh_.resize(scene->mNumMeshes);
-    for (size_t i = 0; i < ptr->Mesh_.size(); i++) {
-
-        const auto pm = scene->mMeshes[i];
-       // ParseMesh(ptr->Mesh_[i], pm);
-    }
-    //--------------------------------------------
-    ptr->Mtr_.clear();
-    ptr->Mtr_.resize(scene->mNumMaterials);
-    for (size_t i = 0; i < ptr->Mtr_.size(); i++) {
-
-
-        const auto pm = scene->mMaterials[i];
-        ParseMaterial(ptr->Mtr_[i],ptr->Mesh_[i].defTex_, pm);
-    }
-    //--------------------------------------------
-    ptr->TexName_.clear();
-    ptr->TexName_.resize(scene->mNumTextures);
-    for (auto i = 0u; i < scene->mNumMaterials; i++) {
-
-    }
-    //----------
-
-    for (size_t i = 0; i < ptr->Mesh_.size(); i++) {
-        ptr->Mesh_[i].bnsinfo_.clear();
-        ptr->Mesh_[i].bnsinfo_.resize(ptr->Mesh_[i].vtcs_.size());
-        const auto pm = scene->mMeshes[i];
-
-    }
-
-    scene = nullptr;
-
-    return true;
-}
-
-void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src, Mat mat)
+void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src, Mat mat, vector<Armature>& amt)
 {
     mesh.ID_Material = src->mMaterialIndex;
 
@@ -197,19 +146,45 @@ void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src, Mat mat)
     }
 
     {
-        auto n = src->mNumBones;
         mesh.indexes_.resize(src->mNumFaces * TRIANGLE);
     }
 
+    auto weighting = [](float4& wgts,XMINT4& ids,float wgt,int id) 
+        {
+            if (wgts.x == .0f) { wgts.x = wgt; ids.x = id; return; }
+            if (wgts.y == .0f) { wgts.y = wgt; ids.y = id; return; }
+            if (wgts.z == .0f) { wgts.z = wgt; ids.z = id; return; }
+            if (wgts.w == .0f) { wgts.w = wgt; ids.w = id; return; }
+        };
+
+    auto getBoneID = [&](const string& name)->uint16_t
+        {
+            auto size = amt[mesh.index_armature].bnsinfo_.size();
+            auto ptr = amt[mesh.index_armature].bnsinfo_.data();
+
+            for (auto i = 0u; i < size; ++i) {
+                
+                if (ptr[i].name_ == name)    return i;
+            }
+
+            return NULL;
+        };
+    
     static int cnt = 0;
     for (auto i = 0u; i < src->mNumBones; ++i) {
+        auto bone = src->mBones[i];
+        if (!(bone->mNumWeights))    continue;
 
-        string str = src->mBones[i]->mName.C_Str();
-        auto p = src->mBones[i]->mNode;
-        if (str == "body")
-        {
-            auto b = src->mBones[i];
-            cnt++;
+        auto bID = getBoneID(bone->mName.C_Str());
+        for (auto j = 0u; j < bone->mNumWeights; ++j) {
+
+            weighting
+            (
+                mesh.vtcs_[bone->mWeights[j].mVertexId].bWghts_,
+                mesh.vtcs_[bone->mWeights[j].mVertexId].bIDs_,
+                bone->mWeights[j].mWeight,
+                bID
+            );
         }
     }
 
@@ -400,14 +375,47 @@ void MeshLoader::ParseMaterial(Material& mtl, MapBOOL& mpb, const aiMaterial* sr
     }
 }
 
-void MeshLoader::ParseBone(BONE_INFO& bns, const aiMesh* src, Mat mat)
+void MeshLoader::ParseBone(std::vector<Armature>& arm, const aiBone* src, Mat mat, MESH& mesh)
 {
-    for (auto b = 0u; b < src->mNumBones; b++) {
+    for (auto i = 0u; i < arm.size(); ++i) {
 
-        UINT ind = 0;
-        string bname = src->mBones[b]->mName.data;
-
+        if (src->mArmature->mName.C_Str() == arm[i].name_) { mesh.index_armature = i; return; }
     }
+
+    Armature temp = {};
+    
+    temp.name_ = src->mArmature->mName.C_Str();
+
+    std::function<void(aiNode* ,Mat)>pushBone = [&](aiNode* me,Mat mat) 
+        {
+            BONE_INFO info = {};
+            
+            auto m = me->mTransformation;
+            Mat mymat =
+            {
+                m.a1,m.b1,m.c1,m.d1,
+                m.a2,m.b2,m.c2,m.d2,
+                m.a3,m.b3,m.c3,m.d3,
+                m.a4,m.b4,m.c4,m.d4
+            };
+            info.local_ = mymat;
+
+            mymat = mymat * mat;
+            info.global_ = mymat;
+
+            info.name_ = me->mName.C_Str();
+
+            temp.bnsinfo_.push_back(info);
+            for (auto i = 0u; i < me->mNumChildren; ++i) {
+
+                pushBone(me->mChildren[i], mat);
+            }
+        };
+
+    pushBone(src->mNode, mat);
+
+    arm.push_back(temp);
+    mesh.index_armature = arm.size() - 1;
 }
 
 void MeshLoader::ParseUV(aiVector3D& uv)
@@ -459,18 +467,9 @@ void MeshLoader::UnReverse(ai_real& val)
 
 //--------------------------------------------
 
-
-bool LoadMesh(const wchar_t* file, vector<MESH>& mesh, vector<Material>& material)
-{
-    MeshLoader ml = {};
-
-    //Flyweight
-    return (ml.Load(file, mesh, material));
-}
-
 bool LoadMesh(const wchar_t* file, RModel* ptr)
 {
     MeshLoader ml = {};
 
-    return (ml.Load(file, ptr->Mesh_, ptr->Mtr_));
+    return (ml.Load(file, ptr->Mesh_, ptr->Mtr_ ,ptr->armature_));
 }

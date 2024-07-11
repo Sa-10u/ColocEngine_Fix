@@ -187,8 +187,16 @@ struct StructuredBuffer
 struct BONE_INFO
 {
 public:
-	vector<UINT> IDs;
-	vector<float> Weights;
+	
+	XMMATRIX local_;
+	XMMATRIX global_;
+	string name_;
+};
+
+struct Armature
+{
+	vector<BONE_INFO> bnsinfo_;
+	std::string name_;
 };
 
 struct MESH
@@ -196,17 +204,16 @@ struct MESH
 public:
 	vector<VERTEX> vtcs_;
 	vector<uint32_t> indexes_;
-	vector<BONE_INFO> bnsinfo_;
 
 	MapBOOL defTex_;
 	vector<MapBOOL> texIndex_;
 	uint32_t ID_Material;
+	uint8_t index_armature;
 
 	MESH();
 	//-----
 };
 
-bool LoadMesh(const wchar_t* file, vector<MESH>& mesh, vector<Material>& material);
 bool LoadMesh(const wchar_t* file, RModel* ptr);
 
 //--------------------------------------

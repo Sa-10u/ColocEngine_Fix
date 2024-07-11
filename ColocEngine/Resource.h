@@ -29,6 +29,7 @@ public:
 	
 	std::vector<D3D12_VERTEX_BUFFER_VIEW> VBV;
 	std::vector<D3D12_INDEX_BUFFER_VIEW>  IBV;
+	std::vector<Armature> armature_;
 
 	std::wstring Name_;
 	RModel();
