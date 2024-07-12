@@ -3,6 +3,7 @@
 #include<d3d12.h>
 #include <string>
 #include <vector>
+#include<map>
 #include<cstdint>
 #include"S_Light.h"
 
@@ -188,14 +189,31 @@ struct BONE_INFO
 {
 public:
 	
+	BONE_INFO* parent_;
 	XMMATRIX local_;
 	XMMATRIX global_;
-	string name_;
+	std::vector<BONE_INFO*> children_;
+};
+
+struct AnimationData_BONE
+{
+	uint16_t startPos;
+	uint16_t endPos;
+
+	vector<BONE_INFO>	info_;
+	vector<uint16_t>	time_;
+	
+	AnimationData_BONE();
 };
 
 struct Armature
 {
 	vector<BONE_INFO> bnsinfo_;
+	std::map<string, uint16_t>	BonenameIndex_;
+
+	vector<AnimationData_BONE>	anims_;
+	std::map<string, uint16_t>	AnimnameIndex_;
+
 	std::string name_;
 };
 

@@ -76,6 +76,9 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<Material>&
             for (auto i = 0u; i < node->mNumMeshes; ++i) {
 
                 auto index = cnt_mesh++;
+                auto g = scene->mMeshes[node->mMeshes[i]]->mBones[0];
+
+                //do for. this is only include first child , more than secondaly will been ignore.
                 if (scene->mMeshes[node->mMeshes[i]]->HasBones()) { ParseBone(amt, scene->mMeshes[node->mMeshes[i]]->mBones[0], mat, mesh[index]); }
                 ParseMesh(mesh[index], scene->mMeshes[node->mMeshes[i]],mat,amt);
             }
@@ -102,6 +105,28 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<Material>&
     for (auto i = 0; i < scene->mNumAnimations; ++i) {
 
         auto anim = scene->mAnimations[i];
+        for (auto c = 0u; c < anim->mNumChannels; ++c) {
+
+            auto channel = anim->mChannels[c];
+            auto p0 = channel->mPositionKeys[0];
+            auto p1 = channel->mPositionKeys[1];
+
+            auto t = 0;
+        }
+
+        for (auto mc = 0u; mc < anim->mNumMeshChannels; ++mc) {
+        
+            auto mesh = anim->mMeshChannels[mc];
+
+            auto t = 0;
+        }
+        for (auto mm = 0u; mm < anim->mNumMorphMeshChannels; mm++) {
+
+            auto morph = anim->mMorphMeshChannels[mm];
+            morph->mNumKeys;
+
+            auto t = 0;
+        }
     }
 
     scene = nullptr;
@@ -159,15 +184,7 @@ void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src, Mat mat, vector<Armatu
 
     auto getBoneID = [&](const string& name)->uint16_t
         {
-            auto size = amt[mesh.index_armature].bnsinfo_.size();
-            auto ptr = amt[mesh.index_armature].bnsinfo_.data();
-
-            for (auto i = 0u; i < size; ++i) {
-                
-                if (ptr[i].name_ == name)    return i;
-            }
-
-            return NULL;
+            return amt[mesh.index_armature].BonenameIndex_.at(name);
         };
     
     static int cnt = 0;
@@ -390,6 +407,7 @@ void MeshLoader::ParseBone(std::vector<Armature>& arm, const aiBone* src, Mat ma
         {
             BONE_INFO info = {};
             
+            
             auto m = me->mTransformation;
             Mat mymat =
             {
@@ -403,15 +421,27 @@ void MeshLoader::ParseBone(std::vector<Armature>& arm, const aiBone* src, Mat ma
             mymat = mymat * mat;
             info.global_ = mymat;
 
-            info.name_ = me->mName.C_Str();
-
             temp.bnsinfo_.push_back(info);
+
+            auto name = std::pair<string, uint16_t>{ me->mName.C_Str(),static_cast<uint16_t>(temp.bnsinfo_.size() - 1) };
+            temp.BonenameIndex_.insert(name);
+
             for (auto i = 0u; i < me->mNumChildren; ++i) {
 
                 pushBone(me->mChildren[i], mat);
             }
         };
 
+    auto m = src->mOffsetMatrix;
+    Mat offset =
+    {
+        m.a1,m.b1,m.c1,m.d1,
+        m.a2,m.b2,m.c2,m.d2,
+        m.a3,m.b3,m.c3,m.d3,
+        m.a4,m.b4,m.c4,m.d4
+    };
+
+    mat = mat * offset;
     pushBone(src->mNode, mat);
 
     arm.push_back(temp);
