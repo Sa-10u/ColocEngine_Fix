@@ -79,7 +79,10 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<Material>&
                 auto g = scene->mMeshes[node->mMeshes[i]]->mBones[0];
 
                 //do for. this is only include first child , more than secondaly will been ignore.
-                if (scene->mMeshes[node->mMeshes[i]]->HasBones()) { ParseBone(amt, scene->mMeshes[node->mMeshes[i]]->mBones[0], mat, mesh[index]); }
+
+                for (auto bn = 0u;bn < scene->mMeshes[node->mMeshes[i]]->mBones[0]->mArmature->mNumChildren;++bn){
+                    ParseBone(amt, scene->mMeshes[node->mMeshes[i]]->mBones[0]->mArmature->mChildren[bn], mat, mesh[index]);
+                }
                 ParseMesh(mesh[index], scene->mMeshes[node->mMeshes[i]],mat,amt);
             }
 
@@ -416,10 +419,7 @@ void MeshLoader::ParseBone(std::vector<Armature>& arm, const aiBone* src, Mat ma
                 m.a3,m.b3,m.c3,m.d3,
                 m.a4,m.b4,m.c4,m.d4
             };
-            info.local_ = mymat;
-
-            mymat = mymat * mat;
-            info.global_ = mymat;
+            info.bind_ = mymat * mat;
 
             temp.bnsinfo_.push_back(info);
 

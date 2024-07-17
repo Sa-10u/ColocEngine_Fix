@@ -190,8 +190,8 @@ struct BONE_INFO
 public:
 	
 	BONE_INFO* parent_;
-	XMMATRIX local_;
-	XMMATRIX global_;
+	XMMATRIX bind_;
+	XMMATRIX current_;
 	std::vector<BONE_INFO*> children_;
 };
 

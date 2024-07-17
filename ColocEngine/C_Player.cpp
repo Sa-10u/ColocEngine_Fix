@@ -65,21 +65,9 @@ void C_Player::Run(float tick)
 	oi.wld = trans->WLDGetMTX();
 	S_Draw::Draw(&oi, md, nullptr, NULL);
 
-	if (cnt == 100)
-	{
-		//c.SetVolume(0.1);
-	}
-
-	if (cnt == 20)
-	{
-		//c.SetVolume(1.5);
-		//S_Sound::ReSetSE(&c);
-		//c.Release();
-	}
-
-	if (cnt == 900)
-	{
-		S_Sound::StartSE(c.GetSounder());
+	for (auto i = 0u; i < ResourceManager::GetPointer_Mdl()[md].armature_[0].bnsinfo_.size(); ++i) {
+		auto bind = ResourceManager::GetPointer_Mdl()[md].armature_[0].bnsinfo_[i].bind_;
+		S_Draw::Draw(&bind, md, nullptr, NULL);
 	}
 }
 
