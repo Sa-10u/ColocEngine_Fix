@@ -76,13 +76,8 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<Material>&
             for (auto i = 0u; i < node->mNumMeshes; ++i) {
 
                 auto index = cnt_mesh++;
-                auto g = scene->mMeshes[node->mMeshes[i]]->mBones[0];
-
-                //do for. this is only include first child , more than secondaly will been ignore.
-
-                for (auto bn = 0u;bn < scene->mMeshes[node->mMeshes[i]]->mBones[0]->mArmature->mNumChildren;++bn){
-                    ParseBone(amt, scene->mMeshes[node->mMeshes[i]]->mBones[0]->mArmature->mChildren[bn], mat, mesh[index]);
-                }
+                auto b = scene->mMeshes[node->mMeshes[i]]->HasBones();
+                if(scene->mMeshes[node->mMeshes[i]]->HasBones())    ParseBone(amt, scene->mMeshes[node->mMeshes[i]]->mBones[0]->mArmature, mat, mesh[index]);
                 ParseMesh(mesh[index], scene->mMeshes[node->mMeshes[i]],mat,amt);
             }
 
@@ -141,9 +136,7 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<Material>&
 void MeshLoader::ParseMesh(MESH& mesh, const aiMesh* src, Mat mat, vector<Armature>& amt)
 {
     mesh.ID_Material = src->mMaterialIndex;
-
     aiVector3D vecdef(0.0f, 0.0f, 0.0f);
-
     mesh.vtcs_.resize(src->mNumVertices);
     
 
@@ -399,17 +392,17 @@ void MeshLoader::ParseBone(std::vector<Armature>& arm, const aiNode* src, Mat ma
 {
     for (auto i = 0u; i < arm.size(); ++i) {
 
-        if (src->mParent->mName.C_Str() == arm[i].name_) { mesh.index_armature = i; return; }
+        if (src->mName.C_Str() == arm[i].name_) { mesh.index_armature = i; return; }
+
     }
 
     Armature temp = {};
     
-    temp.name_ = src->mParent->mName.C_Str();
+    temp.name_ = src->mName.C_Str();
 
     std::function<void(aiNode* ,Mat)>pushBone = [&](aiNode* me,Mat mat) 
         {
             BONE_INFO info = {};
-            
             
             auto m = me->mTransformation;
             Mat mymat =
@@ -432,16 +425,6 @@ void MeshLoader::ParseBone(std::vector<Armature>& arm, const aiNode* src, Mat ma
             }
         };
 
-    auto m = src->mTransformation;
-    Mat offset =
-    {
-        m.a1,m.b1,m.c1,m.d1,
-        m.a2,m.b2,m.c2,m.d2,
-        m.a3,m.b3,m.c3,m.d3,
-        m.a4,m.b4,m.c4,m.d4
-    };
-
-    mat = mat * offset;
     for (auto i = 0u; i < src->mNumChildren; ++i) {
 
         pushBone(src->mChildren[i], mat);

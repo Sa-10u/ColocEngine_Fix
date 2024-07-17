@@ -36,7 +36,7 @@ void C_Player::Run(float tick)
 	static int cnt = 0;
 	cnt++;
 	trans->scale = {1,1,1};
-	trans->pos = {-1,0,0};
+	trans->pos = {0,0,0};
 
 	oi.wld = trans->WLDGetMTX();
 
@@ -45,29 +45,31 @@ void C_Player::Run(float tick)
 
 	MapBOOL* ptr[1] = { &mb };
 
-	S_Draw::Draw(&oi, md, ptr, _countof(ptr));
+	//S_Draw::Draw(&oi, md, ptr, _countof(ptr));
 
 	trans->scale = { .1f,.1f,.1f };
 	trans->pos = { 0,0,0 };
 
 	oi.wld = trans->WLDGetMTX();
-	S_Draw::Draw(&oi, ResourceManager::ModelLoad(L"Sphere.fbx"), nullptr, NULL);
+	//S_Draw::Draw(&oi, ResourceManager::ModelLoad(L"Sphere.fbx"), nullptr, NULL);
 
 	trans->scale = { .1f,.1f,.1f };
 	trans->pos = { 1,0,0 };
 
 	oi.wld = trans->WLDGetMTX();
-	S_Draw::Draw(&oi, ResourceManager::ModelLoad(L"Sphere.fbx"), nullptr, NULL);
+	//S_Draw::Draw(&oi, ResourceManager::ModelLoad(L"Sphere.fbx"), nullptr, NULL);
 
 	trans->scale = { 1,1,1 };
 	trans->pos = { 0,1,0 };
 
 	oi.wld = trans->WLDGetMTX();
-	S_Draw::Draw(&oi, md, nullptr, NULL);
+	//S_Draw::Draw(&oi, md, nullptr, NULL);
 
 	for (auto i = 0u; i < ResourceManager::GetPointer_Mdl()[md].armature_[0].bnsinfo_.size(); ++i) {
+		auto c = ResourceManager::GetPointer_Mdl()[md].armature_[0].bnsinfo_;
+
 		auto bind = ResourceManager::GetPointer_Mdl()[md].armature_[0].bnsinfo_[i].bind_;
-		S_Draw::Draw(&bind, md, nullptr, NULL);
+		S_Draw::Draw(bind, md, nullptr, NULL);
 	}
 }
 
