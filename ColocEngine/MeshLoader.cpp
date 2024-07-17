@@ -395,16 +395,16 @@ void MeshLoader::ParseMaterial(Material& mtl, MapBOOL& mpb, const aiMaterial* sr
     }
 }
 
-void MeshLoader::ParseBone(std::vector<Armature>& arm, const aiBone* src, Mat mat, MESH& mesh)
+void MeshLoader::ParseBone(std::vector<Armature>& arm, const aiNode* src, Mat mat, MESH& mesh)
 {
     for (auto i = 0u; i < arm.size(); ++i) {
 
-        if (src->mArmature->mName.C_Str() == arm[i].name_) { mesh.index_armature = i; return; }
+        if (src->mParent->mName.C_Str() == arm[i].name_) { mesh.index_armature = i; return; }
     }
 
     Armature temp = {};
     
-    temp.name_ = src->mArmature->mName.C_Str();
+    temp.name_ = src->mParent->mName.C_Str();
 
     std::function<void(aiNode* ,Mat)>pushBone = [&](aiNode* me,Mat mat) 
         {
@@ -432,7 +432,7 @@ void MeshLoader::ParseBone(std::vector<Armature>& arm, const aiBone* src, Mat ma
             }
         };
 
-    auto m = src->mOffsetMatrix;
+    auto m = src->mTransformation;
     Mat offset =
     {
         m.a1,m.b1,m.c1,m.d1,
@@ -442,7 +442,10 @@ void MeshLoader::ParseBone(std::vector<Armature>& arm, const aiBone* src, Mat ma
     };
 
     mat = mat * offset;
-    pushBone(src->mNode, mat);
+    for (auto i = 0u; i < src->mNumChildren; ++i) {
+
+        pushBone(src->mChildren[i], mat);
+    }
 
     arm.push_back(temp);
     mesh.index_armature = arm.size() - 1;

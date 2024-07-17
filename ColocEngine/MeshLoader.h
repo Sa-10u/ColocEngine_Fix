@@ -20,7 +20,7 @@ private:
 
 	void ParseMesh(MESH& mesh, const aiMesh* src , Mat mat , vector<Armature>& amt);
 	void ParseMaterial(Material& mtl,MapBOOL& mpb ,const aiMaterial* src);
-	void ParseBone(std::vector<Armature>& arm,const aiBone* src, Mat mat,MESH& mesh);
+	void ParseBone(std::vector<Armature>& arm,const aiNode* src, Mat mat,MESH& mesh);
 	void ParseAnim(std::vector<Armature>& arm);
 
 	void ParseUV(aiVector3D &uv);
