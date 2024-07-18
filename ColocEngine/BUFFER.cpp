@@ -66,3 +66,7 @@ SimpleQuad::SimpleQuad() :tick(0), val0(0), val1(0), val2(0)
 AnimationData_BONE::AnimationData_BONE():startPos(NULL),endPos(NULL)
 {
 }
+
+BONE_INFO::BONE_INFO() :parent_(-1), bind_{}, current_{}
+{
+}

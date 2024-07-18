@@ -64,6 +64,9 @@
     <Filter Include="shader\Deferred">
       <UniqueIdentifier>{0138dbb1-d50f-4ed6-9b9f-dd92c0fabba9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shader\GPGPU">
+      <UniqueIdentifier>{d94bb482-9c13-4774-adf1-8051474e5ae1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MAIN.cpp">
@@ -273,6 +276,9 @@
     </FxCompile>
     <FxCompile Include="Deferred_Def_PS.hlsl">
       <Filter>shader\Deferred</Filter>
+    </FxCompile>
+    <FxCompile Include="AnimationMatrix.hlsl">
+      <Filter>shader\GPGPU</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

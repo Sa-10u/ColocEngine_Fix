@@ -189,10 +189,11 @@ struct BONE_INFO
 {
 public:
 	
-	BONE_INFO* parent_;
+	int32_t parent_;
 	XMMATRIX bind_;
 	XMMATRIX current_;
-	std::vector<BONE_INFO*> children_;
+
+	BONE_INFO();
 };
 
 struct AnimationData_BONE
