@@ -68,7 +68,7 @@ void C_Player::Run(float tick)
 	for (auto i = 0u; i < ResourceManager::GetPointer_Mdl()[md].armature_[0].bnsinfo_.size(); ++i) {
 		auto c = ResourceManager::GetPointer_Mdl()[md].armature_[0].bnsinfo_;
 
-		auto bind = ResourceManager::GetPointer_Mdl()[md].armature_[0].bnsinfo_[i].bind_;
+		auto bind = ResourceManager::GetPointer_Mdl()[md].armature_[0].bnsinfo_[i].pose_;
 		S_Draw::Draw(bind, md, nullptr, NULL);
 	}
 }

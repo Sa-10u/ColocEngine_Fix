@@ -101,16 +101,19 @@ bool MeshLoader::Load(const wchar_t* file, vector<MESH>& mesh, vector<Material>&
     }
 
     for (auto i = 0; i < scene->mNumAnimations; ++i) {
-
         auto anim = scene->mAnimations[i];
+        vector<aiNodeAnim*> channels = {};
+        
         for (auto c = 0u; c < anim->mNumChannels; ++c) {
-
-            auto channel = anim->mChannels[c];
-            auto p0 = channel->mPositionKeys[0];
-            auto p1 = channel->mPositionKeys[1];
-
-            auto t = 0;
+            channels.push_back( anim->mChannels[c]);
         }
+        for (auto armature : amt)
+            {
+                ParseAnim(armature, channels, anim->mName.C_Str());
+                break;
+            }
+        
+        
 
         for (auto mc = 0u; mc < anim->mNumMeshChannels; ++mc) {
         
@@ -388,36 +391,42 @@ void MeshLoader::ParseMaterial(Material& mtl, MapBOOL& mpb, const aiMaterial* sr
     }
 }
 
-void MeshLoader::ParseBone(std::vector<Armature>& arm, const aiNode* src, Mat mat, MESH& mesh)
+void MeshLoader::ParseBone(std::vector<Armature>& amt, const aiNode* src, Mat mat, MESH& mesh)
 {
-    for (auto i = 0u; i < arm.size(); ++i) {
+    for (auto i = 0u; i < amt.size(); ++i) {
 
-        if (src->mName.C_Str() == arm[i].name_) { mesh.index_armature = i; return; }
+        if (src->mName.C_Str() == amt[i].name_) { mesh.index_armature = i; return; }
 
     }
 
     Armature temp = {};
-    
+
     temp.name_ = src->mName.C_Str();
+    
 
     std::function<void(aiNode* ,Mat)>pushBone = [&](aiNode* me,Mat mat) 
         {
-            BONE_INFO info = {};
-            
-            auto m = me->mTransformation;
-            Mat mymat =
+            string name = me->mName.C_Str();
+
+            if (!(name.at(name.size() - 3) == 'e' && name.at(name.size() - 2) == 'n' && name.at(name.size() - 1) == 'd'))
             {
-                m.a1,m.b1,m.c1,m.d1,
-                m.a2,m.b2,m.c2,m.d2,
-                m.a3,m.b3,m.c3,m.d3,
-                m.a4,m.b4,m.c4,m.d4
-            };
-            info.bind_ = mymat * mat;
+                BONE_INFO info = {};
 
-            temp.bnsinfo_.push_back(info);
+                auto m = me->mTransformation;
+                Mat mymat =
+                {
+                    m.a1,m.b1,m.c1,m.d1,
+                    m.a2,m.b2,m.c2,m.d2,
+                    m.a3,m.b3,m.c3,m.d3,
+                    m.a4,m.b4,m.c4,m.d4
+                };
+                info.pose_ = mymat * mat;
 
-            auto name = std::pair<string, uint16_t>{ me->mName.C_Str(),static_cast<uint16_t>(temp.bnsinfo_.size() - 1) };
-            temp.BonenameIndex_.insert(name);
+                temp.bnsinfo_.push_back(info);
+
+                auto name = std::pair<string, uint16_t>{ me->mName.C_Str(),static_cast<uint16_t>(temp.bnsinfo_.size() - 1) };
+                temp.BonenameIndex_.insert(name);
+            }
 
             for (auto i = 0u; i < me->mNumChildren; ++i) {
 
@@ -430,8 +439,54 @@ void MeshLoader::ParseBone(std::vector<Armature>& arm, const aiNode* src, Mat ma
         pushBone(src->mChildren[i], mat);
     }
 
-    arm.push_back(temp);
-    mesh.index_armature = arm.size() - 1;
+    amt.push_back(temp);
+    mesh.index_armature = amt.size() - 1;
+}
+
+void MeshLoader::ParseAnim(Armature& amt, vector<aiNodeAnim*> nodes, string animName)
+{
+    vector<AnimationData_BONE>temp (nodes.size());
+
+    for (auto& node : nodes) {
+        if (node->mNodeName.C_Str() == amt.name_)    continue;
+
+        auto index = amt.BonenameIndex_.at(node->mNodeName.C_Str());
+
+        temp[index].rot_.resize(node->mNumRotationKeys);
+        temp[index].Rtime_.resize(node->mNumRotationKeys);
+        temp[index].pos_.resize(node->mNumPositionKeys);
+        temp[index].Ptime_.resize(node->mNumPositionKeys);
+        temp[index].scale_.resize(node->mNumScalingKeys);
+        temp[index].Stime_.resize(node->mNumScalingKeys);
+
+        for (auto r = 0u; r < node->mNumRotationKeys; ++r) {
+            auto& val = node->mRotationKeys[r].mValue;
+            auto& time = node->mRotationKeys[r].mTime;
+            
+            temp[index].rot_[r] = float3(val.x, val.y, val.z);
+            temp[index].Rtime_[r] = time;
+        }
+
+        for (auto p = 0u; p < node->mNumPositionKeys; ++p) {
+            auto& val = node->mPositionKeys[p].mValue;
+            auto& time = node->mPositionKeys[p].mTime;
+      
+            temp[index].pos_[p] = float3(val.x, val.y, val.z);
+            temp[index].Ptime_[p] = time;
+        }
+
+        for (auto s = 0u; s < node->mNumScalingKeys; ++s) {
+            auto& val = node->mScalingKeys[s].mValue;
+            auto& time = node->mScalingKeys[s].mTime;
+
+            temp[index].scale_[s] = float3(val.x, val.y, val.z);
+            temp[index].Stime_[s] = time;
+        }
+    }
+    std::pair<string, uint16_t> animdatnum ={animName,amt.anims_.size()};
+    amt.AnimnameIndex_.insert(animdatnum);
+
+    amt.anims_.push_back(temp);
 }
 
 void MeshLoader::ParseUV(aiVector3D& uv)

@@ -20,6 +20,7 @@ public:
 
 	UINT DrawCount_;
 	vector<ObjInfo> info;
+	vector<BONE_INFO> currentPose_;
 
 	std::vector<MESH> Mesh_;
 	std::vector<Material> Mtr_;

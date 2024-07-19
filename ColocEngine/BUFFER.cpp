@@ -63,10 +63,10 @@ Rect2D::Rect2D():lx(0),ty(0),rx(1),by(1)
 SimpleQuad::SimpleQuad() :tick(0), val0(0), val1(0), val2(0)
 {}
 
-AnimationData_BONE::AnimationData_BONE():startPos(NULL),endPos(NULL)
+AnimationData_BONE::AnimationData_BONE()
 {
 }
 
-BONE_INFO::BONE_INFO() :parent_(-1), bind_{}, current_{}
+BONE_INFO::BONE_INFO() :parent_(-1), pose_{}
 {
 }

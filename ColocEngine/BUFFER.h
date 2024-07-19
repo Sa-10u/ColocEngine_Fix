@@ -6,6 +6,7 @@
 #include<map>
 #include<cstdint>
 #include"S_Light.h"
+#include"MACRO.h"
 
 using std::string;
 using std::vector;
@@ -190,19 +191,20 @@ struct BONE_INFO
 public:
 	
 	int32_t parent_;
-	XMMATRIX bind_;
-	XMMATRIX current_;
+	XMMATRIX pose_;
 
 	BONE_INFO();
 };
 
 struct AnimationData_BONE
 {
-	uint16_t startPos;
-	uint16_t endPos;
+	vector<float3> rot_;
+	vector<float3> pos_;
+	vector<float3> scale_;
 
-	vector<BONE_INFO>	info_;
-	vector<uint16_t>	time_;
+	vector<uint16_t>	Rtime_;
+	vector<uint16_t>	Ptime_;
+	vector<uint16_t>	Stime_;
 	
 	AnimationData_BONE();
 };
@@ -212,7 +214,7 @@ struct Armature
 	vector<BONE_INFO> bnsinfo_;
 	std::map<string, uint16_t>	BonenameIndex_;
 
-	vector<AnimationData_BONE>	anims_;
+	vector<vector<AnimationData_BONE>>	anims_;
 	std::map<string, uint16_t>	AnimnameIndex_;
 
 	std::string name_;
