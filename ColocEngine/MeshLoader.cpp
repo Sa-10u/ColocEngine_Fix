@@ -447,8 +447,16 @@ void MeshLoader::ParseAnim(Armature& amt, vector<aiNodeAnim*> nodes, string anim
 {
     vector<AnimationData_BONE>temp (nodes.size());
 
+    for (auto i = 0u; i < nodes.size(); ++i) {
+        if(nodes[i]->mNodeName.C_Str() == amt.name_)
+        {
+            temp.erase(temp.begin() + i);
+            nodes.erase(nodes.begin() + i);
+            break;
+        }
+    }
+
     for (auto& node : nodes) {
-        if (node->mNodeName.C_Str() == amt.name_)    continue;
 
         auto index = amt.BonenameIndex_.at(node->mNodeName.C_Str());
 
@@ -485,7 +493,7 @@ void MeshLoader::ParseAnim(Armature& amt, vector<aiNodeAnim*> nodes, string anim
     }
     std::pair<string, uint16_t> animdatnum ={animName,amt.anims_.size()};
     amt.AnimnameIndex_.insert(animdatnum);
-
+    
     amt.anims_.push_back(temp);
 }
 
