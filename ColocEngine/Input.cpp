@@ -12,7 +12,7 @@ namespace Input_KB
     HRESULT Input_KB::Init()
     {
         HRESULT res;
-
+        
         //------------------------------
         if (DInput == nullptr)
         {

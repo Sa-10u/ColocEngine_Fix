@@ -3,26 +3,26 @@
 
 namespace InputConfig
 {
-	int CRs[static_cast<uint16_t>(CR::Amount)];
-	int KBs[static_cast<uint16_t>(KB::Amount)];
+	uint8_t CRs[static_cast<uint16_t>(CR::Amount)];
+	uint8_t KBs[static_cast<uint16_t>(KB::Amount)];
 }
 
-int16_t InputConfig::GetCode(CR key)
+uint8_t InputConfig::GetCode(CR key)
 {
-	return CRs[static_cast<int>(key)];
+	return CRs[static_cast<uint8_t>(key)];
 }
 
-int16_t InputConfig::GetCode(KB key)
+uint8_t InputConfig::GetCode(KB key)
 {
-	return KBs[static_cast<int>(key)];
+	return KBs[static_cast<uint8_t>(key)];
 }
 
-void InputConfig::SetConfig(KB k, int code)
+void InputConfig::SetConfig(KB k, uint8_t code)
 {
-	KBs[static_cast<int>(k)] = code;
+	KBs[static_cast<uint8_t>(k)] = code;
 }
 
-void InputConfig::SetConfig(CR c, int code)
+void InputConfig::SetConfig(CR c, uint8_t code)
 {
-	CRs[static_cast<int>(c)] = code;
+	CRs[static_cast<uint8_t>(c)] = code;
 }

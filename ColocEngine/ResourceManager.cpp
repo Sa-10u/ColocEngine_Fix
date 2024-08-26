@@ -355,6 +355,7 @@ UINT ResourceManager::TexLoad(std::wstring str)
     if (FAILED(res)) return NULL;
 
     image = scr.GetImage(0, 0, 0);
+    scr.Release();
 
     D3D12_RESOURCE_DESC rc_desc_tex = {};
     {
@@ -445,7 +446,6 @@ void ResourceManager::ModelFlush()
         md.VB.clear();
         md.IB.clear();
         md.TexName_.clear();
-        md.Mtr_.clear();
         md.Mesh_.clear();
     }
 }
@@ -493,7 +493,6 @@ void ResourceManager::ALL_RELEASE_MODEL()
         itr.IBV.clear();
         itr.info.clear();
         itr.Mesh_.clear();
-        itr.Mtr_.clear();
         itr.Name_.clear();
 
         itr = {};

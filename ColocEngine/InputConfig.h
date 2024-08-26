@@ -19,10 +19,10 @@ namespace InputConfig
 		Amount
 	};
 
-	int16_t GetCode(CR key);
-	int16_t GetCode(KB key);
+	uint8_t GetCode(CR key);
+	uint8_t GetCode(KB key);
 
-	void SetConfig(KB k, int code);
-	void SetConfig(CR c, int code);
+	void SetConfig(KB k, uint8_t code);
+	void SetConfig(CR c, uint8_t code);
 };
 
