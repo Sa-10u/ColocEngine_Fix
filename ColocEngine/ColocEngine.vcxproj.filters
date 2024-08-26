@@ -162,6 +162,12 @@
     <ClCompile Include="C_Billboard.cpp">
       <Filter>Components\ColocEngine\source</Filter>
     </ClCompile>
+    <ClCompile Include="C_P_move.cpp">
+      <Filter>Components\YourComponents\source</Filter>
+    </ClCompile>
+    <ClCompile Include="InputConfig.cpp">
+      <Filter>Head\Scene\source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinView.h">
@@ -250,6 +256,15 @@
     </ClInclude>
     <ClInclude Include="C_Billboard.h">
       <Filter>Components\ColocEngine\header</Filter>
+    </ClInclude>
+    <ClInclude Include="I_move.h">
+      <Filter>Components\YourComponents\header</Filter>
+    </ClInclude>
+    <ClInclude Include="C_P_move.h">
+      <Filter>Components\YourComponents\header</Filter>
+    </ClInclude>
+    <ClInclude Include="InputConfig.h">
+      <Filter>Head\Scene\header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -26,10 +26,12 @@
     <ClCompile Include="ColliderManager.cpp" />
     <ClCompile Include="C_Billboard.cpp" />
     <ClCompile Include="C_Player.cpp" />
+    <ClCompile Include="C_P_move.cpp" />
     <ClCompile Include="C_Quad.cpp" />
     <ClCompile Include="C_Text.cpp" />
     <ClCompile Include="C_UI.cpp" />
     <ClCompile Include="DefaultColliders.cpp" />
+    <ClCompile Include="InputConfig.cpp" />
     <ClCompile Include="PSO.cpp" />
     <ClCompile Include="PSOManager.cpp" />
     <ClCompile Include="Resource.cpp" />
@@ -59,10 +61,13 @@
     <ClInclude Include="ColliderManager.h" />
     <ClInclude Include="C_Billboard.h" />
     <ClInclude Include="C_Player.h" />
+    <ClInclude Include="C_P_move.h" />
     <ClInclude Include="C_Quad.h" />
     <ClInclude Include="C_Text.h" />
     <ClInclude Include="C_UI.h" />
     <ClInclude Include="DefaultColliders.h" />
+    <ClInclude Include="InputConfig.h" />
+    <ClInclude Include="I_move.h" />
     <ClInclude Include="PSO.h" />
     <ClInclude Include="PSOManager.h" />
     <ClInclude Include="ShaderCompiler.h" />
