@@ -48,7 +48,7 @@ bool WinView::setup()
     {
         if (D3D->Initialize(h_wnd,h_,w_))
         {
-
+            
             ResourceManager::Init();
             CAM::Init();
             DataManager::Init();

@@ -59,6 +59,46 @@ void ResourceManager::Init()
 
         textures_.at(i) = temp;
     }
+
+    //this do init Armatures texture of bone mats
+    {
+        Texture& amtex = Armature::BoneMatsTex_;
+
+        D3D12_RESOURCE_DESC rsc_desc = {};
+        {
+            uint8_t matblock = 4u;
+
+            rsc_desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+            rsc_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+            rsc_desc.MipLevels = 1;
+            rsc_desc.DepthOrArraySize = 1;
+            rsc_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+            rsc_desc.Height = CBCOUNT;                      //256
+            rsc_desc.Width = Armature::MAX_Bones * matblock;//256 * 4
+            rsc_desc.SampleDesc.Count = 1;
+            rsc_desc.SampleDesc.Quality = 0;
+            rsc_desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+        }
+
+        D3D12_HEAP_PROPERTIES hp_prop = {};
+        {
+            hp_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
+            hp_prop.CreationNodeMask = 0;
+            hp_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
+            hp_prop.Type = D3D12_HEAP_TYPE_CUSTOM;
+            hp_prop.VisibleNodeMask = 0;
+        }
+
+        HRESULT res = PTR_D3D::ptr->GetDevice()->CreateCommittedResource
+        (
+            &hp_prop,
+            D3D12_HEAP_FLAG_NONE,
+            &rsc_desc,
+            D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+            nullptr,
+            IID_PPV_ARGS(&amtex.rsc_ptr)
+        );
+    }
 }
 
 void ResourceManager::Term()
@@ -83,18 +123,18 @@ void ResourceManager::MakeErrorTex(Texture* tex)
         col[i] = Magenta;
     }
 
-    D3D12_RESOURCE_DESC rc_desc_tex = {};
+    D3D12_RESOURCE_DESC rsc_desc_tex = {};
     {
-        rc_desc_tex.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-        rc_desc_tex.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-        rc_desc_tex.MipLevels = 1;
-        rc_desc_tex.DepthOrArraySize = 1;
-        rc_desc_tex.Flags = D3D12_RESOURCE_FLAG_NONE;
-        rc_desc_tex.Height = th;
-        rc_desc_tex.Width = tw;
-        rc_desc_tex.SampleDesc.Count = 1;
-        rc_desc_tex.SampleDesc.Quality = 0;
-        rc_desc_tex.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+        rsc_desc_tex.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+        rsc_desc_tex.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        rsc_desc_tex.MipLevels = 1;
+        rsc_desc_tex.DepthOrArraySize = 1;
+        rsc_desc_tex.Flags = D3D12_RESOURCE_FLAG_NONE;
+        rsc_desc_tex.Height = th;
+        rsc_desc_tex.Width = tw;
+        rsc_desc_tex.SampleDesc.Count = 1;
+        rsc_desc_tex.SampleDesc.Quality = 0;
+        rsc_desc_tex.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
     }
 
     D3D12_HEAP_PROPERTIES hp_prop_tex = {};
@@ -110,7 +150,7 @@ void ResourceManager::MakeErrorTex(Texture* tex)
     (
         &hp_prop_tex,
         D3D12_HEAP_FLAG_NONE,
-        &rc_desc_tex,
+        &rsc_desc_tex,
         D3D12_RESOURCE_STATE_COPY_DEST,
         nullptr,
         IID_PPV_ARGS(&tex->rsc_ptr)
@@ -126,7 +166,7 @@ void ResourceManager::MakeErrorTex(Texture* tex)
 
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
     srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    srvDesc.Format = rc_desc_tex.Format;
+    srvDesc.Format = rsc_desc_tex.Format;
     srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
     srvDesc.Texture2D.MipLevels = 1;
 

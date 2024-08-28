@@ -218,6 +218,9 @@ struct Armature
 	std::map<string, uint16_t>	AnimnameIndex_;
 
 	std::string name_;
+
+	static Texture BoneMatsTex_;
+	static const uint16_t MAX_Bones = 256;
 };
 
 struct MESH
