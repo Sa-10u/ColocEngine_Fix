@@ -1162,12 +1162,14 @@ void D3d::write()
         for (auto& mesh : itr.Mesh_) {
 
             {
-                SB_MTL[IND_frame].view[v].alp = itr.Mtr_[v].alp;
-                SB_MTL[IND_frame].view[v].dif = itr.Mtr_[v].dif;
-                SB_MTL[IND_frame].view[v].emis = itr.Mtr_[v].emis;
-                SB_MTL[IND_frame].view[v].shin = itr.Mtr_[v].shin;
-                SB_MTL[IND_frame].view[v].spec = itr.Mtr_[v].spec;
+                /*
+                SB_MTL[IND_frame].view[v].alp = 
+                SB_MTL[IND_frame].view[v].dif = 
+                SB_MTL[IND_frame].view[v].emis = 
+                SB_MTL[IND_frame].view[v].shin = 
+                SB_MTL[IND_frame].view[v].spec = 
                 SB_MTL[IND_frame].view[v].emis_str = 0;
+                */
             }
 
             if (_inscnt + itr.DrawCount_ >= ResourceManager::CBCOUNT - 1)

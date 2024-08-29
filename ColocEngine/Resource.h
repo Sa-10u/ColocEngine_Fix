@@ -24,6 +24,7 @@ public:
 
 	std::vector<MESH> Mesh_;
 	std::vector<string> TexName_;
+	std::vector<Material> Mtr_;
 	std::vector<ID3D12Resource*> VB;
 	std::vector<ID3D12Resource*> IB;
 	

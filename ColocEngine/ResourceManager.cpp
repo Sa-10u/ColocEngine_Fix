@@ -62,6 +62,28 @@ void ResourceManager::Init()
 
     //this do init Armatures texture of bone mats
     {
+        {
+            D3D12_DESCRIPTOR_HEAP_DESC hp_desc = {};
+            {
+                uint8_t BoneBufferNum = 2;//mat,parent
+
+                hp_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+                hp_desc.NodeMask = 0;
+                hp_desc.NumDescriptors = BoneBufferNum;
+                hp_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+            }
+
+            HRESULT&& res = PTR_D3D::ptr->GetDevice()->CreateDescriptorHeap
+            (
+                &hp_desc,
+                IID_PPV_ARGS(&ResourceManager::heapBone_)
+            );
+
+            ResourceManager::DHH_Bone = new DH(PTR_D3D::ptr->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV), &ResourceManager::heapBone_);
+
+            assert(FAILED(res));
+        }
+
         Texture& amtex = Armature::BoneMatsTex_;
 
         D3D12_RESOURCE_DESC rsc_desc = {};
@@ -98,6 +120,30 @@ void ResourceManager::Init()
             nullptr,
             IID_PPV_ARGS(&amtex.rsc_ptr)
         );
+        assert(FAILED(res));
+
+        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+        {
+            srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+            srvDesc.Texture2D.MipLevels = 1;
+            srvDesc.Format = rsc_desc.Format;
+            srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        }
+
+        amtex.HCPU = DHH_Bone->GetAndIncreCPU();
+        amtex.HGPU = DHH_Bone->GetAndIncreGPU();
+
+        PTR_D3D::ptr->GetDevice()->CreateShaderResourceView
+        (
+            amtex.rsc_ptr,
+            &srvDesc,
+            amtex.HCPU
+        );
+    }
+
+    //this do init Armatures texture of parent
+    {
+       
     }
 }
 
