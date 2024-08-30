@@ -36,15 +36,24 @@ namespace PSOManager
 		AMOUNT
 	};
 
+	enum class ShaderCompute
+	{
+		BoneAnim,
+
+		AMOUNT
+	};
+
 	extern std::array<PSO*, static_cast<uint32_t>(ShaderDeferred::AMOUNT)> PSODeferred;
 	extern std::array<PSO*, static_cast<uint32_t>(Shader3D::AMOUNT)> PSO3D;
 	extern std::array<PSO*, static_cast<uint32_t>(ShaderPost::AMOUNT)> PSOPost;
 	extern std::array<PSO*, static_cast<uint32_t>(ShaderUI::AMOUNT)>PSOUI;
+	extern std::array<PSO*, static_cast<uint32_t>(ShaderCompute::AMOUNT)>PSOComp;
 
 	PSO* GetPSO(ShaderDeferred ind);
 	PSO* GetPSO(Shader3D ind);
 	PSO* GetPSO(ShaderPost ind);
 	PSO* GetPSO(ShaderUI ind);
+	PSO* GetPSO(ShaderCompute ind);
 
 //-------------------------------------------------
 

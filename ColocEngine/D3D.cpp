@@ -14,8 +14,6 @@ extern "C" { __declspec(dllexport) extern const char8_t* D3D12SDKPath = u8".\\D3
 #include"PSOManager.h"
 
 constexpr UINT HPSIZE = 64;
-constexpr UINT POST_HPSIZE = 1;
-constexpr UINT UI_HPSIZE = 1;
 
 bool D3d::Initialize(HWND hwnd, uint32_t h, uint32_t w)
 {
@@ -735,14 +733,6 @@ bool D3d::InitGBO()
                     srv.Buffer.NumElements = ResourceManager::CBCOUNT;
                     srv.Buffer.StructureByteStride = sizeof(SimpleQuad);
                     srv.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-                }
-
-                D3D12_DESCRIPTOR_HEAP_DESC hpd_desc = {};
-                {
-                    hpd_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-                    hpd_desc.NodeMask = 0;
-                    hpd_desc.NumDescriptors = FrameAmount * UI_HPSIZE;
-                    hpd_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
                 }
 
                 SB_UI[i].HCPU = ResourceManager::DHH_CbSrUaV->GetAndIncreCPU();

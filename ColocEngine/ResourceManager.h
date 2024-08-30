@@ -35,9 +35,6 @@ namespace ResourceManager
 	extern ID3D12DescriptorHeap* heapCBV_SRV_UAV_;
 	extern DH* DHH_CbSrUaV;
 
-	extern ID3D12DescriptorHeap* heapBone_;
-	extern DH* DHH_Bone;
-
 	//-----------
 	extern const uint16_t MAX_Textures;
 	extern const uint16_t MAX_Models;

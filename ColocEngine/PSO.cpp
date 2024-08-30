@@ -516,3 +516,15 @@ bool DefDeferred::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* 
 
 	return true;
 }
+
+BoneAnimCompute::BoneAnimCompute() : PSO()
+{
+}
+
+bool BoneAnimCompute::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sampler, D3D12_ROOT_SIGNATURE_FLAGS flag, uint16_t paramcnt, uint16_t sampcnt)
+{
+	ID3DBlob* blob = nullptr;
+
+	HRESULT res = {};
+	res = ShaderModel6_8::Compile(L"AnimationMatrix.hlsl", blob, ShaderCompileType::Compute);
+}

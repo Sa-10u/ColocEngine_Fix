@@ -80,3 +80,12 @@ public:
 	bool Init
 	(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sampler, D3D12_ROOT_SIGNATURE_FLAGS flag, uint16_t paramcnt, uint16_t sampcnt)override;
 };
+
+class BoneAnimCompute : public PSO
+{
+public:
+	BoneAnimCompute();
+
+	bool Init
+	(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sampler, D3D12_ROOT_SIGNATURE_FLAGS flag, uint16_t paramcnt, uint16_t sampcnt)override;
+};

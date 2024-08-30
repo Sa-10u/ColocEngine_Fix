@@ -54,9 +54,11 @@ bool ShaderModel6_8::Compile(std::wstring file, ID3DBlob*& blob, ShaderCompileTy
 	args.push_back(L"-T");
 	switch (sct)
 	{
-	case ShaderCompileType::Vertex: args.push_back(L"vs_6_7"); break;
+	case ShaderCompileType::Vertex: args.push_back(L"vs_6_8"); break;
 
-	case ShaderCompileType::Pixel: args.push_back(L"ps_6_7"); break;
+	case ShaderCompileType::Pixel: args.push_back(L"ps_6_8"); break;
+
+	case ShaderCompileType::Compute: args.push_back(L"cs_6_8"); break;
 	}
 	//args.push_back(L"-enable-16bit-types");
 

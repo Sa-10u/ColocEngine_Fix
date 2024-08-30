@@ -8,6 +8,7 @@ namespace PSOManager
     std::array<PSO*, static_cast<uint32_t>(Shader3D::AMOUNT)> PSO3D = {new Def3D()};
     std::array<PSO*, static_cast<uint32_t>(ShaderPost::AMOUNT)> PSOPost = {new DefPost()};
     std::array<PSO*, static_cast<uint32_t>(ShaderUI::AMOUNT)>PSOUI = {new DefUI()};
+    std::array<PSO*, static_cast<uint32_t>(ShaderCompute::AMOUNT)>PSOComp = {new BoneAnimCompute()};
 }
 
 bool PSOManager::Init()
@@ -398,29 +399,21 @@ bool PSOManager::Init()
 
 void PSOManager::Term()
 {
-    for (auto i = 0u; i < static_cast<size_t>(ShaderDeferred::AMOUNT); i++) {
 
-        PSODeferred[i]->Term();
-        delete PSODeferred[i];
-    }
+    auto Term_and_Delete = [&](PSO** arr, size_t length)->void {
 
-    for (auto i = 0u; i < static_cast<size_t>(Shader3D::AMOUNT); i++) {
+        for (auto i = 0u; i < length; ++i) {
 
-        PSO3D[i]->Term();
-        delete PSO3D[i];
-    }
+            arr[i]->Term();
+            delete arr[i];
+        }
 
-    for (auto i = 0u; i < static_cast<size_t>(ShaderPost::AMOUNT); i++) {
-
-        PSOPost[i]->Term();
-        delete PSOPost[i];
-    }
-
-    for (auto i = 0u; i < static_cast<size_t>(ShaderUI::AMOUNT); i++) {
-
-        PSOUI[i]->Term();
-        delete PSOUI[i];
-    }
+        };
+    Term_and_Delete(PSODeferred.data(), static_cast<size_t>(ShaderDeferred::AMOUNT));
+    Term_and_Delete(PSO3D.data(), static_cast<size_t>(Shader3D::AMOUNT));
+    Term_and_Delete(PSOPost.data(), static_cast<size_t>(ShaderPost::AMOUNT));
+    Term_and_Delete(PSOUI.data(), static_cast<size_t>(ShaderUI::AMOUNT));
+    Term_and_Delete(PSOComp.data(), static_cast<size_t>(ShaderCompute::AMOUNT));
 }
 
 PSO* PSOManager::GetPSO(ShaderDeferred ind)
@@ -441,5 +434,10 @@ PSO* PSOManager::GetPSO(ShaderPost ind)
 PSO* PSOManager::GetPSO(ShaderUI ind)
 {
     return PSOUI.at(static_cast<size_t>(ind));
+}
+
+PSO* PSOManager::GetPSO(ShaderCompute ind)
+{
+    return PSOComp.at(static_cast<size_t>(ind));
 }
 

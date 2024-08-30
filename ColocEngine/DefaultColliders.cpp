@@ -181,21 +181,6 @@ float3 BoxCol::GetLengthZWLD()
 }
 
 
-
-//-----------------------------------
-template<>
-uint8_t ColType<SphereCol>()
-{
-	return static_cast<uint8_t>(ColliderType::Sphere);
-}
-
-template<>
-uint8_t ColType<BoxCol>()
-{
-	return static_cast<uint8_t>(ColliderType::Box);
-
-}
-
 bool SandS(float3 c_pos, float c_rad, float3 t_pos, float t_rad , float3* getlen)
 {
 	float&& StoS = GetLength(c_pos - t_pos);

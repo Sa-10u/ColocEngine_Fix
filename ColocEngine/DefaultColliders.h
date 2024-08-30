@@ -1,6 +1,7 @@
 #pragma once
 #include"MACRO.h"
 #include<typeinfo>
+#include<type_traits>
 
 class Collider
 {
@@ -79,13 +80,23 @@ static bool BandS(float3 bpos, float3 bx,float3 by ,float3 bz,float3 spos , floa
 static bool BandB(float3 c_pos,float3 cx, float3 cy, float3 cz, float3 t_pos, float3 tx, float3 ty, float3 tz ,float3* getlen);
 
 //-----------------
+template<typename f>
+constexpr bool DeferredFalse = false;
 template<typename t>
 uint8_t ColType()
 {
-	return -1;
-}
+	if constexpr (std::is_same<t, SphereCol>)
+	{
+		return static_cast<uint8_t>(ColliderType::Sphere);
+	}
+	else if (std::is_same<t, BoxCol>)
+	{
+		return static_cast<uint8_t>(ColliderType::Box);
+	}
 
-template<>
-uint8_t ColType<SphereCol>();
-template<>
-uint8_t ColType<BoxCol>();
+	else
+	{
+		static_assert(DeferredFalse<t>, "unexpected or not yet implemented Collider Type");
+	}
+
+}

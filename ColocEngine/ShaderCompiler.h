@@ -9,7 +9,9 @@
 enum class ShaderCompileType
 {
 	Vertex,
-	Pixel
+	Pixel,
+	Compute,
+
 };
 
 namespace ShaderModel6_8
