@@ -393,6 +393,14 @@ bool PSOManager::Init()
             if (!PSOUI[i]->Init(r_param, &sampler, flag, U_Amount, 1))  return false;
         }
     }
+    
+    //---compute
+    {
+        D3D12_ROOT_PARAMETER r_param = {};
+        {
+            r_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        }
+    }
 
     return true;
 }

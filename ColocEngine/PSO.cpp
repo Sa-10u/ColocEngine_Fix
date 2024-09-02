@@ -523,8 +523,56 @@ BoneAnimCompute::BoneAnimCompute() : PSO()
 
 bool BoneAnimCompute::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DESC* sampler, D3D12_ROOT_SIGNATURE_FLAGS flag, uint16_t paramcnt, uint16_t sampcnt)
 {
-	ID3DBlob* blob = nullptr;
-
+	auto device_ = PTR_D3D::ptr->GetDevice();
+	ID3DBlob* S_blob = nullptr;
+	ID3DBlob* E_blob = nullptr;
 	HRESULT res = {};
+
+	{
+		D3D12_ROOT_SIGNATURE_DESC rtdesc = {};
+		{
+			rtdesc.Flags = flag;
+			rtdesc.NumParameters = paramcnt;
+			rtdesc.NumStaticSamplers = NULL;
+			rtdesc.pParameters = params;
+			rtdesc.pStaticSamplers = nullptr;
+		}
+
+		res = D3D12SerializeRootSignature
+		(
+			&rtdesc,
+			D3D_ROOT_SIGNATURE_VERSION_1_0,
+			&S_blob,
+			&E_blob
+		);
+		if (FAILED(res))	return false;
+	}
+
+	res = device_->CreateRootSignature
+	(
+		NULL,
+		S_blob->GetBufferPointer(),
+		S_blob->GetBufferSize(),
+		IID_PPV_ARGS(&rtsg)
+	);
+	if (!res)	return false;
+
+	ID3DBlob* blob = nullptr;
 	res = ShaderModel6_8::Compile(L"AnimationMatrix.hlsl", blob, ShaderCompileType::Compute);
+
+	D3D12_COMPUTE_PIPELINE_STATE_DESC pso_desc = {};
+	{
+		pso_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+		pso_desc.NodeMask = 0;
+		pso_desc.pRootSignature = rtsg;
+		pso_desc.CachedPSO = {};
+		pso_desc.CS.BytecodeLength = blob->GetBufferSize();
+		pso_desc.CS.pShaderBytecode = blob->GetBufferPointer();
+	}
+
+	res = device_->CreateComputePipelineState
+	(
+		&pso_desc,
+		IID_PPV_ARGS(&ptr)
+	);
 }
