@@ -1011,6 +1011,7 @@ void D3d::TermGBO()
 
 void D3d::Run(int interval)
 {
+    GPGPUSkinning();
     Update();
     write();
     deferredrender();
@@ -1020,6 +1021,31 @@ void D3d::Run(int interval)
     finalrender();
     present(0);
 
+}
+
+void D3d::GPGPUSkinning()
+{
+    void* ptr = nullptr;
+
+    Armature::BoneMatsTex0_.rsc_ptr->Map(NULL,0,&ptr);
+    //
+    Armature::BoneMatsTex0_.rsc_ptr->Unmap(0, 0);
+
+    Armature::BoneMatsTex1_.rsc_ptr->Map(NULL, 0, &ptr);
+    //
+    Armature::BoneMatsTex1_.rsc_ptr->Unmap(0, 0);
+
+    Armature::BoneParentTex_.rsc_ptr->Map(NULL, 0, &ptr);
+    //
+    Armature::BoneParentTex_.rsc_ptr->Unmap(0, 0);
+
+    Armature::BoneFrameTex_.rsc_ptr->Map(NULL, 0, &ptr);
+    //
+    Armature::BoneFrameTex_.rsc_ptr->Unmap(0, 0);
+
+    Armature::BoneLinearTex_.rsc_ptr->Map(NULL, 0, &ptr);
+    //
+    Armature::BoneLinearTex_.rsc_ptr->Unmap(0, 0);
 }
 
 void D3d::Update()
@@ -1059,6 +1085,7 @@ void D3d::Update()
     }
 
 }
+
 
 void D3d::write()
 {

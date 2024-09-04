@@ -51,6 +51,7 @@ public:
 
 private:
 
+	void GPGPUSkinning();
 	void write();
 	void waitGPU();
 	void deferredrender();

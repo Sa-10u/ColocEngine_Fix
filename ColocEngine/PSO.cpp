@@ -575,4 +575,7 @@ bool BoneAnimCompute::Init(D3D12_ROOT_PARAMETER* params, D3D12_STATIC_SAMPLER_DE
 		&pso_desc,
 		IID_PPV_ARGS(&ptr)
 	);
+	if (FAILED(res))	return false;
+
+	return true;
 }

@@ -396,9 +396,96 @@ bool PSOManager::Init()
     
     //---compute
     {
-        D3D12_ROOT_PARAMETER r_param = {};
+        enum BoneTextures
         {
-            r_param.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+            Mats0,
+            Mats1,
+            Parent,
+            Frame,
+            Linear,
+
+            AMOUNT
+        };
+        D3D12_ROOT_PARAMETER r_param[BoneTextures::AMOUNT] = {};
+        {
+            D3D12_DESCRIPTOR_RANGE range_m0 = {};
+            {
+                range_m0.BaseShaderRegister = 0;
+                range_m0.RegisterSpace = 0;
+                range_m0.NumDescriptors = 1;
+                range_m0.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+                range_m0.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            }
+            {
+                r_param[BoneTextures::Mats0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+                r_param[BoneTextures::Mats0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+                r_param[BoneTextures::Mats0].DescriptorTable.NumDescriptorRanges = 1;
+                r_param[BoneTextures::Mats0].DescriptorTable.pDescriptorRanges = &range_m0;
+            }
+
+            D3D12_DESCRIPTOR_RANGE range_m1 = {};
+            {
+                range_m1.BaseShaderRegister = 1;
+                range_m1.RegisterSpace = 0;
+                range_m1.NumDescriptors = 1;
+                range_m1.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+                range_m1.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            }
+            {
+                r_param[BoneTextures::Mats1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+                r_param[BoneTextures::Mats1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+                r_param[BoneTextures::Mats1].DescriptorTable.NumDescriptorRanges = 1;
+                r_param[BoneTextures::Mats1].DescriptorTable.pDescriptorRanges = &range_m1;
+            }
+
+            D3D12_DESCRIPTOR_RANGE range_pa = {};
+            {
+                range_pa.BaseShaderRegister = 2;
+                range_pa.RegisterSpace = 0;
+                range_pa.NumDescriptors = 1;
+                range_pa.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+                range_pa.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            }
+            {
+                r_param[BoneTextures::Parent].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+                r_param[BoneTextures::Parent].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+                r_param[BoneTextures::Parent].DescriptorTable.NumDescriptorRanges = 1;
+                r_param[BoneTextures::Parent].DescriptorTable.pDescriptorRanges = &range_pa;
+            }
+
+            D3D12_DESCRIPTOR_RANGE range_fr = {};
+            {
+                range_fr.BaseShaderRegister = 3;
+                range_fr.RegisterSpace = 0;
+                range_fr.NumDescriptors = 1;
+                range_fr.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+                range_fr.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            }
+            {
+                r_param[BoneTextures::Frame].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+                r_param[BoneTextures::Frame].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+                r_param[BoneTextures::Frame].DescriptorTable.NumDescriptorRanges = 1;
+                r_param[BoneTextures::Frame].DescriptorTable.pDescriptorRanges = &range_fr;
+            }
+
+            D3D12_DESCRIPTOR_RANGE range_li = {};
+            {
+                range_li.BaseShaderRegister = 4;
+                range_li.RegisterSpace = 0;
+                range_li.NumDescriptors = 1;
+                range_li.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+                range_li.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            }
+            {
+                r_param[BoneTextures::Linear].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+                r_param[BoneTextures::Linear].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+                r_param[BoneTextures::Linear].DescriptorTable.NumDescriptorRanges = 1;
+                r_param[BoneTextures::Linear].DescriptorTable.pDescriptorRanges = &range_li;
+            }
+
+            D3D12_ROOT_SIGNATURE_FLAGS flag = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+            
+            PSOComp[static_cast<size_t>(ShaderCompute::BoneAnim)]->Init(r_param,nullptr,flag,1,0);
         }
     }
 
