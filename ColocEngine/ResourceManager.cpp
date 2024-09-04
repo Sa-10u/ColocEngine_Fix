@@ -15,6 +15,10 @@ namespace ResourceManager
     std::array<RModel,MAX_Models> models_;
     std::array<RTexture,MAX_Textures> textures_;
     std::array<RAudioData, MAX_AudioData> audiodata_;
+    std::array<Mat, CBCOUNT * Armature::MAX_Bones> bonemats0_;
+    std::array<Mat, CBCOUNT * Armature::MAX_Bones> bonemats1_;
+    std::array<uint8_t, CBCOUNT * Armature::MAX_Bones> boneparents_;
+    std::array<float, CBCOUNT> bonelinears_;
 
     ID3D12DescriptorHeap* heapCBV_SRV_UAV_;
     DH* DHH_CbSrUaV;
@@ -176,52 +180,6 @@ void ResourceManager::InitBoneResource()
             srvDesc.Format = rsc_desc.Format;
             srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
         }
-
-        patex.HCPU = DHH_CbSrUaV->GetAndIncreCPU();
-        patex.HGPU = DHH_CbSrUaV->GetAndIncreGPU();
-
-        PTR_D3D::ptr->GetDevice()->CreateShaderResourceView
-        (
-            patex.rsc_ptr,
-            &srvDesc,
-            patex.HCPU
-        );
-
-        //---------------
-        Texture& frtex = Armature::BoneFrameTex_;
-        {
-            rsc_desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE1D;
-            rsc_desc.Format = DXGI_FORMAT_R16_UINT;
-            rsc_desc.Height = 1;                      
-            rsc_desc.Width = CBCOUNT;
-        }
-
-        HRESULT res = PTR_D3D::ptr->GetDevice()->CreateCommittedResource
-        (
-            &hp_prop,
-            D3D12_HEAP_FLAG_NONE,
-            &rsc_desc,
-            D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
-            nullptr,
-            IID_PPV_ARGS(&frtex.rsc_ptr)
-        );
-        assert(FAILED(res));
-
-        {
-            srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1D;
-            srvDesc.Texture1D.MipLevels = 1;
-            srvDesc.Format = rsc_desc.Format;
-        }
-
-        frtex.HCPU = DHH_CbSrUaV->GetAndIncreCPU();
-        frtex.HGPU = DHH_CbSrUaV->GetAndIncreGPU();
-
-        PTR_D3D::ptr->GetDevice()->CreateShaderResourceView
-        (
-            frtex.rsc_ptr,
-            &srvDesc,
-            frtex.HCPU
-        );
 
         //-------------------------
 

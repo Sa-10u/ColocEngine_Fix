@@ -401,7 +401,6 @@ bool PSOManager::Init()
             Mats0,
             Mats1,
             Parent,
-            Frame,
             Linear,
 
             AMOUNT
@@ -451,21 +450,6 @@ bool PSOManager::Init()
                 r_param[BoneTextures::Parent].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
                 r_param[BoneTextures::Parent].DescriptorTable.NumDescriptorRanges = 1;
                 r_param[BoneTextures::Parent].DescriptorTable.pDescriptorRanges = &range_pa;
-            }
-
-            D3D12_DESCRIPTOR_RANGE range_fr = {};
-            {
-                range_fr.BaseShaderRegister = 3;
-                range_fr.RegisterSpace = 0;
-                range_fr.NumDescriptors = 1;
-                range_fr.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-                range_fr.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-            }
-            {
-                r_param[BoneTextures::Frame].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-                r_param[BoneTextures::Frame].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-                r_param[BoneTextures::Frame].DescriptorTable.NumDescriptorRanges = 1;
-                r_param[BoneTextures::Frame].DescriptorTable.pDescriptorRanges = &range_fr;
             }
 
             D3D12_DESCRIPTOR_RANGE range_li = {};
