@@ -20,7 +20,6 @@ public:
 
 	UINT DrawCount_;
 	vector<ObjInfo> info;
-	vector<BONE_INFO> currentPose_;
 
 	std::vector<MESH> Mesh_;
 	std::vector<string> TexName_;
@@ -34,6 +33,17 @@ public:
 
 	std::wstring Name_;
 	RModel();
+};
+
+struct AnimData
+{
+	string AnimName0;
+	string AnimName1;
+
+	int32_t prog0;
+	int32_t prog1;
+
+	float linear;
 };
 
 class RAudioData

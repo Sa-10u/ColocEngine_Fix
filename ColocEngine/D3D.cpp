@@ -1039,10 +1039,6 @@ void D3d::GPGPUSkinning()
     //
     Armature::BoneParentTex_.rsc_ptr->Unmap(0, 0);
 
-    Armature::BoneFrameTex_.rsc_ptr->Map(NULL, 0, &ptr);
-    //
-    Armature::BoneFrameTex_.rsc_ptr->Unmap(0, 0);
-
     Armature::BoneLinearTex_.rsc_ptr->Map(NULL, 0, &ptr);
     //
     Armature::BoneLinearTex_.rsc_ptr->Unmap(0, 0);

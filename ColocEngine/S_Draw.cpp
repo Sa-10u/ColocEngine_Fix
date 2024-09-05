@@ -4,6 +4,16 @@
 #include"BUFFER.h"
 
 //fix draw count , over instance's count then run GPU 
+namespace S_Draw
+{
+	void ParseBoneInfo
+	(	vector<BONE_INFO>& bns, vector<AnimationData_BONE>* data0,
+		vector<AnimationData_BONE>* data1, int32_t prog0, int32_t prog1,float linear,
+		vector<Mat>& mat0, vector<Mat>& mat1, vector<uint8_t>parent,vector<float>linears
+	);
+
+	void ParseFrameData(vector<AnimationData_BONE>& data, int32_t prog, vector<Mat>& info);
+}
 
 void S_Draw::Draw(XMMATRIX* wld, uint16_t md, MapBOOL** mb, uint16_t size)
 {
@@ -45,6 +55,48 @@ void S_Draw::Draw(ObjInfo* info, uint16_t md, MapBOOL** mb, uint16_t size)
 	setTex(md, mb, size);
 }
 
+void S_Draw::Draw(XMMATRIX* wld, uint16_t md, MapBOOL** mb, uint16_t size, AnimData& ad)
+{
+	ResourceManager::GetPointer_Mdl()[md].DrawCount_++;
+
+	ObjInfo i;
+	i.wld = *wld;
+
+	ResourceManager::GetPointer_Mdl()[md].info.push_back(i);
+	setTex(md, mb, size);
+
+
+}
+
+void S_Draw::Draw(C_Trans* trans, uint16_t md, MapBOOL** mb, uint16_t size, AnimData& ad)
+{
+	ResourceManager::GetPointer_Mdl()[md].DrawCount_++;
+
+	ObjInfo i;
+	i.wld = trans->WLDGetMTX();
+
+	ResourceManager::GetPointer_Mdl()[md].info.push_back(i);
+	setTex(md, mb, size);
+}
+
+void S_Draw::Draw(XMMATRIX mat, uint16_t md, MapBOOL** mb, uint16_t size, AnimData& ad)
+{
+	ResourceManager::GetPointer_Mdl()[md].DrawCount_++;
+
+	ObjInfo i;
+	i.wld = mat;
+
+	ResourceManager::GetPointer_Mdl()[md].info.push_back(i);
+	setTex(md, mb, size);
+}
+
+void S_Draw::Draw(ObjInfo* info, uint16_t md, MapBOOL** mb, uint16_t size, AnimData& ad)
+{
+	ResourceManager::GetPointer_Mdl()[md].DrawCount_++;
+	ResourceManager::GetPointer_Mdl()[md].info.push_back(*info);
+	setTex(md, mb, size);
+}
+
 void S_Draw::setTex(uint16_t md ,MapBOOL** arr, uint16_t size)
 {
 	auto ind = ResourceManager::GetPointer_Mdl()[md].info.size() - 1;
@@ -72,4 +124,21 @@ void S_Draw::Flush(uint16_t md)
 	for (auto i = 0u; i < ResourceManager::GetPointer_Mdl()[md].Mesh_.size(); i++) {
 		ResourceManager::GetPointer_Mdl()[md].Mesh_[i].texIndex_.clear();
 	}
+}
+
+void S_Draw::ParseBoneInfo
+(
+	vector<BONE_INFO>& bns, vector<AnimationData_BONE>* data0,
+	vector<AnimationData_BONE>* data1, int32_t prog0, int32_t prog1, float linear,
+	vector<Mat>& mat0, vector<Mat>& mat1, vector<uint8_t>parent, vector<float>linears
+){
+
+
+}
+
+void S_Draw::ParseFrameData(vector<AnimationData_BONE>& data, int32_t prog, vector<Mat>& info)
+{
+	bool isOK = false;
+
+	for(auto i = 0u;i <= data.size()-1;)
 }
