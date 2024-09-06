@@ -101,7 +101,7 @@ void ResourceManager::InitBoneResource()
                 hp_prop.VisibleNodeMask = 0;
             }
 
-            HRESULT res = PTR_D3D::ptr->GetDevice()->CreateCommittedResource
+            HRESULT&& res = PTR_D3D::ptr->GetDevice()->CreateCommittedResource
             (
                 &hp_prop,
                 D3D12_HEAP_FLAG_NONE,
@@ -162,7 +162,7 @@ void ResourceManager::InitBoneResource()
             hp_prop.VisibleNodeMask = 0;
         }
 
-        HRESULT res = PTR_D3D::ptr->GetDevice()->CreateCommittedResource
+        HRESULT&& res = PTR_D3D::ptr->GetDevice()->CreateCommittedResource
         (
             &hp_prop,
             D3D12_HEAP_FLAG_NONE,
@@ -192,7 +192,7 @@ void ResourceManager::InitBoneResource()
             rsc_desc.Width = CBCOUNT;
         }
 
-        HRESULT res = PTR_D3D::ptr->GetDevice()->CreateCommittedResource
+        res = PTR_D3D::ptr->GetDevice()->CreateCommittedResource
         (
             &hp_prop,
             D3D12_HEAP_FLAG_NONE,
@@ -266,7 +266,7 @@ void ResourceManager::MakeErrorTex(Texture* tex)
         hp_prop_tex.VisibleNodeMask = 0;
     }
 
-    HRESULT res = PTR_D3D::ptr->GetDevice()->CreateCommittedResource
+    HRESULT&& res = PTR_D3D::ptr->GetDevice()->CreateCommittedResource
     (
         &hp_prop_tex,
         D3D12_HEAP_FLAG_NONE,
@@ -338,7 +338,7 @@ UINT ResourceManager::ModelLoad(std::wstring str)
 
     ID3D12Device* device_ = PTR_D3D::ptr->GetDevice();
 
-	HRESULT res = E_FAIL;
+	HRESULT&& res = E_FAIL;
 
 	RModel temp;
 	
@@ -497,7 +497,7 @@ UINT ResourceManager::TexLoad(std::wstring str)
             if (index == MAX_Textures) return NULL;
         }
     }
-    HRESULT res = E_FAIL;
+    HRESULT&& res = E_FAIL;
 
     res = E_FAIL;
     //-------

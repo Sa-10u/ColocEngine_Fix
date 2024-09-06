@@ -190,7 +190,7 @@ struct BONE_INFO
 {
 public:
 	
-	int32_t parent_;
+	int16_t parent_;
 	XMMATRIX pose_;
 
 	BONE_INFO();

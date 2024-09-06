@@ -9,7 +9,7 @@ namespace S_Draw
 	void ParseBoneInfo
 	(	vector<BONE_INFO>& bns, vector<AnimationData_BONE>* data0,
 		vector<AnimationData_BONE>* data1, int32_t prog0, int32_t prog1,float linear,
-		vector<Mat>& mat0, vector<Mat>& mat1, vector<uint8_t>parent,vector<float>linears
+		vector<Mat>& mat0, vector<Mat>& mat1, vector<float>linears
 	);
 
 	void ParseFrameData(vector<AnimationData_BONE>& data, int32_t prog, vector<Mat>& info);
@@ -64,8 +64,6 @@ void S_Draw::Draw(XMMATRIX* wld, uint16_t md, MapBOOL** mb, uint16_t size, AnimD
 
 	ResourceManager::GetPointer_Mdl()[md].info.push_back(i);
 	setTex(md, mb, size);
-
-
 }
 
 void S_Draw::Draw(C_Trans* trans, uint16_t md, MapBOOL** mb, uint16_t size, AnimData& ad)
@@ -130,8 +128,17 @@ void S_Draw::ParseBoneInfo
 (
 	vector<BONE_INFO>& bns, vector<AnimationData_BONE>* data0,
 	vector<AnimationData_BONE>* data1, int32_t prog0, int32_t prog1, float linear,
-	vector<Mat>& mat0, vector<Mat>& mat1, vector<uint8_t>parent, vector<float>linears
+	vector<Mat>& mat0, vector<Mat>& mat1, vector<float>linears
 ){
+	auto&& BoneNum = bns.size();
+
+	vector<int16_t> arr_parents = {}; arr_parents.resize(BoneNum);
+	vector<Mat>arr_mat = {}; arr_mat.resize(BoneNum);
+
+	for (auto i = 0u; i < BoneNum; ++i) {
+
+		arr_parents[i] = bns[i].parent_; arr_mat[i] = bns[i].pose_;
+	}
 
 
 }
@@ -140,5 +147,55 @@ void S_Draw::ParseFrameData(vector<AnimationData_BONE>& data, int32_t prog, vect
 {
 	bool isOK = false;
 
-	for(auto i = 0u;i <= data.size()-1;)
+	C_Trans trans = C_Trans("");
+	uint8_t boneindex = 0;
+
+	for (auto& bone : data) {//data is some bones!
+
+		float3 pos = {};
+		float3 rot = {};
+		float3 size = {};
+
+		for (auto i = 0u; i < bone.Ptime_.size() - 1;) {
+
+			if (!(bone.Ptime_[i] <= prog <= bone.Ptime_[i + i]))	continue;
+
+			float per = GetGradation(bone.Ptime_[i], bone.Ptime_[i + 1], prog);
+			
+			pos = (bone.pos_[i] * per) + (bone.pos_[i + 1] * (1 - per));
+
+			break;
+		}
+
+		for (auto i = 0u; i < bone.Rtime_.size() - 1;) {
+
+			if (!(bone.Rtime_[i] <= prog <= bone.Rtime_[i + i]))	continue;
+			
+			float per = GetGradation(bone.Rtime_[i], bone.Rtime_[i + 1], prog);
+
+			pos = (bone.rot_[i] * per) + (bone.rot_[i + 1] * (1 - per));
+
+
+			break;
+		}
+
+		for (auto i = 0u; i < bone.Stime_.size() - 1;) {
+
+			if (!(bone.Stime_[i] <= prog <= bone.Stime_[i + i]))	continue;
+
+			float per = GetGradation(bone.Stime_[i], bone.Stime_[i + 1], prog);
+
+			pos = (bone.scale_[i] * per) + (bone.scale_[i + 1] * (1 - per));
+
+
+			break;
+		}
+
+		trans.pos = pos;
+		trans.rot = rot;
+		trans.scale = size;
+
+		info[boneindex] = trans.LCLGetMTX();
+		++boneindex;
+	}
 }

@@ -24,9 +24,16 @@ inline void SAFE_RELEASE(tgt*& p)
 
 }
 
+inline float GetGradation(float min,float max, float val)
+{
+	int&& r = max - min;
+	int&& m = val - min;
+
+	return static_cast<float>(m) / r;
+}
+
 #define __guidof __uuidof
 
-constexpr double _PI = 3.141592;
 #define _DebugCUI true;
 
 typedef DirectX::XMFLOAT2 float2;
