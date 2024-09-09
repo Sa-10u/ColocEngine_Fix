@@ -132,14 +132,14 @@ void S_Draw::ParseBoneInfo
 ){
 	auto&& BoneNum = bns.size();
 
-	vector<int16_t> arr_parents = {}; arr_parents.resize(BoneNum);
-	vector<Mat>arr_mat = {}; arr_mat.resize(BoneNum);
+	auto arr_parents = static_cast<int16_t*>(malloc(sizeof(int16_t) * BoneNum));
+	auto arr_mat = static_cast<Mat*>(malloc(sizeof(Mat) * BoneNum));
 
 	for (auto i = 0u; i < BoneNum; ++i) {
 
 		arr_parents[i] = bns[i].parent_; arr_mat[i] = bns[i].pose_;
 	}
-
+	free(arr_parents), free(arr_mat);
 
 }
 
