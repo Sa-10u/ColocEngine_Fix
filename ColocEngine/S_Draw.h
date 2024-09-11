@@ -20,4 +20,5 @@ namespace S_Draw
 	inline void setTex(uint16_t md, MapBOOL** arr, uint16_t size);
 
 	void Flush(uint16_t md);
+	void Close();
 }

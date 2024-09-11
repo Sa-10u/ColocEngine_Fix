@@ -18,7 +18,8 @@ class RModel
 {
 public:
 
-	UINT DrawCount_;
+	uint16_t DrawCount_;
+	inline static uint32_t TotalDrawCount_{ 0u };
 	vector<ObjInfo> info;
 
 	std::vector<MESH> Mesh_;

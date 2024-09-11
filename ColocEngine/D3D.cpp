@@ -1248,6 +1248,7 @@ void D3d::write()
     ID3D12CommandList* commands[] = { cmdlist_ };
     cmdque_->ExecuteCommandLists(1, commands);
 
+    S_Draw::Close();
     waitGPU();
 
     cmdalloc_[IND_frame]->Reset();
