@@ -1027,21 +1027,21 @@ void D3d::GPGPUSkinning()
 {
     void* ptr = nullptr;
 
-    Armature::BoneMatsTex0_.rsc_ptr->Map(NULL,0,&ptr);
-    //
-    Armature::BoneMatsTex0_.rsc_ptr->Unmap(0, 0);
+    //Armature::BoneMatsTex0_.rsc_ptr->Map(NULL,0,&ptr);
+    ////
+    //Armature::BoneMatsTex0_.rsc_ptr->Unmap(0, 0);
 
-    Armature::BoneMatsTex1_.rsc_ptr->Map(NULL, 0, &ptr);
-    //
-    Armature::BoneMatsTex1_.rsc_ptr->Unmap(0, 0);
+    //Armature::BoneMatsTex1_.rsc_ptr->Map(NULL, 0, &ptr);
+    ////
+    //Armature::BoneMatsTex1_.rsc_ptr->Unmap(0, 0);
 
-    Armature::BoneParentTex_.rsc_ptr->Map(NULL, 0, &ptr);
-    //
-    Armature::BoneParentTex_.rsc_ptr->Unmap(0, 0);
+    //Armature::BoneParentTex_.rsc_ptr->Map(NULL, 0, &ptr);
+    ////
+    //Armature::BoneParentTex_.rsc_ptr->Unmap(0, 0);
 
-    Armature::BoneLinearTex_.rsc_ptr->Map(NULL, 0, &ptr);
-    //
-    Armature::BoneLinearTex_.rsc_ptr->Unmap(0, 0);
+    //Armature::BoneLinearTex_.rsc_ptr->Map(NULL, 0, &ptr);
+    ////
+    //Armature::BoneLinearTex_.rsc_ptr->Unmap(0, 0);
 }
 
 void D3d::Update()
@@ -1248,7 +1248,6 @@ void D3d::write()
     ID3D12CommandList* commands[] = { cmdlist_ };
     cmdque_->ExecuteCommandLists(1, commands);
 
-    S_Draw::Close();
     waitGPU();
 
     cmdalloc_[IND_frame]->Reset();

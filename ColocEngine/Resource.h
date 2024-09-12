@@ -19,7 +19,6 @@ class RModel
 public:
 
 	uint16_t DrawCount_;
-	inline static uint32_t TotalDrawCount_{ 0u };
 	vector<ObjInfo> info;
 
 	std::vector<MESH> Mesh_;
@@ -34,6 +33,11 @@ public:
 
 	std::wstring Name_;
 	RModel();
+
+	inline static Texture BoneMatsTex0_ {};
+	inline static Texture BoneMatsTex1_ {};
+	inline static Texture BoneParentTex_{};
+	inline static Texture BoneLinearTex_{};
 };
 
 struct AnimData
@@ -45,6 +49,8 @@ struct AnimData
 	int32_t prog1;
 
 	float linear;
+
+	uint8_t armatureIndex;
 };
 
 class RAudioData

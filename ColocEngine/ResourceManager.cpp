@@ -131,13 +131,13 @@ void ResourceManager::InitBoneResource()
             );
             };
 
-        BoneMatsTex(Armature::BoneMatsTex0_);
-        BoneMatsTex(Armature::BoneMatsTex1_);
+        BoneMatsTex(RModel::BoneMatsTex0_);
+        BoneMatsTex(RModel::BoneMatsTex1_);
     }
 
     //this do init Armatures texture of parent
     {
-        Texture& patex = Armature::BoneParentTex_;
+        Texture& patex = RModel::BoneParentTex_;
 
         D3D12_RESOURCE_DESC rsc_desc = {};
         {
@@ -183,7 +183,7 @@ void ResourceManager::InitBoneResource()
 
         //-------------------------
 
-        Texture& litex = Armature::BoneLinearTex_;
+        Texture& litex = RModel::BoneLinearTex_;
 
         {
             rsc_desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE1D;

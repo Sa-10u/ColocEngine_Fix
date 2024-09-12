@@ -9,16 +9,15 @@ namespace S_Draw
 	void ParseBoneInfo
 	(	vector<BONE_INFO>& bns, vector<AnimationData_BONE>* data0,
 		vector<AnimationData_BONE>* data1, int32_t prog0, int32_t prog1,float linear,
-		vector<Mat>& mat0, vector<Mat>& mat1, vector<float>linears,uint8_t texPos
+		vector<Mat>& mat0, vector<Mat>& mat1, vector<float>linears
 	);
 
-	void ParseFrameData(vector<AnimationData_BONE>& data, int32_t prog, vector<Mat>& info);
+	void ParseFrameData(Mat* pose,vector<AnimationData_BONE>& data, int32_t prog, vector<Mat>& dst);
 }
 
 void S_Draw::Draw(XMMATRIX* wld, uint16_t md, MapBOOL** mb, uint16_t size)
 {
 	++ResourceManager::GetPointer_Mdl()[md].DrawCount_;
-	auto cnt = RModel::TotalDrawCount_++;
 
 	ObjInfo i;
 	i.wld = *wld;
@@ -30,7 +29,6 @@ void S_Draw::Draw(XMMATRIX* wld, uint16_t md, MapBOOL** mb, uint16_t size)
 void S_Draw::Draw(C_Trans* trans, uint16_t md, MapBOOL** mb, uint16_t size)
 {
 	++ResourceManager::GetPointer_Mdl()[md].DrawCount_;
-	auto cnt = RModel::TotalDrawCount_++;
 
 	ObjInfo i;
 	i.wld = trans->WLDGetMTX();
@@ -42,7 +40,6 @@ void S_Draw::Draw(C_Trans* trans, uint16_t md, MapBOOL** mb, uint16_t size)
 void S_Draw::Draw(XMMATRIX mat, uint16_t md, MapBOOL** mb, uint16_t size)
 {
 	++ResourceManager::GetPointer_Mdl()[md].DrawCount_;
-	auto cnt = RModel::TotalDrawCount_++;
 
 	ObjInfo i;
 	i.wld = mat;
@@ -54,28 +51,42 @@ void S_Draw::Draw(XMMATRIX mat, uint16_t md, MapBOOL** mb, uint16_t size)
 void S_Draw::Draw(ObjInfo* info, uint16_t md, MapBOOL** mb, uint16_t size)
 {
 	++ResourceManager::GetPointer_Mdl()[md].DrawCount_;
-	auto cnt = RModel::TotalDrawCount_++;
 
 	ResourceManager::GetPointer_Mdl()[md].info.push_back(*info);
 	setTex(md, mb, size);
 }
 
 void S_Draw::Draw(XMMATRIX* wld, uint16_t md, MapBOOL** mb, uint16_t size, AnimData& ad)
-{
-	++ResourceManager::GetPointer_Mdl()[md].DrawCount_;
-	auto cnt = RModel::TotalDrawCount_++;
+{ 
+	namespace R = ResourceManager;
+
+	++R::GetPointer_Mdl()[md].DrawCount_;
 
 	ObjInfo i;
 	i.wld = *wld;
 
-	ResourceManager::GetPointer_Mdl()[md].info.push_back(i);
+	R::GetPointer_Mdl()[md].info.push_back(i);
 	setTex(md, mb, size);
+
+	auto& amt = R::GetPointer_Mdl()[md].armature_[ad.armatureIndex];
+
+	auto anim0 = amt.AnimnameIndex_.contains(ad.AnimName0) ? &amt.anims_[(amt.AnimnameIndex_.at(ad.AnimName0))] : nullptr;
+	auto anim1 = amt.AnimnameIndex_.contains(ad.AnimName1) ? &amt.anims_[(amt.AnimnameIndex_.at(ad.AnimName1))] : nullptr;
+
+	amt.mat0_for_tex.resize(R::GetPointer_Mdl()[md].DrawCount_);
+	amt.mat1_for_tex.resize(R::GetPointer_Mdl()[md].DrawCount_);
+
+	auto& matTex0 = amt.mat0_for_tex[R::GetPointer_Mdl()[md].DrawCount_ - 1];
+	auto& matTex1 = amt.mat1_for_tex[R::GetPointer_Mdl()[md].DrawCount_ - 1];
+
+	amt.linear_tex.resize(R::GetPointer_Mdl()[md].DrawCount_);
+
+	ParseBoneInfo(amt.bnsinfo_, anim0, anim1, ad.prog0, ad.prog1, ad.linear, matTex0, matTex1, amt.linear_tex);
 }
 
 void S_Draw::Draw(C_Trans* trans, uint16_t md, MapBOOL** mb, uint16_t size, AnimData& ad)
 {
 	++ResourceManager::GetPointer_Mdl()[md].DrawCount_;
-	auto cnt = RModel::TotalDrawCount_++;
 
 	ObjInfo i;
 	i.wld = trans->WLDGetMTX();
@@ -87,7 +98,6 @@ void S_Draw::Draw(C_Trans* trans, uint16_t md, MapBOOL** mb, uint16_t size, Anim
 void S_Draw::Draw(XMMATRIX mat, uint16_t md, MapBOOL** mb, uint16_t size, AnimData& ad)
 {
 	++ResourceManager::GetPointer_Mdl()[md].DrawCount_;
-	auto cnt = RModel::TotalDrawCount_++;
 
 	ObjInfo i;
 	i.wld = mat;
@@ -99,7 +109,6 @@ void S_Draw::Draw(XMMATRIX mat, uint16_t md, MapBOOL** mb, uint16_t size, AnimDa
 void S_Draw::Draw(ObjInfo* info, uint16_t md, MapBOOL** mb, uint16_t size, AnimData& ad)
 {
 	++ResourceManager::GetPointer_Mdl()[md].DrawCount_;
-	auto cnt = RModel::TotalDrawCount_++;
 
 	ResourceManager::GetPointer_Mdl()[md].info.push_back(*info);
 	setTex(md, mb, size);
@@ -127,40 +136,37 @@ void S_Draw::setTex(uint16_t md ,MapBOOL** arr, uint16_t size)
 
 void S_Draw::Flush(uint16_t md)
 {
-	ResourceManager::GetPointer_Mdl()[md].DrawCount_ = NULL;
+	ResourceManager::GetPointer_Mdl()[md].DrawCount_ = 0;
 	ResourceManager::GetPointer_Mdl()[md].info.clear();
+	ResourceManager::GetPointer_Mdl()[md].armature_.clear();
+
 	for (auto i = 0u; i < ResourceManager::GetPointer_Mdl()[md].Mesh_.size(); i++) {
 		ResourceManager::GetPointer_Mdl()[md].Mesh_[i].texIndex_.clear();
 	}
-}
-
-void S_Draw::Close()
-{
-	RModel::TotalDrawCount_  = 0u;
 }
 
 void S_Draw::ParseBoneInfo
 (
 	vector<BONE_INFO>& bns, vector<AnimationData_BONE>* data0,
 	vector<AnimationData_BONE>* data1, int32_t prog0, int32_t prog1, float linear,
-	vector<Mat>& mat0, vector<Mat>& mat1, vector<float>linears, uint8_t texPos
+	vector<Mat>& mat0, vector<Mat>& mat1, vector<float>linears
 ){
 	auto&& BoneNum = bns.size();
 
 	auto arr_parents = static_cast<int16_t*>(malloc(sizeof(int16_t) * BoneNum));
 	auto arr_mat = static_cast<Mat*>(malloc(sizeof(Mat) * BoneNum));
-	if (data0 != nullptr && linear >= 1.0f)	ParseFrameData(*data0, prog0, mat0);
 
 	for (auto i = 0u; i < BoneNum; ++i) {
 
 		arr_parents[i] = bns[i].parent_; arr_mat[i] = bns[i].pose_;
 	}
-
+	if (data0 != nullptr && !(linear >= 1.0f))	ParseFrameData(arr_mat, *data0, prog0, mat0);
+	if (data1 != nullptr && !(0.0f >= linear))	ParseFrameData(arr_mat, *data1, prog1, mat1);
 
 	free(arr_parents), free(arr_mat);
 }
 
-void S_Draw::ParseFrameData(vector<AnimationData_BONE>& data, int32_t prog, vector<Mat>& info)
+void S_Draw::ParseFrameData(Mat* pose, vector<AnimationData_BONE>& data, int32_t prog, vector<Mat>& dst)
 {
 	bool isOK = false;
 
@@ -212,7 +218,7 @@ void S_Draw::ParseFrameData(vector<AnimationData_BONE>& data, int32_t prog, vect
 		trans.rot = rot;
 		trans.scale = size;
 
-		info[boneindex] = trans.LCLGetMTX();
+		dst[boneindex] = pose[boneindex] * trans.LCLGetMTX();
 		++boneindex;
 	}
 }

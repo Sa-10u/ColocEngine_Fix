@@ -219,10 +219,10 @@ struct Armature
 
 	std::string name_;
 
-	static Texture BoneMatsTex0_;
-	static Texture BoneMatsTex1_;
-	static Texture BoneParentTex_;
-	static Texture BoneLinearTex_;
+	vector<vector<int16_t>> parent_for_tex;
+	vector<vector<Mat>> mat0_for_tex;
+	vector<vector<Mat>> mat1_for_tex;
+	vector<float>		linear_tex;
 
 	static const uint16_t MAX_Bones = 256;
 };
