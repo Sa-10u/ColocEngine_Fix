@@ -1025,23 +1025,34 @@ void D3d::Run(int interval)
 
 void D3d::GPGPUSkinning()
 {
-    void* ptr = nullptr;
+    void* ptr_m0 = nullptr;
+    void* ptr_m1 = nullptr;
+    void* ptr_pa = nullptr;
+    void* ptr_li = nullptr;
 
-    //Armature::BoneMatsTex0_.rsc_ptr->Map(NULL,0,&ptr);
-    ////
-    //Armature::BoneMatsTex0_.rsc_ptr->Unmap(0, 0);
+    RModel::BoneMatsTex0_.rsc_ptr->Map(NULL, 0, &ptr_m0);
+    RModel::BoneMatsTex1_.rsc_ptr->Map(NULL, 0, &ptr_m1);
+    RModel::BoneParentTex_.rsc_ptr->Map(NULL, 0, &ptr_pa);
+    RModel::BoneLinearTex_.rsc_ptr->Map(NULL, 0, &ptr_li);
 
-    //Armature::BoneMatsTex1_.rsc_ptr->Map(NULL, 0, &ptr);
-    ////
-    //Armature::BoneMatsTex1_.rsc_ptr->Unmap(0, 0);
+    uint8_t cnt{};
 
-    //Armature::BoneParentTex_.rsc_ptr->Map(NULL, 0, &ptr);
-    ////
-    //Armature::BoneParentTex_.rsc_ptr->Unmap(0, 0);
+    auto Memcpy_for_Tex = [&]<typename T>(auto* ptr,vector<T>&vec)
+    {
+        for()
+        memcpy(ptr+(sizeof(T) * Armature::MAX_Bones * cnt), vec.data(), vec.size() * sizeof(T));
+    };
 
-    //Armature::BoneLinearTex_.rsc_ptr->Map(NULL, 0, &ptr);
-    ////
-    //Armature::BoneLinearTex_.rsc_ptr->Unmap(0, 0);
+    for (auto i = 0u; i < ResourceManager::MAX_Models; ++i) {
+
+        auto& itr = ResourceManager::GetPointer_Mdl()[i];
+        if (itr.Name_ == L"")  continue;
+    }
+
+    RModel::BoneMatsTex0_.rsc_ptr->Unmap(0, 0);
+    RModel::BoneMatsTex1_.rsc_ptr->Unmap(0, 0);
+    RModel::BoneParentTex_.rsc_ptr->Unmap(0, 0);
+    RModel::BoneLinearTex_.rsc_ptr->Unmap(0, 0);
 }
 
 void D3d::Update()

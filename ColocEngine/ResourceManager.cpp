@@ -7,10 +7,6 @@ namespace ResourceManager
 {
    
     RModel E_Model;
-    RTexture E_Tex;
-    const uint16_t MAX_Textures = 1024;
-    const uint16_t MAX_Models = 1024;
-    const uint16_t MAX_AudioData = 1024;
 
     std::array<RModel,MAX_Models> models_;
     std::array<RTexture,MAX_Textures> textures_;
@@ -19,9 +15,6 @@ namespace ResourceManager
     std::array<Mat, CBCOUNT * Armature::MAX_Bones> bonemats1_;
     std::array<uint8_t, CBCOUNT * Armature::MAX_Bones> boneparents_;
     std::array<float, CBCOUNT> bonelinears_;
-
-    ID3D12DescriptorHeap* heapCBV_SRV_UAV_;
-    DH* DHH_CbSrUaV;
 
     uint16_t nowLength_TEX = NULL;
     uint16_t nowLength_MDL = NULL;

@@ -30,15 +30,15 @@ namespace ResourceManager
 	RModel* GetPointer_Mdl();
 	RAudioData* GetPointer_Ad();
 
-	extern RTexture E_Tex;
+	inline RTexture E_Tex{};
 
-	extern ID3D12DescriptorHeap* heapCBV_SRV_UAV_;
-	extern DH* DHH_CbSrUaV;
+	inline ID3D12DescriptorHeap* heapCBV_SRV_UAV_{};
+	inline DH* DHH_CbSrUaV{};
 
 	//-----------
-	extern const uint16_t MAX_Textures;
-	extern const uint16_t MAX_Models;
-	extern const uint16_t MAX_AudioData;
+	inline const uint16_t MAX_Textures = 1024;
+	inline const uint16_t MAX_Models = 1024;
+	inline const uint16_t MAX_AudioData = 1024;
 
 	constexpr UINT CBCOUNT = 256;
 };

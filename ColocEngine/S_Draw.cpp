@@ -86,32 +86,80 @@ void S_Draw::Draw(XMMATRIX* wld, uint16_t md, MapBOOL** mb, uint16_t size, AnimD
 
 void S_Draw::Draw(C_Trans* trans, uint16_t md, MapBOOL** mb, uint16_t size, AnimData& ad)
 {
-	++ResourceManager::GetPointer_Mdl()[md].DrawCount_;
+	namespace R = ResourceManager;
+	++R::GetPointer_Mdl()[md].DrawCount_;
 
 	ObjInfo i;
 	i.wld = trans->WLDGetMTX();
 
-	ResourceManager::GetPointer_Mdl()[md].info.push_back(i);
+	R::GetPointer_Mdl()[md].info.push_back(i);
 	setTex(md, mb, size);
+
+	auto& amt = R::GetPointer_Mdl()[md].armature_[ad.armatureIndex];
+
+	auto anim0 = amt.AnimnameIndex_.contains(ad.AnimName0) ? &amt.anims_[(amt.AnimnameIndex_.at(ad.AnimName0))] : nullptr;
+	auto anim1 = amt.AnimnameIndex_.contains(ad.AnimName1) ? &amt.anims_[(amt.AnimnameIndex_.at(ad.AnimName1))] : nullptr;
+
+	amt.mat0_for_tex.resize(R::GetPointer_Mdl()[md].DrawCount_);
+	amt.mat1_for_tex.resize(R::GetPointer_Mdl()[md].DrawCount_);
+
+	auto& matTex0 = amt.mat0_for_tex[R::GetPointer_Mdl()[md].DrawCount_ - 1];
+	auto& matTex1 = amt.mat1_for_tex[R::GetPointer_Mdl()[md].DrawCount_ - 1];
+
+	amt.linear_tex.resize(R::GetPointer_Mdl()[md].DrawCount_);
+
+	ParseBoneInfo(amt.bnsinfo_, anim0, anim1, ad.prog0, ad.prog1, ad.linear, matTex0, matTex1, amt.linear_tex);
 }
 
 void S_Draw::Draw(XMMATRIX mat, uint16_t md, MapBOOL** mb, uint16_t size, AnimData& ad)
 {
-	++ResourceManager::GetPointer_Mdl()[md].DrawCount_;
+	namespace R = ResourceManager;
+	++R::GetPointer_Mdl()[md].DrawCount_;
 
 	ObjInfo i;
 	i.wld = mat;
 
-	ResourceManager::GetPointer_Mdl()[md].info.push_back(i);
+	R::GetPointer_Mdl()[md].info.push_back(i);
 	setTex(md, mb, size);
+
+	auto& amt = R::GetPointer_Mdl()[md].armature_[ad.armatureIndex];
+
+	auto anim0 = amt.AnimnameIndex_.contains(ad.AnimName0) ? &amt.anims_[(amt.AnimnameIndex_.at(ad.AnimName0))] : nullptr;
+	auto anim1 = amt.AnimnameIndex_.contains(ad.AnimName1) ? &amt.anims_[(amt.AnimnameIndex_.at(ad.AnimName1))] : nullptr;
+
+	amt.mat0_for_tex.resize(R::GetPointer_Mdl()[md].DrawCount_);
+	amt.mat1_for_tex.resize(R::GetPointer_Mdl()[md].DrawCount_);
+
+	auto& matTex0 = amt.mat0_for_tex[R::GetPointer_Mdl()[md].DrawCount_ - 1];
+	auto& matTex1 = amt.mat1_for_tex[R::GetPointer_Mdl()[md].DrawCount_ - 1];
+
+	amt.linear_tex.resize(R::GetPointer_Mdl()[md].DrawCount_);
+
+	ParseBoneInfo(amt.bnsinfo_, anim0, anim1, ad.prog0, ad.prog1, ad.linear, matTex0, matTex1, amt.linear_tex);
 }
 
 void S_Draw::Draw(ObjInfo* info, uint16_t md, MapBOOL** mb, uint16_t size, AnimData& ad)
 {
-	++ResourceManager::GetPointer_Mdl()[md].DrawCount_;
+	namespace R = ResourceManager;
+	++R::GetPointer_Mdl()[md].DrawCount_;
 
-	ResourceManager::GetPointer_Mdl()[md].info.push_back(*info);
+	R::GetPointer_Mdl()[md].info.push_back(*info);
 	setTex(md, mb, size);
+
+	auto& amt = R::GetPointer_Mdl()[md].armature_[ad.armatureIndex];
+
+	auto anim0 = amt.AnimnameIndex_.contains(ad.AnimName0) ? &amt.anims_[(amt.AnimnameIndex_.at(ad.AnimName0))] : nullptr;
+	auto anim1 = amt.AnimnameIndex_.contains(ad.AnimName1) ? &amt.anims_[(amt.AnimnameIndex_.at(ad.AnimName1))] : nullptr;
+
+	amt.mat0_for_tex.resize(R::GetPointer_Mdl()[md].DrawCount_);
+	amt.mat1_for_tex.resize(R::GetPointer_Mdl()[md].DrawCount_);
+
+	auto& matTex0 = amt.mat0_for_tex[R::GetPointer_Mdl()[md].DrawCount_ - 1];
+	auto& matTex1 = amt.mat1_for_tex[R::GetPointer_Mdl()[md].DrawCount_ - 1];
+
+	amt.linear_tex.resize(R::GetPointer_Mdl()[md].DrawCount_);
+
+	ParseBoneInfo(amt.bnsinfo_, anim0, anim1, ad.prog0, ad.prog1, ad.linear, matTex0, matTex1, amt.linear_tex);
 }
 
 void S_Draw::setTex(uint16_t md ,MapBOOL** arr, uint16_t size)
@@ -160,8 +208,8 @@ void S_Draw::ParseBoneInfo
 
 		arr_parents[i] = bns[i].parent_; arr_mat[i] = bns[i].pose_;
 	}
-	if (data0 != nullptr && !(linear >= 1.0f))	ParseFrameData(arr_mat, *data0, prog0, mat0);
-	if (data1 != nullptr && !(0.0f >= linear))	ParseFrameData(arr_mat, *data1, prog1, mat1);
+	if (data0 != nullptr && !(linear >= 1.0f)) { mat0.resize(BoneNum); ParseFrameData(arr_mat, *data0, prog0, mat0); }
+	if (data1 != nullptr && !(0.0f >= linear)) { mat1.resize(BoneNum); ParseFrameData(arr_mat, *data1, prog1, mat1); }
 
 	free(arr_parents), free(arr_mat);
 }
