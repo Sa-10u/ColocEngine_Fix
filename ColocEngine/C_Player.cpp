@@ -28,7 +28,7 @@ void C_Player::initialize()
 
 	S_Sound::CreateSE(&ad, S_Sound::FLAG::AutoRelease,&c);
 
-	S_Sound::StartSE(c.GetSounder());
+	//S_Sound::StartSE(c.GetSounder());
 }
 
 void C_Player::Run(float tick)
@@ -45,7 +45,7 @@ void C_Player::Run(float tick)
 
 	MapBOOL* ptr[1] = { &mb };
 
-	//S_Draw::Draw(&oi, md, ptr, _countof(ptr));
+	S_Draw::Draw(&oi, md, ptr, _countof(ptr));
 
 	trans->scale = { .1f,.1f,.1f };
 	trans->pos = { 0,0,0 };
@@ -65,12 +65,7 @@ void C_Player::Run(float tick)
 	oi.wld = trans->WLDGetMTX();
 	//S_Draw::Draw(&oi, md, nullptr, NULL);
 
-	for (auto i = 0u; i < ResourceManager::GetPointer_Mdl()[md].armature_[0].bnsinfo_.size(); ++i) {
-		auto c = ResourceManager::GetPointer_Mdl()[md].armature_[0].bnsinfo_;
 
-		auto bind = ResourceManager::GetPointer_Mdl()[md].armature_[0].bnsinfo_[i].pose_;
-		S_Draw::Draw(bind, md, nullptr, NULL);
-	}
 }
 
 void C_Player::release()

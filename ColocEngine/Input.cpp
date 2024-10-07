@@ -1,6 +1,5 @@
 #include "Input.h"
 #include "WinView.h"
-#pragma warning(disable : 4995)
 LPDIRECTINPUT8   DInput = nullptr;
 
 namespace Input_KB
@@ -163,7 +162,6 @@ namespace Input_CR
         );
         */
 
-        XInputEnable(true);
         for (auto i = 0u; i < MAX_Amount; ++i) {
 
             memset(&state_[i], 0, sizeof(XINPUT_STATE));
@@ -208,7 +206,6 @@ namespace Input_CR
             }
         }
         */
-        XInputEnable(false);
     }
 
     bool Down(int index, int code)

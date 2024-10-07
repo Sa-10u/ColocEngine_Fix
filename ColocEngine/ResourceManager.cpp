@@ -103,7 +103,7 @@ void ResourceManager::InitBoneResource()
                 nullptr,
                 IID_PPV_ARGS(&amtex.rsc_ptr)
             );
-            assert(FAILED(res));
+            assert(!FAILED(res));
 
             D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
             {
@@ -164,7 +164,7 @@ void ResourceManager::InitBoneResource()
             nullptr,
             IID_PPV_ARGS(&patex.rsc_ptr)
         );
-        assert(FAILED(res));
+        assert(!FAILED(res));
 
         D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
         {
@@ -194,7 +194,7 @@ void ResourceManager::InitBoneResource()
             nullptr,
             IID_PPV_ARGS(&litex.rsc_ptr)
         );
-        assert(FAILED(res));
+        assert(!FAILED(res));
 
         {
             srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1D;
@@ -508,7 +508,7 @@ UINT ResourceManager::TexLoad(std::wstring str)
     if (FAILED(res)) return NULL;
 
     image = scr.GetImage(0, 0, 0);
-    scr.Release();
+   // scr.Release();
 
     D3D12_RESOURCE_DESC rc_desc_tex = {};
     {
@@ -572,6 +572,7 @@ UINT ResourceManager::TexLoad(std::wstring str)
         textures_.at(index).tex_.HCPU
     );
     textures_.at(index).is_using = true;
+    scr.Release();
 
     return index;
 }

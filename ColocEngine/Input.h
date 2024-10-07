@@ -1,7 +1,8 @@
 #pragma once
-#include <dinput.h>
 #include"MACRO.h"
+#include <dinput.h>
 #include"Xinput.h"
+
 #pragma comment(lib,"dInput8.lib")
 #pragma comment(lib, "xinput.lib")
 

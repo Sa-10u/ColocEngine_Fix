@@ -1039,7 +1039,6 @@ void D3d::GPGPUSkinning()
 
     auto Memcpy_for_Tex = [&]<typename T>(auto* ptr,vector<T>&vec)
     {
-        for()
         memcpy(ptr+(sizeof(T) * Armature::MAX_Bones * cnt), vec.data(), vec.size() * sizeof(T));
     };
 
