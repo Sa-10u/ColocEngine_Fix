@@ -141,7 +141,10 @@ void S_Draw::Draw(XMMATRIX mat, uint16_t md, MapBOOL** mb, uint16_t size, AnimDa
 void S_Draw::Draw(ObjInfo* info, uint16_t md, MapBOOL** mb, uint16_t size, AnimData& ad)
 {
 	namespace R = ResourceManager;
-	++R::GetPointer_Mdl()[md].DrawCount_;
+
+	auto& DrawCount = R::GetPointer_Mdl()[md].DrawCount_;
+	++DrawCount;
+	auto ArrayTail = DrawCount - 1;
 
 	R::GetPointer_Mdl()[md].info.push_back(*info);
 	setTex(md, mb, size);
@@ -151,15 +154,21 @@ void S_Draw::Draw(ObjInfo* info, uint16_t md, MapBOOL** mb, uint16_t size, AnimD
 	auto anim0 = amt.AnimnameIndex_.contains(ad.AnimName0) ? &amt.anims_[(amt.AnimnameIndex_.at(ad.AnimName0))] : nullptr;
 	auto anim1 = amt.AnimnameIndex_.contains(ad.AnimName1) ? &amt.anims_[(amt.AnimnameIndex_.at(ad.AnimName1))] : nullptr;
 
-	amt.mat0_for_tex.resize(R::GetPointer_Mdl()[md].DrawCount_);
-	amt.mat1_for_tex.resize(R::GetPointer_Mdl()[md].DrawCount_);
+	amt.mat0_for_tex.resize(DrawCount);
+	amt.mat1_for_tex.resize(DrawCount);
 
-	auto& matTex0 = amt.mat0_for_tex[R::GetPointer_Mdl()[md].DrawCount_ - 1];
-	auto& matTex1 = amt.mat1_for_tex[R::GetPointer_Mdl()[md].DrawCount_ - 1];
+	auto& matTex0 = amt.mat0_for_tex[ArrayTail];
+	auto& matTex1 = amt.mat1_for_tex[ArrayTail];
 
-	amt.linear_tex.resize(R::GetPointer_Mdl()[md].DrawCount_);
+	amt.linear_tex.resize(DrawCount);
 
 	ParseBoneInfo(amt.bnsinfo_, anim0, anim1, ad.prog0, ad.prog1, ad.linear, matTex0, matTex1, amt.linear_tex);
+
+	R::GetPointer_Mdl()[md].mats0_.resize(DrawCount);
+	R::GetPointer_Mdl()[md].mats1_.resize(DrawCount);
+
+	R::GetPointer_Mdl()[md].mats0_[ArrayTail] = matTex0;
+	R::GetPointer_Mdl()[md].mats1_[ArrayTail] = matTex1;
 }
 
 void S_Draw::setTex(uint16_t md ,MapBOOL** arr, uint16_t size)

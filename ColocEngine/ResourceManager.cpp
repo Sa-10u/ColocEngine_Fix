@@ -126,6 +126,7 @@ void ResourceManager::InitBoneResource()
 
         BoneMatsTex(RModel::BoneMatsTex0_);
         BoneMatsTex(RModel::BoneMatsTex1_);
+        BoneMatsTex(RModel::BoneMatsRes_);
     }
 
     //this do init Armatures texture of parent

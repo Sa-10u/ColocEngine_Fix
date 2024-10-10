@@ -16,6 +16,8 @@ public:
 
 class RModel
 {
+	using Mats = std::vector<Mat>;
+
 public:
 
 	uint16_t DrawCount_;
@@ -26,7 +28,10 @@ public:
 	std::vector<Material> Mtr_;
 	std::vector<ID3D12Resource*> VB;
 	std::vector<ID3D12Resource*> IB;
-	
+
+	std::vector<Mats> mats0_;
+	std::vector<Mats> mats1_;
+
 	std::vector<D3D12_VERTEX_BUFFER_VIEW> VBV;
 	std::vector<D3D12_INDEX_BUFFER_VIEW>  IBV;
 	std::vector<Armature> armature_;
@@ -36,6 +41,7 @@ public:
 
 	inline static Texture BoneMatsTex0_ {};
 	inline static Texture BoneMatsTex1_ {};
+	inline static Texture BoneMatsRes_	{};
 	inline static Texture BoneParentTex_{};
 	inline static Texture BoneLinearTex_{};
 };
